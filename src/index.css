@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 84px;
+}
+
+html, body {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
 .text-stroke-light {
   color: transparent;
   -webkit-text-stroke: 1.5px #f4f4f0;

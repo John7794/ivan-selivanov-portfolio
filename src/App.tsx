@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
-import { ArrowDown, SlidersHorizontal, Sparkles, Filter } from 'lucide-react';
+import { ArrowDown, SlidersHorizontal, Sparkles, Filter, Columns3, LayoutGrid } from 'lucide-react';
 import { Project, ProjectCategory, ProjectStatus, Language } from './types';
 import { getStoredData, PortfolioData, syncWithGoogleSheets } from './services/googleSheets';
 import { Navbar } from './components/Navbar';
@@ -22,6 +22,24 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<ProjectCategory>('all');
   const [selectedStatus, setSelectedStatus] = useState<ProjectStatus>('all');
   const [activeProject, setActiveProject] = useState<Project | null>(null);
+  const [layoutMode, setLayoutMode] = useState<'bento-masonry' | 'bento-grid'>('bento-masonry');
+
+  // Interactive subtle grid spotlight on mouse move
+  const [heroMousePos, setHeroMousePos] = useState({ x: -1000, y: -1000 });
+  const [isHeroHovered, setIsHeroHovered] = useState(false);
+
+  const handleHeroMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setHeroMousePos({
+      x: Math.round(e.clientX - rect.left),
+      y: Math.round(e.clientY - rect.top),
+    });
+    if (!isHeroHovered) setIsHeroHovered(true);
+  };
+
+  const handleHeroMouseLeave = () => {
+    setIsHeroHovered(false);
+  };
 
   const heroRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -54,6 +72,22 @@ export default function App() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeProject]);
+
+  // Smooth scroll to Work section with fixed navbar offset
+  const scrollToWork = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const workSection = document.getElementById('work');
+    if (workSection) {
+      const navOffset = 76;
+      const elementPosition = workSection.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - navOffset;
+
+      window.scrollTo({
+        top: Math.max(0, offsetPosition),
+        behavior: 'smooth'
+      });
+    }
+  };
 
   // Filter projects based on Category & Status
   const filteredProjects = data.projects.filter(p => {
@@ -89,15 +123,43 @@ export default function App() {
         name={data.settings.name[language]}
       />
 
-      {/* Hero Section */}
-      <section ref={heroRef} className="relative w-full flex flex-col p-6 pb-12 lg:p-12 lg:pb-24 overflow-x-hidden pt-36">
-        {/* Subtle background ambient line structure */}
-        <div className="absolute inset-0 pointer-events-none opacity-15">
+      {/* Hero Section with Interactive Ambient Grid */}
+      <section 
+        ref={heroRef} 
+        onMouseMove={handleHeroMouseMove}
+        onMouseEnter={() => setIsHeroHovered(true)}
+        onMouseLeave={handleHeroMouseLeave}
+        className="relative w-full flex flex-col p-6 pb-12 lg:p-12 lg:pb-24 pt-36"
+      >
+        {/* Subtle background ambient line structure with softened interactive spotlight */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* Base ambient grid - softened to 0.08 */}
           <div
-            className="w-full h-full"
+            className="w-full h-full opacity-[0.08]"
             style={{
               backgroundImage: 'linear-gradient(#262626 1px, transparent 1px), linear-gradient(90deg, #262626 1px, transparent 1px)',
               backgroundSize: '5rem 5rem'
+            }}
+          />
+
+          {/* Interactive illuminated grid layer with softened radial spotlight */}
+          <div
+            className="w-full h-full absolute inset-0 transition-opacity duration-500 pointer-events-none"
+            style={{
+              opacity: isHeroHovered ? 0.6 : 0,
+              backgroundImage: 'linear-gradient(#444444 1px, transparent 1px), linear-gradient(90deg, #444444 1px, transparent 1px)',
+              backgroundSize: '5rem 5rem',
+              maskImage: `radial-gradient(350px circle at ${heroMousePos.x}px ${heroMousePos.y}px, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 45%, transparent 75%)`,
+              WebkitMaskImage: `radial-gradient(350px circle at ${heroMousePos.x}px ${heroMousePos.y}px, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 45%, transparent 75%)`,
+            }}
+          />
+
+          {/* Soft ambient halo around cursor */}
+          <div
+            className="w-full h-full absolute inset-0 transition-opacity duration-500 pointer-events-none"
+            style={{
+              opacity: isHeroHovered ? 0.2 : 0,
+              background: `radial-gradient(420px circle at ${heroMousePos.x}px ${heroMousePos.y}px, rgba(255, 255, 255, 0.02), transparent 75%)`
             }}
           />
         </div>
@@ -132,7 +194,7 @@ export default function App() {
 
             {/* Bio & CTA Row */}
             <div className="flex flex-col items-start gap-8 pt-8 w-full lg:w-[calc(100%-380px-2rem)] xl:w-[calc(100%-480px-2rem)] relative z-20 pointer-events-none">
-              {/* Animated Line with Neon Shine */}
+              {/* Animated Line with Continuous Soft Ambient Sheen */}
               <motion.div 
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
@@ -141,9 +203,14 @@ export default function App() {
               >
                 <motion.div 
                   initial={{ x: "-100%" }}
-                  animate={{ x: "200%" }}
-                  transition={{ duration: 1.5, ease: "easeInOut", delay: 0.5, repeat: Infinity, repeatDelay: 4 }}
-                  className="w-1/3 h-full absolute top-0 bg-gradient-to-r from-transparent via-neutral-300 to-transparent shadow-[0_0_8px_1px_rgba(255,255,255,0.4)] opacity-70"
+                  animate={{ x: "400%" }}
+                  transition={{ 
+                    duration: 3.5, 
+                    ease: "linear", 
+                    repeat: Infinity, 
+                    repeatDelay: 0 
+                  }}
+                  className="w-1/4 h-full absolute top-0 bg-gradient-to-r from-transparent via-neutral-300/40 to-transparent opacity-50"
                 />
               </motion.div>
 
@@ -154,6 +221,7 @@ export default function App() {
               <div className="flex items-center gap-6 pointer-events-auto mt-2">
                 <a
                   href="#work"
+                  onClick={scrollToWork}
                   className="flex items-center gap-4 text-xs font-mono uppercase tracking-widest text-[#f4f4f0] bg-[#0a0a0a]/70 hover:bg-[#0a0a0a] backdrop-blur-md px-6 py-4 border border-neutral-800 transition-colors group cursor-pointer"
                 >
                   <span>{language === 'ua' ? 'Дослідити кейси' : 'Explore Portfolio'}</span>
@@ -180,9 +248,9 @@ export default function App() {
       </section>
 
       {/* Selected Work Section */}
-      <section id="work" className="py-24 px-6 lg:px-12 bg-[#0d0d0d] text-[#f4f4f0] border-t border-neutral-900">
+      <section id="work" className="scroll-mt-20 py-24 px-6 lg:px-12 bg-[#0d0d0d] text-[#f4f4f0] border-t border-neutral-900">
         <div className="max-w-[1600px] mx-auto">
-          {/* Section Header & Total Count */}
+          {/* Section Header, View Mode Switcher & Total Count */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-b border-neutral-800 pb-8">
             <div>
               <span className="font-mono text-xs uppercase tracking-widest text-neutral-400 block mb-2">
@@ -192,13 +260,47 @@ export default function App() {
                 {language === 'ua' ? 'Вибрані Роботи' : 'Selected Works'}
               </h2>
             </div>
-            <span className="text-lg font-mono text-neutral-400">
-              ( {filteredProjects.length < 10 ? `0${filteredProjects.length}` : filteredProjects.length} / {data.projects.length} )
-            </span>
+
+            <div className="flex items-center gap-4">
+              {/* Masonry vs Structured Grid View Toggle */}
+              <div className="flex items-center bg-neutral-900 border border-neutral-800 p-1 font-mono text-xs">
+                <button
+                  type="button"
+                  onClick={() => setLayoutMode('bento-masonry')}
+                  title={language === 'ua' ? 'Каскадний вигляд (Masonry)' : 'Masonry View'}
+                  className={`px-3 py-1.5 flex items-center gap-1.5 cursor-pointer transition-all ${
+                    layoutMode === 'bento-masonry'
+                      ? 'bg-[#f4f4f0] text-black font-semibold shadow-sm'
+                      : 'text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  <Columns3 className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{language === 'ua' ? 'Каскад' : 'Masonry'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setLayoutMode('bento-grid')}
+                  title={language === 'ua' ? 'Модульна сітка (Grid)' : 'Grid View'}
+                  className={`px-3 py-1.5 flex items-center gap-1.5 cursor-pointer transition-all ${
+                    layoutMode === 'bento-grid'
+                      ? 'bg-[#f4f4f0] text-black font-semibold shadow-sm'
+                      : 'text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{language === 'ua' ? 'Сітка' : 'Grid'}</span>
+                </button>
+              </div>
+
+              <span className="text-sm sm:text-base font-mono text-neutral-400 border-l border-neutral-800 pl-4">
+                ( {filteredProjects.length < 10 ? `0${filteredProjects.length}` : filteredProjects.length} / {data.projects.length} )
+              </span>
+            </div>
           </div>
 
           {/* Two-Axis Filter Bar: Category & Status */}
-          <div className="mb-16 space-y-4 font-mono text-xs">
+          <div className="mb-14 space-y-4 font-mono text-xs">
             {/* Category Filter Axis */}
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-neutral-500 uppercase tracking-wider mr-2 hidden sm:inline">
@@ -240,19 +342,35 @@ export default function App() {
             </div>
           </div>
 
-          {/* Project List */}
+          {/* Project List: Pinterest Bento Masonry or Bento Grid */}
           {filteredProjects.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-24">
-              {filteredProjects.map((project, index) => (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  index={index}
-                  language={language}
-                  onSelect={setActiveProject}
-                />
-              ))}
-            </div>
+            layoutMode === 'bento-masonry' ? (
+              <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 [column-fill:_balance]">
+                {filteredProjects.map((project, index) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    index={index}
+                    language={language}
+                    onSelect={setActiveProject}
+                    isBentoGrid={false}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredProjects.map((project, index) => (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    index={index}
+                    language={language}
+                    onSelect={setActiveProject}
+                    isBentoGrid={true}
+                  />
+                ))}
+              </div>
+            )
           ) : (
             <div className="py-24 text-center border border-neutral-900 p-12 text-neutral-500 font-mono text-sm">
               {language === 'ua'
@@ -264,7 +382,7 @@ export default function App() {
       </section>
 
       {/* Expertise & Architecture (Bento Grid) */}
-      <BentoExpertise language={language} />
+      <BentoExpertise language={language} expertise={data.settings.expertise} />
 
       {/* Philosophy Quote */}
       <section className="py-32 px-6 lg:px-12 flex items-center justify-center bg-[#070707] border-t border-neutral-900">

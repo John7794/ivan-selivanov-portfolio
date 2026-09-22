@@ -12,14 +12,37 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLanguageChange,
   name
 }) => {
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    e.preventDefault();
+    const element = document.getElementById(targetId);
+    if (element) {
+      const navOffset = 76;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - navOffset;
+
+      window.scrollTo({
+        top: Math.max(0, offsetPosition),
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const scrollToTop = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
   return (
     <header className="fixed top-0 left-0 w-full p-4 sm:p-6 flex justify-between items-center z-40 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-neutral-900">
       {/* Brand Monogram "IS" */}
       <a
         href="#"
+        onClick={scrollToTop}
         className="group flex items-center gap-2 text-2xl font-bold tracking-tighter leading-none text-white hover:text-neutral-300 transition-colors"
       >
-        <span className="font-mono text-xs text-neutral-500 mr-1">//</span>
         <span className="relative font-mono tracking-widest group-hover:tracking-[0.25em] transition-all duration-300">
           IS
         </span>
@@ -30,16 +53,16 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Main Nav Links */}
       <nav className="hidden lg:flex items-center gap-8 text-xs font-mono tracking-widest uppercase text-neutral-400">
-        <a href="#work" className="hover:text-white transition-colors">
+        <a href="#work" onClick={(e) => handleNavClick(e, 'work')} className="hover:text-white transition-colors">
           {language === 'ua' ? 'Проєкти' : 'Work'}
         </a>
-        <a href="#expertise" className="hover:text-white transition-colors">
+        <a href="#expertise" onClick={(e) => handleNavClick(e, 'expertise')} className="hover:text-white transition-colors">
           {language === 'ua' ? 'Експертиза' : 'Expertise'}
         </a>
-        <a href="#experience" className="hover:text-white transition-colors">
+        <a href="#experience" onClick={(e) => handleNavClick(e, 'experience')} className="hover:text-white transition-colors">
           {language === 'ua' ? 'Досвід' : 'Experience'}
         </a>
-        <a href="#contact" className="hover:text-white transition-colors">
+        <a href="#contact" onClick={(e) => handleNavClick(e, 'contact')} className="hover:text-white transition-colors">
           {language === 'ua' ? 'Контакт' : 'Contact'}
         </a>
       </nav>

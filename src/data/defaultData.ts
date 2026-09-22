@@ -25,7 +25,56 @@ export const DEFAULT_SETTINGS: GeneralSettings = {
   heroImage: 'https://drive.google.com/uc?export=download&id=1jCDr21Fo4A_b8X4sIWeQHhOLG2LcJJnq',
   appsScriptUrl: 'https://script.google.com/macros/s/AKfycbzWBH_tyMHYUEeaRM1u91hS1TWTKiQm3F2H6eFfQNN9oUBIKfbwZnF36kFERfZ9D1gLhA/exec',
   googleSheetId: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms',
-  lastSyncedAt: 'Live Google Sheets Connected'
+  lastSyncedAt: 'Live Google Sheets Connected',
+  expertise: {
+    heading: { ua: 'Експертиза & Архітектура', en: 'Expertise & Architecture' },
+    subtitle: { 
+      ua: 'Поєднання строгості швейцарського дизайну, продуктової психології та сучасного інженерного стеку', 
+      en: 'Bridging Swiss rationalism, cognitive psychology, and cutting-edge engineering' 
+    },
+    card1Title: { ua: 'Продуктовий UI/UX та Системи', en: 'Product UI/UX & Systems' },
+    card1Desc: { 
+      ua: 'Проєктування складних B2B/Enterprise інтерфейсів, біржових терміналів, аналітичних систем та мобільних додатків. Повний цикл: від дослідження користувачів та CJM до масштабованих Design Tokens у Figma та коді.', 
+      en: 'Architecting complex B2B/Enterprise workspaces, trading terminals, and consumer platforms. End-to-end lifecycle: user research, journey mapping to production-ready design tokens in code.' 
+    },
+    card2Title: { ua: 'Швейцарська Типографіка', en: 'Swiss Typography & Grids' },
+    card2Desc: { 
+      ua: 'Математичні пропорційні сітки (DIN, ISO-216), робота з базовим інтерліньяжем, мікротипографіка та препрес-підготовка.', 
+      en: 'Rigid proportional grids (DIN canon), baseline rhythm synchronization, micro-typography, and high-spec prepress discipline.' 
+    },
+    card3Title: { ua: '3D & Просторові Концепти', en: '3D & Spatial Direction' },
+    card3Desc: { 
+      ua: 'Об’ємне моделювання, скульптурне освітлення та втілення статичних рендерів у живому веб-середовищі за допомогою шейдерів.', 
+      en: 'Volumetric exploration, sculptural lighting, and reviving static renders in live web environments using displacement shaders.' 
+    },
+    card4Title: { ua: 'UX Евристики (Nielsen & Rams)', en: 'UX Heuristics & Principles' },
+    heuristics: { 
+      ua: [
+        'Прозорість системного статусу', 
+        'Консистентність та стандарти', 
+        'Менше дизайну — це більше дизайну', 
+        'Захист від критичних помилок'
+      ], 
+      en: [
+        'Visibility of system status', 
+        'Consistency and platform standards', 
+        'Good design is as little design as possible', 
+        'Error prevention over error recovery'
+      ] 
+    },
+    techStackTitle: { ua: 'Технологічний стек', en: 'Technology Stack' },
+    techStackItems: [
+      'Figma & Tokens Studio',
+      'Next.js 15 (App Router)',
+      'React 19 & TypeScript',
+      'Tailwind CSS v4',
+      'Motion & GSAP',
+      'Three.js & WebGL',
+      'Adobe InDesign & Prepress',
+      'Google Sheets API / Apps Script',
+      'Cinema 4D & Octane'
+    ]
+  }
 };
 
 export const DEFAULT_TESTIMONIALS: Testimonial[] = [
@@ -363,15 +412,22 @@ export const DEFAULT_EXPERIENCE: ExperienceItem[] = [
   {
     id: 'exp-1',
     type: 'art-direction',
-    company: 'Monolith Design Labs',
-    location: 'Kyiv / Remote',
-    position: {
+    company: {
+      ua: 'Monolith Design Labs',
+      en: 'Monolith Design Labs'
+    },
+    location: {
+      ua: 'Київ / Віддалено',
+      en: 'Kyiv / Remote'
+    },
+    role: {
       ua: 'Lead UI/UX Architect & Art Director',
       en: 'Lead UI/UX Architect & Art Director'
     },
-    startDate: '2023',
-    endDate: 'Зараз',
-    isCurrent: true,
+    period: {
+      ua: '2023 — Зараз',
+      en: '2023 — Present'
+    },
     description: {
       ua: [
         'Керування дизайн-стратегією складних фінтех та Web3 платформ для клієнтів з Лондона, Берліна та Нью-Йорка.',
@@ -389,15 +445,22 @@ export const DEFAULT_EXPERIENCE: ExperienceItem[] = [
   {
     id: 'exp-2',
     type: 'commercial',
-    company: 'Apex Digital Systems',
-    location: 'Kyiv',
-    position: {
+    company: {
+      ua: 'Apex Digital Systems',
+      en: 'Apex Digital Systems'
+    },
+    location: {
+      ua: 'Київ',
+      en: 'Kyiv'
+    },
+    role: {
       ua: 'Senior Product Designer',
       en: 'Senior Product Designer'
     },
-    startDate: '2021',
-    endDate: '2023',
-    isCurrent: false,
+    period: {
+      ua: '2021 — 2023',
+      en: '2021 — 2023'
+    },
     description: {
       ua: [
         'Створення інтерфейсів SaaS платформ, аналітичних дашбордів та мобільних додатків із мільйонною аудиторією.',
@@ -415,15 +478,22 @@ export const DEFAULT_EXPERIENCE: ExperienceItem[] = [
   {
     id: 'exp-3',
     type: 'education',
-    company: 'Kyiv National Academy of Media Arts (KAMA)',
-    location: 'Kyiv',
-    position: {
+    company: {
+      ua: 'Kyiv National Academy of Media Arts (KAMA)',
+      en: 'Kyiv National Academy of Media Arts (KAMA)'
+    },
+    location: {
+      ua: 'Київ',
+      en: 'Kyiv'
+    },
+    role: {
       ua: 'Art Direction & Digital Design Honors',
       en: 'Art Direction & Digital Design Honors'
     },
-    startDate: '2019',
-    endDate: '2021',
-    isCurrent: false,
+    period: {
+      ua: '2019 — 2021',
+      en: '2019 — 2021'
+    },
     description: {
       ua: [
         'Поглиблене вивчення історії швейцарської типографіки, структурної семіотики, кольорознавства та кінетичного дизайну.',

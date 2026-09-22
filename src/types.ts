@@ -59,15 +59,22 @@ export interface Project {
 export interface ExperienceItem {
   id: string;
   type: 'commercial' | 'art-direction' | 'education';
-  company: string;
-  location: string;
-  position: {
+  company: {
     ua: string;
     en: string;
   };
-  startDate: string;
-  endDate: string;
-  isCurrent: boolean;
+  location: {
+    ua: string;
+    en: string;
+  };
+  role: {
+    ua: string;
+    en: string;
+  };
+  period: {
+    ua: string;
+    en: string;
+  };
   description: {
     ua: string[];
     en: string[];
@@ -117,4 +124,18 @@ export interface GeneralSettings {
   googleSheetId?: string;
   appsScriptUrl?: string;
   lastSyncedAt?: string;
+  expertise?: {
+    heading: { ua: string; en: string };
+    subtitle: { ua: string; en: string };
+    card1Title: { ua: string; en: string };
+    card1Desc: { ua: string; en: string };
+    card2Title: { ua: string; en: string };
+    card2Desc: { ua: string; en: string };
+    card3Title: { ua: string; en: string };
+    card3Desc: { ua: string; en: string };
+    card4Title: { ua: string; en: string };
+    heuristics: { ua: string[]; en: string[] };
+    techStackTitle: { ua: string; en: string };
+    techStackItems: string[];
+  };
 }

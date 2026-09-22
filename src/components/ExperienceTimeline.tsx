@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Briefcase, GraduationCap, Sparkles } from 'lucide-react';
 import { ExperienceItem, Language } from '../types';
@@ -9,6 +9,22 @@ interface ExperienceTimelineProps {
 }
 
 export const ExperienceTimeline: React.FC<ExperienceTimelineProps> = ({ experience, language }) => {
+  const [mousePos, setMousePos] = useState({ x: -1000, y: -1000 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMousePos({
+      x: Math.round(e.clientX - rect.left),
+      y: Math.round(e.clientY - rect.top),
+    });
+    if (!isHovered) setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  };
+
   const t = {
     title: language === 'ua' ? 'Кар’єрний Шлях & Досвід' : 'Career Track & Background',
     subtitle: language === 'ua'
@@ -18,8 +34,49 @@ export const ExperienceTimeline: React.FC<ExperienceTimelineProps> = ({ experien
   };
 
   return (
-    <section id="experience" className="py-24 px-6 lg:px-12 border-t border-neutral-900 bg-[#0a0a0a] text-[#f4f4f0]">
-      <div className="max-w-[1600px] mx-auto">
+    <section 
+      id="experience" 
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={handleMouseLeave}
+      className="relative py-24 px-6 lg:px-12 border-t border-neutral-900 bg-[#0a0a0a] text-[#f4f4f0]"
+    >
+      {/* Subtle background ambient grid with softened spotlight */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Base ambient grid - softened */}
+        <div
+          className="w-full h-full opacity-[0.07]"
+          style={{
+            backgroundImage:
+              'linear-gradient(#262626 1px, transparent 1px), linear-gradient(90deg, #262626 1px, transparent 1px)',
+            backgroundSize: '5rem 5rem'
+          }}
+        />
+
+        {/* Soft interactive illuminated grid layer with radial spotlight */}
+        <div
+          className="w-full h-full absolute inset-0 transition-opacity duration-500 pointer-events-none"
+          style={{
+            opacity: isHovered ? 0.6 : 0,
+            backgroundImage:
+              'linear-gradient(#444444 1px, transparent 1px), linear-gradient(90deg, #444444 1px, transparent 1px)',
+            backgroundSize: '5rem 5rem',
+            maskImage: `radial-gradient(340px circle at ${mousePos.x}px ${mousePos.y}px, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 45%, transparent 75%)`,
+            WebkitMaskImage: `radial-gradient(340px circle at ${mousePos.x}px ${mousePos.y}px, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 45%, transparent 75%)`,
+          }}
+        />
+
+        {/* Delicate ambient aura */}
+        <div
+          className="w-full h-full absolute inset-0 transition-opacity duration-500 pointer-events-none"
+          style={{
+            opacity: isHovered ? 0.2 : 0,
+            background: `radial-gradient(400px circle at ${mousePos.x}px ${mousePos.y}px, rgba(255, 255, 255, 0.02), transparent 70%)`
+          }}
+        />
+      </div>
+
+      <div className="max-w-[1600px] mx-auto relative z-10">
         <div className="mb-16">
           <span className="font-mono text-xs uppercase tracking-widest text-neutral-400 block mb-3">
             03 // TRACK RECORD
@@ -64,39 +121,43 @@ export const ExperienceTimeline: React.FC<ExperienceTimelineProps> = ({ experien
                       ) : (
                         <Briefcase className="w-3.5 h-3.5 text-emerald-400" />
                       )}
-                      <span className="uppercase tracking-wider">{item.company}</span>
+                      <span className="uppercase tracking-wider">{item.company[language]}</span>
                     </span>
                     <span>
-                      {item.startDate} — {item.isCurrent ? t.present : item.endDate}
+                      {item.period[language]}
                     </span>
                   </div>
 
                   <h3 className="text-xl md:text-2xl font-medium tracking-tight uppercase text-white mb-2">
-                    {item.position[language]}
+                    {item.role[language]}
                   </h3>
                   <span className="text-xs font-mono text-neutral-500 block mb-4">
-                    {item.location}
+                    {item.location[language]}
                   </span>
 
-                  <ul className="space-y-2 mb-6">
-                    {item.description[language].map((desc, dIdx) => (
-                      <li key={dIdx} className="text-neutral-400 text-sm font-light leading-relaxed flex items-start gap-2">
-                        <span className="text-neutral-600 select-none">•</span>
-                        <span>{desc}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  {item.description[language]?.length > 0 && (
+                    <ul className="space-y-2 mb-6">
+                      {item.description[language].map((desc, dIdx) => (
+                        <li key={dIdx} className="text-neutral-400 text-sm font-light leading-relaxed flex items-start gap-2">
+                          <span className="text-neutral-600 select-none">•</span>
+                          <span>{desc}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
 
-                  <div className="flex flex-wrap gap-1.5 pt-4 border-t border-neutral-800/80">
-                    {item.technologies.map((tech, tIdx) => (
-                      <span
-                        key={tIdx}
-                        className="px-2 py-0.5 text-[10px] font-mono bg-neutral-900 border border-neutral-800 text-neutral-400"
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
+                  {item.technologies?.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 pt-4 border-t border-neutral-800/80">
+                      {item.technologies.map((tech, tIdx) => (
+                        <span
+                          key={tIdx}
+                          className="px-2 py-0.5 text-[10px] font-mono bg-neutral-900 border border-neutral-800 text-neutral-400"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </motion.div>
             );

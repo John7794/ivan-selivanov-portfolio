@@ -107,22 +107,6 @@ export const Footer: React.FC<FooterProps> = ({ settings, language }) => {
               >
                 <span>LinkedIn</span> <MoveRight className="w-4 h-4" />
               </a>
-              <a
-                href={settings.telegram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 hover:opacity-60 transition-opacity"
-              >
-                <span>Telegram</span> <MoveRight className="w-4 h-4" />
-              </a>
-              <a
-                href={settings.behance}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 hover:opacity-60 transition-opacity"
-              >
-                <span>Behance</span> <MoveRight className="w-4 h-4" />
-              </a>
             </div>
           </div>
 
