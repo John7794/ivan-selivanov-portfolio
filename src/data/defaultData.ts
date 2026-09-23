@@ -1,4 +1,4 @@
-import { Project, ExperienceItem, Testimonial, GeneralSettings, LegalAndBannersData } from '../types';
+import { Project, ExperienceItem, Testimonial, GeneralSettings, LegalAndBannersData, ContactsData } from '../types';
 
 export const DEFAULT_SETTINGS: GeneralSettings = {
   name: {
@@ -26,10 +26,10 @@ export const DEFAULT_SETTINGS: GeneralSettings = {
     en: 'Lviv, Ukraine (Available Worldwide)'
   },
   email: 'ivanselivanov771994@gmail.com',
-  telegram: 'https://t.me/ivanselivanov',
+  telegram: '',
   linkedin: 'https://www.linkedin.com/in/ivan-selivanov-4bb884183/',
-  behance: 'https://behance.net/ivanselivanov',
-  github: 'https://github.com/ivanselivanov',
+  behance: '',
+  github: '',
   heroImage: 'https://drive.google.com/uc?export=download&id=1jCDr21Fo4A_b8X4sIWeQHhOLG2LcJJnq',
   appsScriptUrl: 'https://script.google.com/macros/s/AKfycbzWBH_tyMHYUEeaRM1u91hS1TWTKiQm3F2H6eFfQNN9oUBIKfbwZnF36kFERfZ9D1gLhA/exec',
   googleSheetId: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms',
@@ -89,6 +89,20 @@ export const DEFAULT_SETTINGS: GeneralSettings = {
       'SVG',
       'Adobe Illustrator'
     ]
+  },
+  menu: {
+    systemTitle: { ua: 'IS // СИСТЕМА НАВІГАЦІЇ', en: 'IS // NAVIGATION SYSTEM' },
+    item1Title: { ua: 'Проєкти', en: 'Selected Work' },
+    item1Desc: { ua: 'Вибрані кейси & інтерфейси', en: 'Featured cases & digital products' },
+    item2Title: { ua: 'Експертиза', en: 'Core Expertise' },
+    item2Desc: { ua: 'UI/UX, графіка та стек', en: 'UI/UX, visual design & tech' },
+    item3Title: { ua: 'Досвід', en: 'Career Timeline' },
+    item3Desc: { ua: 'Кар’єрний шлях та ролі', en: 'Professional trajectory & milestones' },
+    item4Title: { ua: 'Контакти', en: 'Get In Touch' },
+    item4Desc: { ua: 'Зв’язок для нових викликів', en: 'Direct collaboration inquiries' },
+    contactsTitle: { ua: 'Прямі контакти:', en: 'Direct Channels:' },
+    copyBtn: { ua: 'Копія', en: 'Copy' },
+    copiedBtn: { ua: 'Копія!', en: 'Copied!' }
   }
 };
 
@@ -801,3 +815,21 @@ export const DEFAULT_LEGAL_AND_BANNERS: LegalAndBannersData = {
     link: '#contact'
   }
 };
+
+export const DEFAULT_CONTACTS: ContactsData = {
+  email: 'ivanselivanov771994@gmail.com',
+  telegram: '',
+  linkedin: 'https://www.linkedin.com/in/ivan-selivanov-4bb884183/',
+  behance: '',
+  github: '',
+  phone: '',
+  address: {
+    ua: 'Львів, Україна (Доступний по всьому світу)',
+    en: 'Lviv, Ukraine (Available Worldwide)'
+  },
+  location: {
+    ua: 'Львів, Україна (Доступний по всьому світу)',
+    en: 'Lviv, Ukraine (Available Worldwide)'
+  }
+};
+

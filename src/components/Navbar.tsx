@@ -8,16 +8,20 @@ import {
   Send, 
   Linkedin, 
   Check, 
-  Copy 
+  Copy,
+  MapPin,
+  Phone
 } from 'lucide-react';
-import { Language, GeneralSettings } from '../types';
+import { Language, GeneralSettings, ContactsData } from '../types';
 import { playClickSound } from '../utils/audio';
+import { getLocalizedText } from '../utils/i18n';
 
 interface NavbarProps {
   language: Language;
   onLanguageChange: (lang: Language) => void;
   name: string;
   settings?: GeneralSettings;
+  contacts?: ContactsData;
   onOpenLegal?: (doc: 'privacy' | 'terms') => void;
   onOpenCookies?: () => void;
 }
@@ -27,6 +31,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLanguageChange,
   name,
   settings,
+  contacts,
   onOpenLegal,
   onOpenCookies
 }) => {
@@ -93,16 +98,61 @@ export const Navbar: React.FC<NavbarProps> = ({
     setTimeout(() => setCopiedEmail(false), 2200);
   };
 
+  const menuTexts = settings?.menu;
+
   const navItems = [
-    { id: 'work', num: '01', titleUa: 'Проєкти', titleEn: 'Selected Work', descUa: 'Вибрані кейси & інтерфейси', descEn: 'Featured cases & digital products' },
-    { id: 'expertise', num: '02', titleUa: 'Експертиза', titleEn: 'Core Expertise', descUa: 'UI/UX, графіка та стек', descEn: 'UI/UX, visual design & tech' },
-    { id: 'experience', num: '03', titleUa: 'Досвід', titleEn: 'Career Timeline', descUa: 'Кар’єрний шлях та ролі', descEn: 'Professional trajectory & milestones' },
-    { id: 'contact', num: '04', titleUa: 'Контакти', titleEn: 'Get In Touch', descUa: 'Зв’язок для нових викликів', descEn: 'Direct collaboration inquiries' },
+    { 
+      id: 'work', 
+      num: '01', 
+      titleUa: getLocalizedText(menuTexts?.item1Title, 'ua', { ua: 'Проєкти', en: 'Selected Work' }), 
+      titleEn: getLocalizedText(menuTexts?.item1Title, 'en', { ua: 'Проєкти', en: 'Selected Work' }), 
+      descUa: getLocalizedText(menuTexts?.item1Desc, 'ua', { ua: 'Вибрані кейси & інтерфейси', en: 'Featured cases & digital products' }), 
+      descEn: getLocalizedText(menuTexts?.item1Desc, 'en', { ua: 'Вибрані кейси & інтерфейси', en: 'Featured cases & digital products' }) 
+    },
+    { 
+      id: 'expertise', 
+      num: '02', 
+      titleUa: getLocalizedText(menuTexts?.item2Title, 'ua', { ua: 'Експертиза', en: 'Core Expertise' }), 
+      titleEn: getLocalizedText(menuTexts?.item2Title, 'en', { ua: 'Експертиза', en: 'Core Expertise' }), 
+      descUa: getLocalizedText(menuTexts?.item2Desc, 'ua', { ua: 'UI/UX, графіка та стек', en: 'UI/UX, visual design & tech' }), 
+      descEn: getLocalizedText(menuTexts?.item2Desc, 'en', { ua: 'UI/UX, графіка та стек', en: 'UI/UX, visual design & tech' }) 
+    },
+    { 
+      id: 'experience', 
+      num: '03', 
+      titleUa: getLocalizedText(menuTexts?.item3Title, 'ua', { ua: 'Досвід', en: 'Career Timeline' }), 
+      titleEn: getLocalizedText(menuTexts?.item3Title, 'en', { ua: 'Досвід', en: 'Career Timeline' }), 
+      descUa: getLocalizedText(menuTexts?.item3Desc, 'ua', { ua: 'Кар’єрний шлях та ролі', en: 'Professional trajectory & milestones' }), 
+      descEn: getLocalizedText(menuTexts?.item3Desc, 'en', { ua: 'Кар’єрний шлях та ролі', en: 'Professional trajectory & milestones' }) 
+    },
+    { 
+      id: 'contact', 
+      num: '04', 
+      titleUa: getLocalizedText(menuTexts?.item4Title, 'ua', { ua: 'Контакти', en: 'Get In Touch' }), 
+      titleEn: getLocalizedText(menuTexts?.item4Title, 'en', { ua: 'Контакти', en: 'Get In Touch' }), 
+      descUa: getLocalizedText(menuTexts?.item4Desc, 'ua', { ua: 'Зв’язок для нових викликів', en: 'Direct collaboration inquiries' }), 
+      descEn: getLocalizedText(menuTexts?.item4Desc, 'en', { ua: 'Зв’язок для нових викликів', en: 'Direct collaboration inquiries' }) 
+    },
   ];
 
-  const currentEmail = settings?.email || 'ivanselivanov771994@gmail.com';
-  const currentTelegram = settings?.telegram || 'https://t.me/ivanselivanov';
-  const currentLinkedin = settings?.linkedin || 'https://www.linkedin.com/in/ivan-selivanov-4bb884183/';
+  const currentEmail = (contacts?.email !== undefined ? contacts.email : (settings?.email || 'ivanselivanov771994@gmail.com')).trim();
+  const currentTelegram = (contacts?.telegram !== undefined ? contacts.telegram : (settings?.telegram || '')).trim();
+  const currentLinkedin = (contacts?.linkedin !== undefined ? contacts.linkedin : (settings?.linkedin || 'https://www.linkedin.com/in/ivan-selivanov-4bb884183/')).trim();
+  const currentBehance = (contacts?.behance !== undefined ? contacts.behance : (settings?.behance || '')).trim();
+  const currentGithub = (contacts?.github !== undefined ? contacts.github : (settings?.github || '')).trim();
+  const currentPhone = (contacts?.phone || '').trim();
+
+  const activeAddress = getLocalizedText(
+    contacts?.address || contacts?.location || settings?.location,
+    language,
+    { ua: 'Львів, Україна (Доступний по всьому світу)', en: 'Lviv, Ukraine (Available Worldwide)' }
+  );
+
+  const displayName = getLocalizedText(
+    { ua: name || settings?.name?.ua, en: settings?.name?.en || name },
+    language,
+    { ua: 'Іван Селіванов', en: 'Ivan Selivanov' }
+  );
 
   return (
     <>
@@ -117,23 +167,23 @@ export const Navbar: React.FC<NavbarProps> = ({
             IS
           </span>
           <span className="hidden sm:inline-block font-mono text-[10px] uppercase tracking-widest text-neutral-400 font-normal border-l border-neutral-800 pl-3">
-            {(name || 'IVAN SELIVANOV').toUpperCase()}
+            {displayName.toUpperCase()}
           </span>
         </a>
 
         {/* Desktop Quick Nav Links */}
         <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-xs font-mono tracking-widest uppercase text-neutral-400">
           <a href="#work" onClick={(e) => handleNavClick(e, 'work')} className="hover:text-white transition-colors cursor-pointer">
-            {language === 'ua' ? 'Проєкти' : 'Work'}
+            {language === 'ua' ? navItems[0].titleUa : (navItems[0].titleEn || 'Selected Work')}
           </a>
           <a href="#expertise" onClick={(e) => handleNavClick(e, 'expertise')} className="hover:text-white transition-colors cursor-pointer">
-            {language === 'ua' ? 'Експертиза' : 'Expertise'}
+            {language === 'ua' ? navItems[1].titleUa : (navItems[1].titleEn || 'Core Expertise')}
           </a>
           <a href="#experience" onClick={(e) => handleNavClick(e, 'experience')} className="hover:text-white transition-colors cursor-pointer">
-            {language === 'ua' ? 'Досвід' : 'Experience'}
+            {language === 'ua' ? navItems[2].titleUa : (navItems[2].titleEn || 'Career Timeline')}
           </a>
           <a href="#contact" onClick={(e) => handleNavClick(e, 'contact')} className="hover:text-white transition-colors cursor-pointer">
-            {language === 'ua' ? 'Контакт' : 'Contact'}
+            {language === 'ua' ? navItems[3].titleUa : (navItems[3].titleEn || 'Get In Touch')}
           </a>
         </nav>
 
@@ -235,23 +285,70 @@ export const Navbar: React.FC<NavbarProps> = ({
               {/* Top Bar inside Menu */}
               <div className="p-4 sm:p-6 border-b border-neutral-800/80 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <span className="font-mono text-xs uppercase tracking-widest text-emerald-400 font-bold">
-                    IS // NAVIGATION SYSTEM
+                  <span className="font-mono text-xs uppercase tracking-widest text-[#f4f4f0] font-bold">
+                    {getLocalizedText(menuTexts?.systemTitle, language, { ua: 'IS // СИСТЕМА НАВІГАЦІЇ', en: 'IS // NAVIGATION SYSTEM' })}
                   </span>
                   <span className="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   <span className="hidden sm:inline-block font-mono text-[11px] text-neutral-400">
-                    {settings?.heroTag ? settings.heroTag[language] : (language === 'ua' ? 'Готовий до співпраці' : 'Available for work')}
+                    {getLocalizedText(settings?.heroTag, language, { ua: 'Готовий до співпраці', en: 'Available for work' })}
                   </span>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => { playClickSound(); setIsMenuOpen(false); }}
-                  className="w-9 h-9 rounded-full border border-neutral-800 hover:border-neutral-600 bg-neutral-900/80 hover:bg-neutral-800 flex items-center justify-center transition-colors cursor-pointer text-neutral-300 hover:text-white"
-                  aria-label="Закрити"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  {/* Language Switcher inside Menu */}
+                  <div className="flex items-center border border-neutral-800 bg-neutral-900/90 p-0.5 shadow-sm">
+                    <button
+                      type="button"
+                      onClick={() => { playClickSound(); onLanguageChange('ua'); }}
+                      className={`px-2 py-1 sm:px-2.5 sm:py-1 text-xs font-semibold cursor-pointer transition-colors flex items-center gap-1.5 ${
+                        language === 'ua' ? 'bg-[#f4f4f0] text-black font-bold' : 'text-neutral-400 hover:text-white'
+                      }`}
+                      title="Українська"
+                    >
+                      <span className="w-3.5 h-2.5 rounded-[1px] overflow-hidden flex flex-col border border-neutral-700/60 shrink-0">
+                        <span className="w-full h-1/2 bg-[#0057b7]" />
+                        <span className="w-full h-1/2 bg-[#ffd700]" />
+                      </span>
+                      <span className="text-[11px] font-mono">UA</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { playClickSound(); onLanguageChange('en'); }}
+                      className={`px-2 py-1 sm:px-2.5 sm:py-1 text-xs font-semibold cursor-pointer transition-colors flex items-center gap-1.5 ${
+                        language === 'en' ? 'bg-[#f4f4f0] text-black font-bold' : 'text-neutral-400 hover:text-white'
+                      }`}
+                      title="English"
+                    >
+                      <span className="w-3.5 h-2.5 rounded-[1px] overflow-hidden flex shrink-0 border border-neutral-700/60">
+                        <svg viewBox="0 0 60 30" className="w-full h-full">
+                          <clipPath id="nav-s-menu">
+                            <path d="M0,0 v30 h60 v-30 z"/>
+                          </clipPath>
+                          <clipPath id="nav-t-menu">
+                            <path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/>
+                          </clipPath>
+                          <g clipPath="url(#nav-s-menu)">
+                            <path d="M0,0 v30 h60 v-30 z" fill="#012169"/>
+                            <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6"/>
+                            <path d="M0,0 L60,30 M60,0 L0,30" clipPath="url(#nav-t-menu)" stroke="#C8102E" strokeWidth="4"/>
+                            <path d="M30,0 v30 M0,15 h60" stroke="#fff" strokeWidth="10"/>
+                            <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" strokeWidth="6"/>
+                          </g>
+                        </svg>
+                      </span>
+                      <span className="text-[11px] font-mono">EN</span>
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => { playClickSound(); setIsMenuOpen(false); }}
+                    className="w-9 h-9 rounded-full border border-neutral-800 hover:border-neutral-600 bg-neutral-900/80 hover:bg-neutral-800 flex items-center justify-center transition-colors cursor-pointer text-neutral-300 hover:text-white"
+                    aria-label={language === 'ua' ? 'Закрити' : 'Close'}
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
               {/* Main Content Grid: Monumental Navigation + Quick Details */}
@@ -269,7 +366,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       className="group py-5 sm:py-7 flex items-baseline justify-between transition-colors cursor-pointer"
                     >
                       <div className="flex items-baseline gap-4 sm:gap-6">
-                        <span className="font-mono text-xs text-neutral-500 group-hover:text-emerald-400 transition-colors">
+                        <span className="font-mono text-xs text-neutral-500 group-hover:text-white transition-colors">
                           {item.num}
                         </span>
                         <div>
@@ -289,75 +386,107 @@ export const Navbar: React.FC<NavbarProps> = ({
                   ))}
                 </div>
 
-                {/* Right Column: Context, Tools & Direct Contacts (lg:col-span-5) */}
-                <div className="lg:col-span-5 flex flex-col justify-between gap-8 pt-4 lg:pt-0 lg:border-l lg:border-neutral-800/80 lg:pl-10">
-                  {/* Status & Location Card */}
-                  <div className="bg-neutral-950 border border-neutral-800/90 p-5 space-y-3">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      <span className="font-mono text-xs uppercase tracking-widest text-emerald-400 font-semibold">
-                        {settings?.heroTag ? settings.heroTag[language] : (language === 'ua' ? 'Готовий до співпраці' : 'Available for work')}
-                      </span>
-                    </div>
-                    <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed font-light">
-                      {settings?.heroTagline ? settings.heroTagline[language] : (settings?.bioShort ? settings.bioShort[language] : '')}
-                    </p>
-                    <div className="font-mono text-[11px] text-neutral-500 pt-1 border-t border-neutral-900">
-                      📍 {settings?.location ? settings.location[language] : (language === 'ua' ? 'Львів, Україна' : 'Lviv, Ukraine')}
-                    </div>
-                  </div>
-
-                  {/* Direct Contact Links */}
-                  <div className="space-y-2.5">
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-neutral-400 block mb-2">
-                      {language === 'ua' ? 'Прямі контакти:' : 'Direct Channels:'}
-                    </span>
-
-                    {/* Email Copy Box */}
-                    <div className="flex items-center justify-between p-3 bg-neutral-950 border border-neutral-800 hover:border-neutral-700 transition-colors">
-                      <div className="flex items-center gap-2.5 overflow-hidden">
-                        <Mail className="w-4 h-4 text-emerald-400 shrink-0" />
-                        <span className="font-mono text-xs text-neutral-200 truncate">{currentEmail}</span>
+                {/* Right Column: Address & Direct Contacts (lg:col-span-5) */}
+                <div className="lg:col-span-5 flex flex-col justify-between gap-6 pt-4 lg:pt-0 lg:border-l lg:border-neutral-800/80 lg:pl-10">
+                  <div className="space-y-6">
+                    {/* Address Box */}
+                    {activeAddress && (
+                      <div className="bg-neutral-950 border border-neutral-800/90 p-4 space-y-2">
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-neutral-400 block">
+                          {language === 'ua' ? 'Адреса' : 'Address'}
+                        </span>
+                        <div className="flex items-start gap-2.5 text-xs sm:text-sm text-neutral-200 font-mono">
+                          <MapPin className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                          <span className="leading-snug">{activeAddress}</span>
+                        </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => handleCopyEmail(currentEmail)}
-                        className="px-2.5 py-1 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-xs font-mono text-neutral-300 hover:text-white flex items-center gap-1.5 cursor-pointer shrink-0 transition-colors"
-                        title={language === 'ua' ? 'Скопіювати email' : 'Copy email'}
-                      >
-                        {copiedEmail ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                        <span className="text-[10px]">{copiedEmail ? (language === 'ua' ? 'Копія!' : 'Copied!') : (language === 'ua' ? 'Копія' : 'Copy')}</span>
-                      </button>
-                    </div>
+                    )}
 
-                    {/* Social quick links */}
-                    <div className="grid grid-cols-2 gap-2">
-                      <a
-                        href={currentTelegram}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-3 bg-neutral-950 border border-neutral-800 hover:border-neutral-700 hover:text-white text-neutral-300 transition-colors flex items-center justify-between font-mono text-xs"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Send className="w-3.5 h-3.5 text-cyan-400" />
-                          <span>Telegram</span>
+                    {/* Direct Contact Links */}
+                    {(currentEmail || currentPhone || currentTelegram || currentLinkedin || currentBehance || currentGithub) && (
+                      <div className="space-y-2.5">
+                        <span className="font-mono text-[10px] uppercase tracking-widest text-neutral-400 block mb-2">
+                          {language === 'ua' ? 'Контакти' : 'Contacts'}
                         </span>
-                        <ArrowUpRight className="w-3.5 h-3.5 text-neutral-500" />
-                      </a>
 
-                      <a
-                        href={currentLinkedin}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-3 bg-neutral-950 border border-neutral-800 hover:border-neutral-700 hover:text-white text-neutral-300 transition-colors flex items-center justify-between font-mono text-xs"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Linkedin className="w-3.5 h-3.5 text-blue-400" />
-                          <span>LinkedIn</span>
-                        </span>
-                        <ArrowUpRight className="w-3.5 h-3.5 text-neutral-500" />
-                      </a>
-                    </div>
+                        {/* Email Box */}
+                        {currentEmail && (
+                          <div className="flex items-center justify-between p-3 bg-neutral-950 border border-neutral-800 hover:border-neutral-700 transition-colors">
+                            <div className="flex items-center gap-2.5 overflow-hidden">
+                              <Mail className="w-4 h-4 text-neutral-400 shrink-0" />
+                              <a
+                                href={`mailto:${currentEmail}`}
+                                className="font-mono text-xs text-neutral-200 hover:text-white truncate"
+                              >
+                                {currentEmail}
+                              </a>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleCopyEmail(currentEmail)}
+                              className="px-2.5 py-1 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 text-xs font-mono text-neutral-300 hover:text-white flex items-center gap-1.5 cursor-pointer shrink-0 transition-colors"
+                              title={language === 'ua' ? 'Скопіювати email' : 'Copy email'}
+                            >
+                              {copiedEmail ? <Check className="w-3.5 h-3.5 text-white" /> : <Copy className="w-3.5 h-3.5" />}
+                              <span className="text-[10px]">
+                                {copiedEmail 
+                                  ? (language === 'ua' ? 'Скопійовано!' : 'Copied!') 
+                                  : (language === 'ua' ? 'Копія' : 'Copy')}
+                              </span>
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Phone if provided */}
+                        {currentPhone && (
+                          <a
+                            href={`tel:${currentPhone.replace(/\s+/g, '')}`}
+                            className="p-3 bg-neutral-950 border border-neutral-800 hover:border-neutral-700 hover:text-white text-neutral-300 transition-colors flex items-center justify-between font-mono text-xs"
+                          >
+                            <span className="flex items-center gap-2">
+                              <Phone className="w-3.5 h-3.5 text-neutral-400" />
+                              <span>{currentPhone}</span>
+                            </span>
+                            <ArrowUpRight className="w-3.5 h-3.5 text-neutral-500" />
+                          </a>
+                        )}
+
+                        {/* Social quick links */}
+                        {(() => {
+                          const socials = [
+                            currentLinkedin ? { name: 'LinkedIn', url: currentLinkedin, icon: Linkedin } : null,
+                            currentTelegram ? { name: 'Telegram', url: currentTelegram, icon: Send } : null,
+                            currentBehance ? { name: 'Behance', url: currentBehance, icon: null } : null,
+                            currentGithub ? { name: 'GitHub', url: currentGithub, icon: null } : null
+                          ].filter(Boolean) as { name: string; url: string; icon: any }[];
+
+                          if (socials.length === 0) return null;
+
+                          return (
+                            <div className={`grid gap-2 ${socials.length > 1 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
+                              {socials.map((soc) => {
+                                const Icon = soc.icon;
+                                return (
+                                  <a
+                                    key={soc.name}
+                                    href={soc.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="p-3 bg-neutral-950 border border-neutral-800 hover:border-neutral-700 hover:text-white text-neutral-300 transition-colors flex items-center justify-between font-mono text-xs"
+                                  >
+                                    <span className="flex items-center gap-2">
+                                      {Icon && <Icon className="w-3.5 h-3.5 text-neutral-400" />}
+                                      <span>{soc.name}</span>
+                                    </span>
+                                    <ArrowUpRight className="w-3.5 h-3.5 text-neutral-500" />
+                                  </a>
+                                );
+                              })}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    )}
                   </div>
 
                   {/* Legal Quick Actions */}

@@ -1,14 +1,18 @@
-import { Project, ExperienceItem, Testimonial, GeneralSettings, LegalAndBannersData } from '../types';
-import { DEFAULT_PROJECTS, DEFAULT_EXPERIENCE, DEFAULT_TESTIMONIALS, DEFAULT_SETTINGS, DEFAULT_LEGAL_AND_BANNERS } from '../data/defaultData';
+import { Project, ExperienceItem, Testimonial, GeneralSettings, LegalAndBannersData, ContactsData, FilterOption } from '../types';
+import { DEFAULT_PROJECTS, DEFAULT_EXPERIENCE, DEFAULT_TESTIMONIALS, DEFAULT_SETTINGS, DEFAULT_LEGAL_AND_BANNERS, DEFAULT_CONTACTS } from '../data/defaultData';
+import { translateToEnglishIfNeeded, hasCyrillic } from '../utils/i18n';
 
 const CACHE_KEY = 'ivan_portfolio_sheets_data';
 const SETTINGS_KEY = 'ivan_portfolio_settings';
 
 export interface PortfolioData {
   projects: Project[];
+  categories?: FilterOption[];
+  statuses?: FilterOption[];
   experience: ExperienceItem[];
   testimonials: Testimonial[];
   settings: GeneralSettings;
+  contacts: ContactsData;
   legalAndBanners: LegalAndBannersData;
   source: 'cache' | 'default' | 'live_sheets';
   lastSyncedAt: string;
@@ -198,16 +202,270 @@ function parseProjectImages(p: any): { thumbnailUrl: string; galleryUrls: string
   };
 }
 
-function mapProjectFromSheet(p: any, idx: number): Project {
-  const category = (p.category || 'ui-ux') as Project['category'];
-  const categoryLabels: Record<string, { ua: string; en: string }> = {
-    'ui-ux': { ua: 'UI/UX Продукт', en: 'UI/UX Product' },
-    '3d-render': { ua: '3D Рендери', en: '3D Renders' },
-    'book-design': { ua: 'Книжковий дизайн', en: 'Book Design' },
-    'branding': { ua: 'Айдентика & Постери', en: 'Identity & Posters' }
-  };
+export function parseProjectCategory(p: any): { id: string; label: { ua: string; en: string } } {
+  const raw = p.category || p.category_ua || p.discipline || p.categoryLabel || '';
+  const rawEn = p.category_en || p.categoryLabel_en || '';
 
-  const catLabel = p.categoryLabel || categoryLabels[category] || { ua: 'Проєкт', en: 'Project' };
+  let rawStr = '';
+  if (typeof raw === 'object' && raw !== null) {
+    rawStr = String(raw.ua || raw.en || '').trim();
+  } else {
+    rawStr = String(raw ?? '').trim();
+  }
+
+  const rawLower = rawStr.toLowerCase();
+
+  // 1. UI/UX patterns
+  if (
+    rawLower === 'ui-ux' ||
+    rawLower === 'ui/ux' ||
+    rawLower.includes('ui/ux') ||
+    rawLower.includes('ui-ux') ||
+    rawLower.includes('продукт') ||
+    rawLower.includes('product') ||
+    rawLower.includes('інтерфейс') ||
+    rawLower.includes('interface')
+  ) {
+    return {
+      id: 'ui-ux',
+      label: {
+        ua: rawStr && !rawLower.includes('ui-ux') ? rawStr : 'UI/UX Продукт',
+        en: String(rawEn || '').trim() || 'UI/UX Product'
+      }
+    };
+  }
+
+  // 2. 3D Render patterns
+  if (
+    rawLower === '3d-render' ||
+    rawLower === '3d' ||
+    rawLower.includes('3d') ||
+    rawLower.includes('рендер') ||
+    rawLower.includes('render')
+  ) {
+    return {
+      id: '3d-render',
+      label: {
+        ua: rawStr && !rawLower.includes('3d-render') ? rawStr : '3D Рендери',
+        en: String(rawEn || '').trim() || '3D Renders'
+      }
+    };
+  }
+
+  // 3. Book Design patterns
+  if (
+    rawLower === 'book-design' ||
+    rawLower.includes('книг') ||
+    rawLower.includes('book') ||
+    rawLower.includes('верстк') ||
+    rawLower.includes('editorial')
+  ) {
+    return {
+      id: 'book-design',
+      label: {
+        ua: rawStr && !rawLower.includes('book-design') ? rawStr : 'Книжковий дизайн',
+        en: String(rawEn || '').trim() || 'Book Design'
+      }
+    };
+  }
+
+  // 4. Branding & Identity patterns
+  if (
+    rawLower === 'branding' ||
+    rawLower.includes('айдентик') ||
+    rawLower.includes('бренд') ||
+    rawLower.includes('brand') ||
+    rawLower.includes('постер') ||
+    rawLower.includes('poster') ||
+    rawLower.includes('identity')
+  ) {
+    return {
+      id: 'branding',
+      label: {
+        ua: rawStr && !rawLower.includes('branding') ? rawStr : 'Айдентика & Постери',
+        en: String(rawEn || '').trim() || 'Identity & Posters'
+      }
+    };
+  }
+
+  // 5. Custom Category from user's table (e.g. Mobile, Motion, Illustrations)
+  if (rawStr) {
+    const slug = rawLower
+      .replace(/[^\w\dа-яіїєґ]+/gi, '-')
+      .replace(/^-+|-+$/g, '') || 'custom';
+    
+    const enLabel = String(rawEn || '').trim() || translateToEnglishIfNeeded(rawStr);
+
+    return {
+      id: slug,
+      label: {
+        ua: rawStr,
+        en: enLabel
+      }
+    };
+  }
+
+  // Fallback if empty
+  return {
+    id: 'ui-ux',
+    label: { ua: 'UI/UX Продукт', en: 'UI/UX Product' }
+  };
+}
+
+export function parseProjectStatus(p: any): { id: string; filterLabel: { ua: string; en: string }; badgeLabel: { ua: string; en: string } } {
+  const raw = p.status || p.status_ua || p.project_status || '';
+  const rawEn = p.status_en || '';
+
+  let rawStr = '';
+  if (typeof raw === 'object' && raw !== null) {
+    rawStr = String(raw.ua || raw.en || '').trim();
+  } else {
+    rawStr = String(raw ?? '').trim();
+  }
+
+  const rawLower = rawStr.toLowerCase();
+
+  // Concept / R&D
+  if (
+    rawLower === 'concept' ||
+    rawLower.includes('концепт') ||
+    rawLower.includes('r&d') ||
+    rawLower.includes('rnd') ||
+    rawLower.includes('досліджен') ||
+    rawLower.includes('research')
+  ) {
+    return {
+      id: 'concept',
+      filterLabel: { ua: 'Концепти & R&D', en: 'Concept & R&D' },
+      badgeLabel: { ua: 'Концепт', en: 'Concept' }
+    };
+  }
+
+  // Realized / Production
+  if (
+    rawLower === 'realized' ||
+    rawLower.includes('продакшн') ||
+    rawLower.includes('продакшен') ||
+    rawLower.includes('реалізован') ||
+    rawLower.includes('production') ||
+    rawLower.includes('live') ||
+    rawLower.includes('реліз') ||
+    rawLower.includes('release')
+  ) {
+    return {
+      id: 'realized',
+      filterLabel: { ua: 'Реалізовані (Продакшн)', en: 'Production' },
+      badgeLabel: { ua: 'Продакшн', en: 'Production' }
+    };
+  }
+
+  // Custom Status from user's table (e.g. "В роботі", "Archive", etc.)
+  if (rawStr) {
+    const slug = rawLower
+      .replace(/[^\w\dа-яіїєґ]+/gi, '-')
+      .replace(/^-+|-+$/g, '') || 'custom';
+
+    const enLabel = String(rawEn || '').trim() || translateToEnglishIfNeeded(rawStr);
+
+    return {
+      id: slug,
+      filterLabel: { ua: rawStr, en: enLabel },
+      badgeLabel: { ua: rawStr, en: enLabel }
+    };
+  }
+
+  // Default to realized
+  return {
+    id: 'realized',
+    filterLabel: { ua: 'Реалізовані (Продакшн)', en: 'Production' },
+    badgeLabel: { ua: 'Продакшн', en: 'Production' }
+  };
+}
+
+export function mapCategoriesFromSheet(raw: any): FilterOption[] {
+  if (!raw) return [];
+  const list = Array.isArray(raw) ? raw : (typeof raw === 'object' ? Object.values(raw) : []);
+  const result: FilterOption[] = [];
+  const seen = new Set<string>();
+
+  list.forEach((row: any, idx: number) => {
+    if (!row) return;
+    const id = String(row.id || row.key || row.slug || row.code || `cat-${idx + 1}`).trim().toLowerCase();
+    const ua = String(row.ua || row.name_ua || row.title_ua || row.title || row.name || row.label || id).trim();
+    const en = String(row.en || row.name_en || row.title_en || row.title || row.name || row.label || ua).trim();
+    if (id && id !== 'all' && !seen.has(id)) {
+      seen.add(id);
+      result.push({ id, ua, en: translateToEnglishIfNeeded(ua, en) });
+    }
+  });
+
+  return result;
+}
+
+export function mapStatusesFromSheet(raw: any): FilterOption[] {
+  if (!raw) return [];
+  const list = Array.isArray(raw) ? raw : (typeof raw === 'object' ? Object.values(raw) : []);
+  const result: FilterOption[] = [];
+  const seen = new Set<string>();
+
+  list.forEach((row: any, idx: number) => {
+    if (!row) return;
+    const id = String(row.id || row.key || row.slug || row.code || `status-${idx + 1}`).trim().toLowerCase();
+    const ua = String(row.ua || row.name_ua || row.title_ua || row.title || row.name || row.label || id).trim();
+    const en = String(row.en || row.name_en || row.title_en || row.title || row.name || row.label || ua).trim();
+    if (id && id !== 'all' && !seen.has(id)) {
+      seen.add(id);
+      result.push({ id, ua, en: translateToEnglishIfNeeded(ua, en) });
+    }
+  });
+
+  return result;
+}
+
+function parseMetrics(val: any): { value: string; label: { ua: string; en: string } }[] {
+  if (Array.isArray(val)) {
+    return val.map((m: any) => ({
+      value: String(m.value || ''),
+      label: isLocalizedObj(m.label) ? m.label : { ua: String(m.label || ''), en: String(m.label || '') }
+    }));
+  }
+  if (typeof val === 'string' && val.trim()) {
+    try {
+      const parsed = JSON.parse(val);
+      if (Array.isArray(parsed)) return parseMetrics(parsed);
+    } catch {}
+    return val.split(/[\n;]+/).map(item => {
+      const parts = item.split(/[:|]/).map(s => s.trim());
+      if (parts.length >= 2) {
+        return {
+          value: parts[0],
+          label: { ua: parts[1], en: parts[1] }
+        };
+      }
+      return {
+        value: item.trim(),
+        label: { ua: '', en: '' }
+      };
+    }).filter(m => Boolean(m.value));
+  }
+  return [];
+}
+
+function parseTools(val: any): string[] {
+  if (Array.isArray(val)) return val.map(String).filter(Boolean);
+  if (typeof val === 'string' && val.trim()) {
+    try {
+      const parsed = JSON.parse(val);
+      if (Array.isArray(parsed)) return parsed.map(String).filter(Boolean);
+    } catch {}
+    return val.split(/[\n,;]+/).map(s => s.trim()).filter(Boolean);
+  }
+  return ['Figma', 'TypeScript', 'Design Systems'];
+}
+
+function mapProjectFromSheet(p: any, idx: number): Project {
+  const { id: catId, label: catLabel } = parseProjectCategory(p);
+  const { id: statusId, filterLabel, badgeLabel } = parseProjectStatus(p);
 
   const parsedFonts = parseFonts(p.fonts || p.designSystem?.fonts);
   const parsedColors = parseColors(p.colors || p.palette || p.designSystem?.colors);
@@ -218,9 +476,11 @@ function mapProjectFromSheet(p: any, idx: number): Project {
     id: String(p.id || `p-${idx + 1}`),
     slug: String(p.slug || p.id || `project-${idx + 1}`),
     title: String(p.title || 'Без назви'),
-    category: category,
-    categoryLabel: isLocalizedObj(catLabel) ? catLabel : { ua: String(catLabel), en: String(catLabel) },
-    status: p.status === 'concept' ? 'concept' : 'realized',
+    client: p.client ? String(p.client).trim() : undefined,
+    category: catId,
+    categoryLabel: catLabel,
+    status: statusId,
+    statusLabel: filterLabel,
     role: isLocalizedObj(p.role) ? p.role : {
       ua: p.role_ua || p.role || 'Lead Designer & Creative Director',
       en: p.role_en || p.role || 'Lead Designer & Creative Director'
@@ -246,13 +506,8 @@ function mapProjectFromSheet(p: any, idx: number): Project {
       ua: String(p.impact_ua || p.businessImpact_ua || '').trim(),
       en: String(p.impact_en || p.businessImpact_en || '').trim()
     },
-    metrics: Array.isArray(p.metrics)
-      ? p.metrics.map((m: any) => ({
-          value: String(m.value || ''),
-          label: isLocalizedObj(m.label) ? m.label : { ua: String(m.label || ''), en: String(m.label || '') }
-        }))
-      : [],
-    toolsUsed: Array.isArray(p.tools) ? p.tools : (Array.isArray(p.toolsUsed) ? p.toolsUsed : ['Figma', 'TypeScript', 'Design Systems']),
+    metrics: parseMetrics(p.metrics || p.metricsData),
+    toolsUsed: parseTools(p.tools || p.toolsUsed),
     designSystem: {
       fonts: parsedFonts,
       colors: parsedColors,
@@ -260,8 +515,8 @@ function mapProjectFromSheet(p: any, idx: number): Project {
     },
     thumbnailUrl,
     galleryUrls,
-    liveLink: p.liveLink || undefined,
-    isFeatured: Boolean(p.featured ?? p.isFeatured ?? true),
+    liveLink: p.liveLink ? String(p.liveLink).trim() : undefined,
+    isFeatured: Boolean(p.featured === true || p.featured === 'true' || p.featured === 1 || p.featured === '1' || p.isFeatured === true),
     sortOrder: Number(p.sortOrder || idx + 1),
     testimonialId: p.testimonialId || undefined
   };
@@ -366,24 +621,25 @@ export function mapSettingsFromSheet(raw: any): GeneralSettings {
 
   const getLoc = (key: string, fallback: { ua: string; en: string }): { ua: string; en: string } => {
     const val = s[key];
+    let candidateUa = '';
+    let candidateEn = '';
+
     if (isLocalizedObj(val)) {
-      return {
-        ua: val.ua !== undefined && String(val.ua).trim() !== '' ? String(val.ua).trim() : fallback.ua,
-        en: val.en !== undefined && String(val.en).trim() !== '' ? String(val.en).trim() : fallback.en
-      };
+      candidateUa = val.ua !== undefined && String(val.ua).trim() !== '' ? String(val.ua).trim() : '';
+      candidateEn = val.en !== undefined && String(val.en).trim() !== '' ? String(val.en).trim() : '';
+    } else if (typeof val === 'string' && val.trim() !== '') {
+      candidateUa = val.trim();
     }
+
     const valUa = s[`${key}_ua`] || s[`${key}_UA`];
     const valEn = s[`${key}_en`] || s[`${key}_EN`];
-    if ((valUa !== undefined && String(valUa).trim() !== '') || (valEn !== undefined && String(valEn).trim() !== '')) {
-      return {
-        ua: valUa !== undefined && String(valUa).trim() !== '' ? String(valUa).trim() : (valEn ? String(valEn).trim() : fallback.ua),
-        en: valEn !== undefined && String(valEn).trim() !== '' ? String(valEn).trim() : (valUa ? String(valUa).trim() : fallback.en)
-      };
-    }
-    if (typeof val === 'string' && val.trim() !== '') {
-      return { ua: val.trim(), en: val.trim() };
-    }
-    return fallback;
+    if (valUa !== undefined && String(valUa).trim() !== '') candidateUa = String(valUa).trim();
+    if (valEn !== undefined && String(valEn).trim() !== '') candidateEn = String(valEn).trim();
+
+    const finalUa = candidateUa || fallback.ua;
+    const finalEn = translateToEnglishIfNeeded(finalUa, candidateEn, fallback.en);
+
+    return { ua: finalUa, en: finalEn };
   };
 
   const parseList = (val: any, fallback: string[]): string[] => {
@@ -451,6 +707,19 @@ export function mapSettingsFromSheet(raw: any): GeneralSettings {
   const techItems = parseList(techItemsRaw, DEFAULT_SETTINGS.expertise!.techStackItems)
     .filter((item: string) => !item.toLowerCase().includes('figjam'));
 
+  const menuSystemTitle = getLoc('menu_system_title', DEFAULT_SETTINGS.menu?.systemTitle || { ua: 'IS // СИСТЕМА НАВІГАЦІЇ', en: 'IS // NAVIGATION SYSTEM' });
+  const menuItem1Title = getLoc('menu_item1_title', DEFAULT_SETTINGS.menu?.item1Title || { ua: 'Проєкти', en: 'Selected Work' });
+  const menuItem1Desc = getLoc('menu_item1_desc', DEFAULT_SETTINGS.menu?.item1Desc || { ua: 'Вибрані кейси & інтерфейси', en: 'Featured cases & digital products' });
+  const menuItem2Title = getLoc('menu_item2_title', DEFAULT_SETTINGS.menu?.item2Title || { ua: 'Експертиза', en: 'Core Expertise' });
+  const menuItem2Desc = getLoc('menu_item2_desc', DEFAULT_SETTINGS.menu?.item2Desc || { ua: 'UI/UX, графіка та стек', en: 'UI/UX, visual design & tech' });
+  const menuItem3Title = getLoc('menu_item3_title', DEFAULT_SETTINGS.menu?.item3Title || { ua: 'Досвід', en: 'Career Timeline' });
+  const menuItem3Desc = getLoc('menu_item3_desc', DEFAULT_SETTINGS.menu?.item3Desc || { ua: 'Кар’єрний шлях та ролі', en: 'Professional trajectory & milestones' });
+  const menuItem4Title = getLoc('menu_item4_title', DEFAULT_SETTINGS.menu?.item4Title || { ua: 'Контакти', en: 'Get In Touch' });
+  const menuItem4Desc = getLoc('menu_item4_desc', DEFAULT_SETTINGS.menu?.item4Desc || { ua: 'Зв’язок для нових викликів', en: 'Direct collaboration inquiries' });
+  const menuContactsTitle = getLoc('menu_contacts_title', DEFAULT_SETTINGS.menu?.contactsTitle || { ua: 'Прямі контакти:', en: 'Direct Channels:' });
+  const menuCopyBtn = getLoc('menu_copy_btn', DEFAULT_SETTINGS.menu?.copyBtn || { ua: 'Копія', en: 'Copy' });
+  const menuCopiedBtn = getLoc('menu_copied_btn', DEFAULT_SETTINGS.menu?.copiedBtn || { ua: 'Скопійовано!', en: 'Copied!' });
+
   return {
     name,
     title,
@@ -484,9 +753,153 @@ export function mapSettingsFromSheet(raw: any): GeneralSettings {
       },
       techStackTitle: techTitle,
       techStackItems: techItems
+    },
+    menu: {
+      systemTitle: menuSystemTitle,
+      item1Title: menuItem1Title,
+      item1Desc: menuItem1Desc,
+      item2Title: menuItem2Title,
+      item2Desc: menuItem2Desc,
+      item3Title: menuItem3Title,
+      item3Desc: menuItem3Desc,
+      item4Title: menuItem4Title,
+      item4Desc: menuItem4Desc,
+      contactsTitle: menuContactsTitle,
+      copyBtn: menuCopyBtn,
+      copiedBtn: menuCopiedBtn
     }
   };
 }
+
+export function mapContactsFromSheet(raw: any, fallbackSettings?: GeneralSettings): ContactsData {
+  const d = DEFAULT_CONTACTS;
+  const dict: Record<string, any> = {};
+  const explicitlyDefinedKeys = new Set<string>();
+
+  const processSource = (source: any) => {
+    if (!source) return;
+    if (Array.isArray(source)) {
+      for (const row of source) {
+        if (!row || typeof row !== 'object') continue;
+        const key = String(row.key || row.Key || row.id || row.Id || row.name || row.Name || '').trim().toLowerCase();
+        if (!key) continue;
+
+        explicitlyDefinedKeys.add(key);
+
+        const uaVal = row.ua ?? row.UA ?? row.Ua ?? row.Ukrainian ?? row.value_ua ?? row.val_ua ?? row.value ?? row.url;
+        const enVal = row.en ?? row.EN ?? row.En ?? row.English ?? row.value_en ?? row.val_en ?? row.value ?? row.url ?? uaVal;
+
+        if (uaVal !== undefined || enVal !== undefined) {
+          dict[key] = {
+            ua: String(uaVal ?? '').trim(),
+            en: String(enVal ?? uaVal ?? '').trim()
+          };
+          dict[`${key}_ua`] = String(uaVal ?? '').trim();
+          dict[`${key}_en`] = String(enVal ?? uaVal ?? '').trim();
+        } else if (row.value !== undefined) {
+          dict[key] = String(row.value ?? '').trim();
+        }
+      }
+    } else if (typeof source === 'object') {
+      for (const [k, val] of Object.entries(source)) {
+        const key = k.toLowerCase();
+        explicitlyDefinedKeys.add(key);
+
+        if (val && typeof val === 'object' && ('ua' in val || 'en' in val)) {
+          dict[key] = {
+            ua: String((val as any).ua ?? '').trim(),
+            en: String((val as any).en ?? (val as any).ua ?? '').trim()
+          };
+        } else if (val !== undefined && val !== null) {
+          dict[key] = String(val).trim();
+        }
+      }
+    }
+  };
+
+  // 1. Initial fallback values
+  if (fallbackSettings) {
+    if (fallbackSettings.email) dict['email'] = fallbackSettings.email;
+    if (fallbackSettings.telegram) dict['telegram'] = fallbackSettings.telegram;
+    if (fallbackSettings.linkedin) dict['linkedin'] = fallbackSettings.linkedin;
+    if (fallbackSettings.behance) dict['behance'] = fallbackSettings.behance;
+    if (fallbackSettings.github) dict['github'] = fallbackSettings.github;
+    if (fallbackSettings.location) {
+      dict['address'] = fallbackSettings.location;
+      dict['location'] = fallbackSettings.location;
+    }
+  }
+
+  // 2. Primary source from "Contacts" sheet (overwrites fallback)
+  if (raw) processSource(raw);
+
+  const getStr = (key: string, fallback: string): string => {
+    // If the key was explicitly in the sheet, respect user choice (even if blank or spaces)
+    if (explicitlyDefinedKeys.has(key)) {
+      const val = dict[key];
+      if (val && typeof val === 'object') {
+        return String(val.ua || val.en || '').trim();
+      }
+      if (typeof val === 'string') {
+        return val.trim();
+      }
+      return '';
+    }
+
+    const val = dict[key];
+    if (val && typeof val === 'object') {
+      const clean = String(val.ua || val.en || '').trim();
+      return clean || fallback;
+    }
+    if (typeof val === 'string' && val.trim()) {
+      return val.trim();
+    }
+    return fallback;
+  };
+
+  const getLoc = (key: string, fallback: { ua: string; en: string }): { ua: string; en: string } => {
+    const val = dict[key];
+    let candidateUa = '';
+    let candidateEn = '';
+
+    if (val && typeof val === 'object' && (val.ua || val.en)) {
+      candidateUa = String(val.ua || '').trim();
+      candidateEn = String(val.en || '').trim();
+    } else if (typeof val === 'string' && val.trim()) {
+      candidateUa = val.trim();
+    }
+
+    // If key was explicitly in sheet and user left it blank:
+    if (explicitlyDefinedKeys.has(key) && !candidateUa && !candidateEn) {
+      return { ua: '', en: '' };
+    }
+
+    const finalUa = candidateUa || fallback.ua;
+    const finalEn = translateToEnglishIfNeeded(finalUa, candidateEn, fallback.en);
+
+    return { ua: finalUa, en: finalEn };
+  };
+
+  const emailFallback = fallbackSettings?.email || d.email;
+  const telegramFallback = fallbackSettings?.telegram || d.telegram || '';
+  const linkedinFallback = fallbackSettings?.linkedin || d.linkedin || '';
+  const behanceFallback = fallbackSettings?.behance || d.behance || '';
+  const githubFallback = fallbackSettings?.github || d.github || '';
+
+  const addressVal = getLoc('address', getLoc('location', fallbackSettings?.location || d.address || { ua: 'Львів, Україна', en: 'Lviv, Ukraine' }));
+
+  return {
+    email: getStr('email', emailFallback),
+    telegram: getStr('telegram', telegramFallback),
+    linkedin: getStr('linkedin', linkedinFallback),
+    behance: getStr('behance', behanceFallback),
+    github: getStr('github', githubFallback),
+    phone: getStr('phone', d.phone || ''),
+    address: addressVal,
+    location: addressVal
+  };
+}
+
 
 
 export function mapLegalAndBannersFromSheet(raw: any, fallbackRaw?: any): LegalAndBannersData {
@@ -631,7 +1044,10 @@ export function getStoredData(): PortfolioData {
       const parsed = JSON.parse(raw);
       // Run the settings through the mapper to catch URL fixes and schema updates on old cache
       if (parsed.settings) {
-        parsed.settings = mapSettingsFromSheet(parsed.settings);
+        parsed.settings = mapSettingsFromSheet({
+          ...(typeof parsed.legalAndBanners === 'object' ? parsed.legalAndBanners : {}),
+          ...parsed.settings
+        });
       }
 
       // Upgrade old cache schemas
@@ -650,8 +1066,21 @@ export function getStoredData(): PortfolioData {
         parsed.legalAndBanners = mapLegalAndBannersFromSheet(parsed.settings);
       }
 
+      const contacts = parsed.contacts 
+        ? mapContactsFromSheet(parsed.contacts, parsed.settings) 
+        : mapContactsFromSheet(parsed.settings, parsed.settings);
+
+      if (parsed.settings) {
+        parsed.settings.email = contacts.email || parsed.settings.email;
+        parsed.settings.telegram = contacts.telegram;
+        parsed.settings.linkedin = contacts.linkedin;
+        parsed.settings.behance = contacts.behance;
+        parsed.settings.github = contacts.github;
+      }
+
       return {
         ...parsed,
+        contacts,
         source: 'cache'
       };
     }
@@ -664,6 +1093,7 @@ export function getStoredData(): PortfolioData {
     experience: DEFAULT_EXPERIENCE,
     testimonials: DEFAULT_TESTIMONIALS,
     settings: DEFAULT_SETTINGS,
+    contacts: DEFAULT_CONTACTS,
     legalAndBanners: DEFAULT_LEGAL_AND_BANNERS,
     source: 'default',
     lastSyncedAt: new Date().toISOString()
@@ -717,13 +1147,27 @@ export async function syncWithGoogleSheets(endpointUrl: string = DEFAULT_SHEETS_
     ? json.testimonials.map(mapTestimonialFromSheet)
     : DEFAULT_TESTIMONIALS;
 
-  const parsedSettings = json.settings
-    ? mapSettingsFromSheet(json.settings)
-    : DEFAULT_SETTINGS;
+  const combinedSettings = {
+    ...(json.legalAndBanners && typeof json.legalAndBanners === 'object' ? json.legalAndBanners : {}),
+    ...(json.settings && typeof json.settings === 'object' ? json.settings : {})
+  };
+
+  const parsedSettings = mapSettingsFromSheet(combinedSettings);
+
+  const parsedContacts = mapContactsFromSheet(
+    json.contacts || json.socials || json.contact,
+    parsedSettings
+  );
+
+  parsedSettings.email = parsedContacts.email || parsedSettings.email;
+  parsedSettings.telegram = parsedContacts.telegram;
+  parsedSettings.linkedin = parsedContacts.linkedin;
+  parsedSettings.behance = parsedContacts.behance;
+  parsedSettings.github = parsedContacts.github;
 
   const parsedLegalAndBanners = mapLegalAndBannersFromSheet(
     json.legalAndBanners || json.legal || json.banners,
-    json.settings
+    combinedSettings
   );
 
   const hasLegalDataInEndpoint = Boolean(
@@ -733,11 +1177,17 @@ export async function syncWithGoogleSheets(endpointUrl: string = DEFAULT_SHEETS_
     (json.settings && (json.settings.cookie_title || json.settings['cookie_title_ua'] || json.settings['cookie_title_UA']))
   );
 
+  const parsedCategories = mapCategoriesFromSheet(json.categories || json.disciplines || json.filters);
+  const parsedStatuses = mapStatusesFromSheet(json.statuses || json.status);
+
   const freshData: PortfolioData = {
     projects: parsedProjects,
+    categories: parsedCategories.length > 0 ? parsedCategories : undefined,
+    statuses: parsedStatuses.length > 0 ? parsedStatuses : undefined,
     experience: parsedExperience,
     testimonials: parsedTestimonials,
     settings: parsedSettings,
+    contacts: parsedContacts,
     legalAndBanners: parsedLegalAndBanners,
     source: 'live_sheets',
     lastSyncedAt: new Date().toISOString(),
@@ -756,11 +1206,14 @@ export function getGoogleAppsScriptTemplate(): string {
   return `/**
  * Google Apps Script for Ivan Selivanov Portfolio Sync
  * Tabs supported:
- * 1. "Projects"
- * 2. "General_Data" (columns: key, ua, en)
- * 3. "Experience"
- * 4. "Testimonials"
- * 5. "Legal_And_Banners" (columns: key, ua, en)
+ * 1. "Projects" (columns: id, title, year, client, category, status, featured, thumbnailUrl, heroImage, liveLink, tagline_ua, tagline_en, overview_ua, overview_en, metrics, tools, palette, challenge_ua, challenge_en, solution_ua, solution_en, impact_ua, impact_en, fonts, colors)
+ * 2. "Categories" (optional custom filter categories, columns: id, ua, en)
+ * 3. "Statuses" (optional custom filter statuses, columns: id, ua, en)
+ * 4. "General_Data" (columns: key, ua, en)
+ * 5. "Contacts" (columns: key, ua, en)
+ * 6. "Experience"
+ * 7. "Testimonials"
+ * 8. "Legal_And_Banners" (columns: key, ua, en)
  * 
  * Deployment:
  * Extensions > Apps Script > Paste this code > Deploy > New deployment > Web app
@@ -788,7 +1241,10 @@ function doGet(e) {
   }
   
   var projectsSheet = findSheet(["Projects", "projects"]);
+  var categoriesSheet = findSheet(["Categories", "categories", "Disciplines", "disciplines"]);
+  var statusesSheet = findSheet(["Statuses", "statuses", "Status", "status"]);
   var generalSheet = findSheet(["General_Data", "general_data", "General", "general"]);
+  var contactsSheet = findSheet(["Contacts", "contacts", "Contact", "contact", "Socials", "socials"]);
   var expSheet = findSheet(["Experience", "experience"]);
   var testSheet = findSheet(["Testimonials", "testimonials"]);
   var legalSheet = findSheet(["Legal_And_Banners", "legal_and_banners", "Legal and Banners", "Legal", "legal", "Banners", "banners", "Cookies", "cookies"]);
@@ -798,7 +1254,10 @@ function doGet(e) {
     timestamp: new Date().toISOString(),
     sheetId: ss.getId(),
     projects: parseSheetToObjects(projectsSheet),
+    categories: parseSheetToObjects(categoriesSheet),
+    statuses: parseSheetToObjects(statusesSheet),
     settings: parseGeneralSheet(generalSheet),
+    contacts: parseContactsSheet(contactsSheet),
     experience: parseSheetToObjects(expSheet),
     testimonials: parseSheetToObjects(testSheet),
     legalAndBanners: parseLegalSheet(legalSheet)
@@ -864,6 +1323,34 @@ function parseGeneralSheet(sheet) {
   return settings;
 }
 
+function parseContactsSheet(sheet) {
+  if (!sheet) return {};
+  var data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return {};
+  var headers = data[0].map(function(h) { return String(h).toLowerCase().trim(); });
+  
+  var keyIdx = headers.indexOf("key");
+  if (keyIdx === -1) keyIdx = 0;
+  var uaIdx = headers.indexOf("ua") !== -1 ? headers.indexOf("ua") : (headers.indexOf("ukrainian") !== -1 ? headers.indexOf("ukrainian") : (headers.length > 1 ? 1 : -1));
+  var enIdx = headers.indexOf("en") !== -1 ? headers.indexOf("en") : (headers.indexOf("english") !== -1 ? headers.indexOf("english") : (headers.length > 2 ? 2 : -1));
+  
+  var result = {};
+  
+  for (var i = 1; i < data.length; i++) {
+    var row = data[i];
+    var key = String(row[keyIdx] || "").trim();
+    if (!key) continue;
+    
+    var uaVal = (uaIdx !== -1 && row[uaIdx] !== undefined) ? String(row[uaIdx]) : "";
+    var enVal = (enIdx !== -1 && row[enIdx] !== undefined) ? String(row[enIdx]) : uaVal;
+    
+    result[key] = { ua: uaVal, en: enVal };
+    result[key + "_ua"] = uaVal;
+    result[key + "_en"] = enVal;
+  }
+  return result;
+}
+
 function parseLegalSheet(sheet) {
   if (!sheet) return {};
   var data = sheet.getDataRange().getValues();
@@ -923,11 +1410,44 @@ export function getGeneralSheetTsvTemplate(): string {
     ['expertise_h3', 'Фронтенд', 'Frontend'],
     ['expertise_h4', 'Таргетинг', 'Targeting'],
     ['expertise_tech_title', 'Інструменти та Технології', 'Tools & Technologies'],
-    ['expertise_tech_items', 'Figma, HTML, CSS, JavaScript, Vercel, Google AI Studio, Google Ads, Meta Ads, Google Tag Manager, Google Sheets, SVG, Adobe Illustrator', 'Figma, HTML, CSS, JavaScript, Vercel, Google AI Studio, Google Ads, Meta Ads, Google Tag Manager, Google Sheets, SVG, Adobe Illustrator']
+    ['expertise_tech_items', 'Figma, HTML, CSS, JavaScript, Vercel, Google AI Studio, Google Ads, Meta Ads, Google Tag Manager, Google Sheets, SVG, Adobe Illustrator', 'Figma, HTML, CSS, JavaScript, Vercel, Google AI Studio, Google Ads, Meta Ads, Google Tag Manager, Google Sheets, SVG, Adobe Illustrator'],
+    ['menu_system_title', 'IS // СИСТЕМА НАВІГАЦІЇ', 'IS // NAVIGATION SYSTEM'],
+    ['menu_item1_title', 'Проєкти', 'Selected Work'],
+    ['menu_item1_desc', 'Вибрані кейси & інтерфейси', 'Featured cases & digital products'],
+    ['menu_item2_title', 'Експертиза', 'Core Expertise'],
+    ['menu_item2_desc', 'UI/UX, графіка та стек', 'UI/UX, visual design & tech'],
+    ['menu_item3_title', 'Досвід', 'Career Timeline'],
+    ['menu_item3_desc', 'Кар’єрний шлях та ролі', 'Professional trajectory & milestones'],
+    ['menu_item4_title', 'Контакти', 'Get In Touch'],
+    ['menu_item4_desc', 'Зв’язок для нових викликів', 'Direct collaboration inquiries'],
+    ['menu_contacts_title', 'Прямі контакти:', 'Direct Channels:'],
+    ['menu_copy_btn', 'Копія', 'Copy'],
+    ['menu_copied_btn', 'Скопійовано!', 'Copied!']
   ];
 
   return rows.map(r => r.join('\t')).join('\n');
 }
+
+/**
+ * Generates copy-pasteable TSV data for the dedicated "Contacts" tab in Google Sheets
+ */
+export function getContactsSheetTsvTemplate(): string {
+  const d = DEFAULT_CONTACTS;
+  const rows: [string, string, string][] = [
+    ['key', 'ua', 'en'],
+    ['email', d.email, d.email],
+    ['telegram', d.telegram, d.telegram],
+    ['linkedin', d.linkedin, d.linkedin],
+    ['behance', d.behance || 'https://behance.net/ivanselivanov', d.behance || 'https://behance.net/ivanselivanov'],
+    ['github', d.github || 'https://github.com/ivanselivanov', d.github || 'https://github.com/ivanselivanov'],
+    ['phone', d.phone || '', d.phone || ''],
+    ['address', d.address?.ua || 'Львів, Україна (Доступний по всьому світу)', d.address?.en || 'Lviv, Ukraine (Available Worldwide)']
+  ];
+
+  const escapeTsv = (str: string) => str.replace(/\t/g, ' ').replace(/\n/g, ' ');
+  return ['key\tua\ten', ...rows.slice(1).map(r => `${r[0]}\t${escapeTsv(r[1])}\t${escapeTsv(r[2])}`)].join('\n');
+}
+
 
 /**
  * Generates copy-pasteable TSV data for the "Legal_And_Banners" tab in Google Sheets
@@ -1008,6 +1528,20 @@ export function getLegalSheetTsvTemplate(): string {
 
     ['terms_s6_title', d.termsOfUse.sections[5].title.ua, d.termsOfUse.sections[5].title.en],
     ['terms_s6_content', d.termsOfUse.sections[5].content.ua, d.termsOfUse.sections[5].content.en],
+
+    // Navigation Menu Texts
+    ['menu_system_title', 'IS // СИСТЕМА НАВІГАЦІЇ', 'IS // NAVIGATION SYSTEM'],
+    ['menu_item1_title', 'Проєкти', 'Selected Work'],
+    ['menu_item1_desc', 'Вибрані кейси & інтерфейси', 'Featured cases & digital products'],
+    ['menu_item2_title', 'Експертиза', 'Core Expertise'],
+    ['menu_item2_desc', 'UI/UX, графіка та стек', 'UI/UX, visual design & tech'],
+    ['menu_item3_title', 'Досвід', 'Career Timeline'],
+    ['menu_item3_desc', 'Кар’єрний шлях та ролі', 'Professional trajectory & milestones'],
+    ['menu_item4_title', 'Контакти', 'Get In Touch'],
+    ['menu_item4_desc', 'Зв’язок для нових викликів', 'Direct collaboration inquiries'],
+    ['menu_contacts_title', 'Прямі контакти:', 'Direct Channels:'],
+    ['menu_copy_btn', 'Копія', 'Copy'],
+    ['menu_copied_btn', 'Скопійовано!', 'Copied!'],
 
     // Announcement Banner
     ['announcement_enabled', String(d.announcementBanner.enabled), String(d.announcementBanner.enabled)],

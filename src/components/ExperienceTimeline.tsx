@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Briefcase, GraduationCap, Sparkles } from 'lucide-react';
 import { ExperienceItem, Language } from '../types';
 import { AnimatedDivider } from './AnimatedDivider';
+import { getLocalizedText, getLocalizedArray } from '../utils/i18n';
 
 interface ExperienceTimelineProps {
   experience: ExperienceItem[];
@@ -128,23 +129,23 @@ export const ExperienceTimeline: React.FC<ExperienceTimelineProps> = ({ experien
                       ) : (
                         <Briefcase className="w-3.5 h-3.5 text-emerald-400" />
                       )}
-                      <span className="uppercase tracking-wider">{item.company[language]}</span>
+                      <span className="uppercase tracking-wider">{getLocalizedText(item.company, language, { ua: 'Studio', en: 'Studio' })}</span>
                     </span>
                     <span>
-                      {item.period[language]}
+                      {getLocalizedText(item.period, language, { ua: '2022 — Зараз', en: '2022 — Present' })}
                     </span>
                   </div>
 
                   <h3 className="text-xl md:text-2xl font-medium tracking-tight uppercase text-white mb-2">
-                    {item.role[language]}
+                    {getLocalizedText(item.role, language, { ua: 'Дизайнер', en: 'Designer' })}
                   </h3>
                   <span className="text-xs font-mono text-neutral-500 block mb-4">
-                    {item.location[language]}
+                    {getLocalizedText(item.location, language, { ua: 'Львів, Україна', en: 'Lviv, Ukraine' })}
                   </span>
 
-                  {item.description[language]?.length > 0 && (
+                  {getLocalizedArray(item.description, language, { ua: [], en: [] }).length > 0 && (
                     <ul className="space-y-2 mb-6">
-                      {item.description[language].map((desc, dIdx) => (
+                      {getLocalizedArray(item.description, language, { ua: [], en: [] }).map((desc, dIdx) => (
                         <li key={dIdx} className="text-neutral-400 text-sm font-light leading-relaxed flex items-start gap-2">
                           <span className="text-neutral-600 select-none">•</span>
                           <span>{desc}</span>

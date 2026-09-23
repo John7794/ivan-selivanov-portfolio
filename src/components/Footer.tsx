@@ -1,17 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowUpRight, Copy, Check, Clock, MoveRight } from 'lucide-react';
-import { GeneralSettings, Language } from '../types';
+import { GeneralSettings, Language, ContactsData } from '../types';
+import { getLocalizedText } from '../utils/i18n';
 
 interface FooterProps {
   settings: GeneralSettings;
+  contacts?: ContactsData;
   language: Language;
   onOpenLegal?: (doc: 'privacy' | 'terms') => void;
   onOpenCookies?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ settings, language, onOpenLegal, onOpenCookies }) => {
+export const Footer: React.FC<FooterProps> = ({ settings, contacts, language, onOpenLegal, onOpenCookies }) => {
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [kyivTime, setKyivTime] = useState('');
+
+  const activeEmail = (contacts?.email !== undefined ? contacts.email : (settings.email || 'ivanselivanov771994@gmail.com')).trim();
+  const activeLinkedin = (contacts?.linkedin !== undefined ? contacts.linkedin : (settings.linkedin || 'https://www.linkedin.com/in/ivan-selivanov-4bb884183/')).trim();
+  const activeTelegram = (contacts?.telegram !== undefined ? contacts.telegram : (settings.telegram || '')).trim();
+  const activeBehance = (contacts?.behance !== undefined ? contacts.behance : (settings.behance || '')).trim();
+  const activeGithub = (contacts?.github !== undefined ? contacts.github : (settings.github || '')).trim();
 
   // Clock in Lviv (EET/UTC+2)
   useEffect(() => {
@@ -33,7 +41,7 @@ export const Footer: React.FC<FooterProps> = ({ settings, language, onOpenLegal,
   }, []);
 
   const handleCopyEmail = () => {
-    navigator.clipboard.writeText(settings.email);
+    navigator.clipboard.writeText(activeEmail);
     setCopiedEmail(true);
     setTimeout(() => setCopiedEmail(false), 2000);
   };
@@ -62,7 +70,7 @@ export const Footer: React.FC<FooterProps> = ({ settings, language, onOpenLegal,
         </div>
 
         <a
-          href={`mailto:${settings.email}`}
+          href={`mailto:${activeEmail}`}
           className="text-[14vw] leading-[0.8] font-bold tracking-tighter uppercase mb-12 hover:italic transition-all inline-block select-none"
         >
           {t.letsTalk}
@@ -77,10 +85,10 @@ export const Footer: React.FC<FooterProps> = ({ settings, language, onOpenLegal,
             </h4>
             <div className="flex flex-wrap items-center gap-2">
               <a
-                href={`mailto:${settings.email}`}
+                href={`mailto:${activeEmail}`}
                 className="text-lg lg:text-2xl font-medium hover:underline underline-offset-8 break-all"
               >
-                {settings.email}
+                {activeEmail}
               </a>
               <button
                 onClick={handleCopyEmail}
@@ -96,23 +104,57 @@ export const Footer: React.FC<FooterProps> = ({ settings, language, onOpenLegal,
           </div>
 
           {/* Social */}
-          <div className="md:col-span-3 lg:col-span-3">
-            <h4 className="font-mono text-xs uppercase tracking-widest text-neutral-500 mb-3">
-              {t.socialLabel}
-            </h4>
-            <div className="flex flex-col gap-2 text-lg md:text-xl font-medium">
-              <a
-                href={settings.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 hover:opacity-60 transition-opacity"
-              >
-                <span>LinkedIn</span> <MoveRight className="w-4 h-4" />
-              </a>
+          {(activeLinkedin || activeTelegram || activeBehance || activeGithub) && (
+            <div className="md:col-span-3 lg:col-span-3">
+              <h4 className="font-mono text-xs uppercase tracking-widest text-neutral-500 mb-3">
+                {t.socialLabel}
+              </h4>
+              <div className="flex flex-col gap-2 text-lg md:text-xl font-medium">
+                {activeLinkedin && (
+                  <a
+                    href={activeLinkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 hover:opacity-60 transition-opacity"
+                  >
+                    <span>LinkedIn</span> <MoveRight className="w-4 h-4" />
+                  </a>
+                )}
+                {activeTelegram && (
+                  <a
+                    href={activeTelegram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 hover:opacity-60 transition-opacity"
+                  >
+                    <span>Telegram</span> <MoveRight className="w-4 h-4" />
+                  </a>
+                )}
+                {activeBehance && (
+                  <a
+                    href={activeBehance}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 hover:opacity-60 transition-opacity"
+                  >
+                    <span>Behance</span> <MoveRight className="w-4 h-4" />
+                  </a>
+                )}
+                {activeGithub && (
+                  <a
+                    href={activeGithub}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 hover:opacity-60 transition-opacity"
+                  >
+                    <span>GitHub</span> <MoveRight className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Time & Location */}
+          {/* Time & Location / Address */}
           <div className="md:col-span-3 lg:col-span-4 md:text-right">
             <h4 className="font-mono text-xs uppercase tracking-widest text-neutral-500 mb-3">
               {t.locationLabel}
@@ -122,7 +164,7 @@ export const Footer: React.FC<FooterProps> = ({ settings, language, onOpenLegal,
               <span>Lviv // {kyivTime || '00:00:00'}</span>
             </div>
             <p className="text-sm font-mono text-neutral-500 mt-1">
-              EET / UTC+2 (Europe)
+              {getLocalizedText(contacts?.address || contacts?.location || settings.location, language, { ua: 'Львів, Україна (Доступний по всьому світу)', en: 'Lviv, Ukraine (Available Worldwide)' })}
             </p>
           </div>
         </div>
@@ -130,7 +172,7 @@ export const Footer: React.FC<FooterProps> = ({ settings, language, onOpenLegal,
 
       {/* Sub-footer */}
       <div className="max-w-[1600px] mx-auto w-full flex flex-col md:flex-row justify-between items-center pt-8 mt-16 border-t border-[#0a0a0a]/20 font-mono text-xs uppercase tracking-widest text-neutral-500">
-        <p>© {new Date().getFullYear()} {settings.name[language]}. {t.rights}</p>
+        <p>© {new Date().getFullYear()} {getLocalizedText(settings.name, language, { ua: 'Іван Селіванов', en: 'Ivan Selivanov' })}. {t.rights}</p>
         <div className="flex flex-wrap items-center gap-6 mt-4 md:mt-0">
           {onOpenCookies && (
             <button

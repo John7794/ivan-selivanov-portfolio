@@ -4,6 +4,7 @@ import { Layout, Type, Box, Cpu, Compass, CheckCircle2 } from 'lucide-react';
 import { Language, GeneralSettings } from '../types';
 import { DEFAULT_SETTINGS } from '../data/defaultData';
 import { AnimatedDivider } from './AnimatedDivider';
+import { getLocalizedText, getLocalizedArray } from '../utils/i18n';
 
 interface BentoExpertiseProps {
   language: Language;
@@ -22,19 +23,20 @@ const removeFigJam = (text: string): string => {
 
 export const BentoExpertise: React.FC<BentoExpertiseProps> = ({ language, expertise = DEFAULT_SETTINGS.expertise }) => {
   const data = expertise || DEFAULT_SETTINGS.expertise!;
+  const def = DEFAULT_SETTINGS.expertise!;
 
   const t = {
-    heading: data.heading[language],
-    subtitle: data.subtitle[language],
-    card1Title: data.card1Title[language],
-    card1Desc: removeFigJam(data.card1Desc[language]),
-    card2Title: data.card2Title[language],
-    card2Desc: removeFigJam(data.card2Desc[language]),
-    card3Title: data.card3Title[language],
-    card3Desc: removeFigJam(data.card3Desc[language]),
-    card4Title: data.card4Title[language],
-    heuristics: data.heuristics[language],
-    techStack: data.techStackTitle[language]
+    heading: getLocalizedText(data.heading, language, def.heading),
+    subtitle: getLocalizedText(data.subtitle, language, def.subtitle),
+    card1Title: getLocalizedText(data.card1Title, language, def.card1Title),
+    card1Desc: removeFigJam(getLocalizedText(data.card1Desc, language, def.card1Desc)),
+    card2Title: getLocalizedText(data.card2Title, language, def.card2Title),
+    card2Desc: removeFigJam(getLocalizedText(data.card2Desc, language, def.card2Desc)),
+    card3Title: getLocalizedText(data.card3Title, language, def.card3Title),
+    card3Desc: removeFigJam(getLocalizedText(data.card3Desc, language, def.card3Desc)),
+    card4Title: getLocalizedText(data.card4Title, language, def.card4Title),
+    heuristics: getLocalizedArray(data.heuristics, language, def.heuristics),
+    techStack: getLocalizedText(data.techStackTitle, language, def.techStackTitle)
   };
 
   const rawTechnologies = data.techStackItems || DEFAULT_SETTINGS.expertise!.techStackItems;

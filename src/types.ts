@@ -1,18 +1,29 @@
 export type Language = 'ua' | 'en';
 
-export type ProjectCategory = 'all' | 'ui-ux' | '3d-render' | 'book-design' | 'branding';
-export type ProjectStatus = 'all' | 'realized' | 'concept';
+export type ProjectCategory = string;
+export type ProjectStatus = string;
+
+export interface FilterOption {
+  id: string;
+  ua: string;
+  en: string;
+}
 
 export interface Project {
   id: string;
   slug: string;
   title: string;
-  category: 'ui-ux' | '3d-render' | 'book-design' | 'branding';
+  category: string;
   categoryLabel: {
     ua: string;
     en: string;
   };
-  status: 'realized' | 'concept';
+  status: string;
+  statusLabel?: {
+    ua: string;
+    en: string;
+  };
+  client?: string;
   role: {
     ua: string;
     en: string;
@@ -147,6 +158,20 @@ export interface GeneralSettings {
     techStackTitle: { ua: string; en: string };
     techStackItems: string[];
   };
+  menu?: {
+    systemTitle?: { ua: string; en: string };
+    item1Title?: { ua: string; en: string };
+    item1Desc?: { ua: string; en: string };
+    item2Title?: { ua: string; en: string };
+    item2Desc?: { ua: string; en: string };
+    item3Title?: { ua: string; en: string };
+    item3Desc?: { ua: string; en: string };
+    item4Title?: { ua: string; en: string };
+    item4Desc?: { ua: string; en: string };
+    contactsTitle?: { ua: string; en: string };
+    copyBtn?: { ua: string; en: string };
+    copiedBtn?: { ua: string; en: string };
+  };
 }
 
 export interface LegalSection {
@@ -209,3 +234,15 @@ export interface LegalAndBannersData {
     link?: string;
   };
 }
+
+export interface ContactsData {
+  email: string;
+  telegram: string;
+  linkedin: string;
+  behance?: string;
+  github?: string;
+  phone?: string;
+  address?: { ua: string; en: string };
+  location?: { ua: string; en: string };
+}
+

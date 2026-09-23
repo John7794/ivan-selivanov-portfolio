@@ -11,13 +11,15 @@ import {
   Code, 
   FileText, 
   CheckCircle2, 
-  AlertCircle 
+  AlertCircle,
+  Mail 
 } from 'lucide-react';
 import { Language, LegalAndBannersData } from '../types';
 import { 
   getGoogleAppsScriptTemplate, 
   getLegalSheetTsvTemplate, 
   getGeneralSheetTsvTemplate,
+  getContactsSheetTsvTemplate,
   syncWithGoogleSheets, 
   PortfolioData 
 } from '../services/googleSheets';
@@ -37,9 +39,10 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
   portfolioData,
   onDataUpdated
 }) => {
-  const [activeTab, setActiveTab] = useState<'general' | 'legal' | 'sync' | 'script'>('general');
+  const [activeTab, setActiveTab] = useState<'contacts' | 'general' | 'legal' | 'sync' | 'script'>('contacts');
   const [copiedTsv, setCopiedTsv] = useState(false);
   const [copiedGeneralTsv, setCopiedGeneralTsv] = useState(false);
+  const [copiedContactsTsv, setCopiedContactsTsv] = useState(false);
   const [copiedScript, setCopiedScript] = useState(false);
   const [endpointUrl, setEndpointUrl] = useState(portfolioData.settings.appsScriptUrl || '');
   const [isSyncing, setIsSyncing] = useState(false);
@@ -49,6 +52,13 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
   });
 
   if (!isOpen) return null;
+
+  const handleCopyContactsTsv = () => {
+    const tsv = getContactsSheetTsvTemplate();
+    navigator.clipboard.writeText(tsv);
+    setCopiedContactsTsv(true);
+    setTimeout(() => setCopiedContactsTsv(false), 2200);
+  };
 
   const handleCopyGeneralTsv = () => {
     const tsv = getGeneralSheetTsvTemplate();
@@ -109,7 +119,11 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
     { key: 'linkedin', label: 'LinkedIn', valUa: portfolioData.settings.linkedin, valEn: portfolioData.settings.linkedin },
     { key: 'expertise_card1_title', label: language === 'ua' ? 'Експертиза 1' : 'Expertise 1', valUa: portfolioData.settings.expertise?.card1Title.ua, valEn: portfolioData.settings.expertise?.card1Title.en },
     { key: 'expertise_card4_title', label: language === 'ua' ? 'Експертиза 4' : 'Expertise 4', valUa: portfolioData.settings.expertise?.card4Title.ua, valEn: portfolioData.settings.expertise?.card4Title.en },
-    { key: 'expertise_tech_items', label: language === 'ua' ? 'Стек інструментів' : 'Tech Stack', valUa: 'Figma, HTML, CSS, JavaScript, Vercel...', valEn: 'Figma, HTML, CSS, JavaScript, Vercel...' }
+    { key: 'expertise_tech_items', label: language === 'ua' ? 'Стек інструментів' : 'Tech Stack', valUa: 'Figma, HTML, CSS, JavaScript, Vercel...', valEn: 'Figma, HTML, CSS, JavaScript, Vercel...' },
+    { key: 'menu_system_title', label: language === 'ua' ? 'Меню: Шапка' : 'Menu: System Title', valUa: portfolioData.settings.menu?.systemTitle?.ua || 'IS // СИСТЕМА НАВІГАЦІЇ', valEn: portfolioData.settings.menu?.systemTitle?.en || 'IS // NAVIGATION SYSTEM' },
+    { key: 'menu_item1_title', label: language === 'ua' ? 'Меню: Пункт 1' : 'Menu: Item 1', valUa: portfolioData.settings.menu?.item1Title?.ua || 'Проєкти', valEn: portfolioData.settings.menu?.item1Title?.en || 'Selected Work' },
+    { key: 'menu_item1_desc', label: language === 'ua' ? 'Меню: Опис 1' : 'Menu: Desc 1', valUa: portfolioData.settings.menu?.item1Desc?.ua || 'Вибрані кейси & інтерфейси', valEn: portfolioData.settings.menu?.item1Desc?.en || 'Featured cases & digital products' },
+    { key: 'menu_contacts_title', label: language === 'ua' ? 'Меню: Заголовок контактів' : 'Menu: Contacts Heading', valUa: portfolioData.settings.menu?.contactsTitle?.ua || 'Прямі контакти:', valEn: portfolioData.settings.menu?.contactsTitle?.en || 'Direct Channels:' }
   ];
 
   const legalPreviewRows = [
@@ -129,6 +143,16 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
     { key: 'terms_title', label: language === 'ua' ? 'Заголовок Умов' : 'Terms Title', valUa: portfolioData.legalAndBanners.termsOfUse.title.ua, valEn: portfolioData.legalAndBanners.termsOfUse.title.en },
     { key: 'terms_s1_title', label: language === 'ua' ? 'Умови // Розділ 01' : 'Terms // Section 01', valUa: portfolioData.legalAndBanners.termsOfUse.sections[0]?.title.ua, valEn: portfolioData.legalAndBanners.termsOfUse.sections[0]?.title.en },
     { key: 'announcement_text', label: language === 'ua' ? 'Текст верхнього банера' : 'Top Banner Text', valUa: portfolioData.legalAndBanners.announcementBanner.text.ua, valEn: portfolioData.legalAndBanners.announcementBanner.text.en },
+  ];
+
+  const contactsPreviewRows = [
+    { key: 'email', label: language === 'ua' ? 'Електронна пошта' : 'Email Address', valUa: portfolioData.contacts?.email || portfolioData.settings.email, valEn: portfolioData.contacts?.email || portfolioData.settings.email },
+    { key: 'telegram', label: language === 'ua' ? 'Telegram' : 'Telegram Link', valUa: portfolioData.contacts?.telegram || portfolioData.settings.telegram, valEn: portfolioData.contacts?.telegram || portfolioData.settings.telegram },
+    { key: 'linkedin', label: language === 'ua' ? 'LinkedIn' : 'LinkedIn Link', valUa: portfolioData.contacts?.linkedin || portfolioData.settings.linkedin, valEn: portfolioData.contacts?.linkedin || portfolioData.settings.linkedin },
+    { key: 'behance', label: language === 'ua' ? 'Behance' : 'Behance Link', valUa: portfolioData.contacts?.behance || 'https://behance.net/ivanselivanov', valEn: portfolioData.contacts?.behance || 'https://behance.net/ivanselivanov' },
+    { key: 'github', label: language === 'ua' ? 'GitHub' : 'GitHub Link', valUa: portfolioData.contacts?.github || 'https://github.com/ivanselivanov', valEn: portfolioData.contacts?.github || 'https://github.com/ivanselivanov' },
+    { key: 'phone', label: language === 'ua' ? 'Телефон' : 'Phone Number', valUa: portfolioData.contacts?.phone || '', valEn: portfolioData.contacts?.phone || '' },
+    { key: 'address', label: language === 'ua' ? 'Адреса / Локація' : 'Address / Location', valUa: portfolioData.contacts?.address?.ua || portfolioData.contacts?.location?.ua || portfolioData.settings.location?.ua || 'Львів, Україна (Доступний по всьому світу)', valEn: portfolioData.contacts?.address?.en || portfolioData.contacts?.location?.en || portfolioData.settings.location?.en || 'Lviv, Ukraine (Available Worldwide)' },
   ];
 
   return (
@@ -167,6 +191,19 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
 
           {/* Navigation Tabs */}
           <div className="flex border-b border-neutral-800 bg-neutral-950 px-6 font-mono text-xs overflow-x-auto">
+            <button
+              type="button"
+              onClick={() => setActiveTab('contacts')}
+              className={`px-4 py-3 flex items-center gap-2 border-b-2 font-medium cursor-pointer transition-colors shrink-0 ${
+                activeTab === 'contacts'
+                  ? 'border-emerald-400 text-white bg-neutral-900/60'
+                  : 'border-transparent text-neutral-400 hover:text-neutral-200'
+              }`}
+            >
+              <Mail className="w-3.5 h-3.5" />
+              <span>{language === 'ua' ? 'Вкладка Contacts' : 'Contacts Tab'}</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setActiveTab('general')}
@@ -222,6 +259,82 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
 
           {/* Tab Content */}
           <div className="overflow-y-auto custom-scrollbar p-6 space-y-6 text-sm">
+            {activeTab === 'contacts' && (
+              <div className="space-y-6">
+                <div className="bg-neutral-900/80 border border-neutral-800 p-5 space-y-3">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <h4 className="font-mono text-xs uppercase tracking-widest text-emerald-400 font-semibold">
+                        {language === 'ua' ? 'Окрема вкладка "Contacts" (key | ua | en):' : 'Dedicated "Contacts" tab (key | ua | en):'}
+                      </h4>
+                      <p className="text-neutral-300 text-xs sm:text-sm mt-1 leading-relaxed">
+                        {language === 'ua'
+                          ? '1. Створіть у вашій Google-таблиці нову вкладку з назвою '
+                          : '1. Create a new tab in your Google Sheet named '}
+                        <strong className="text-white font-mono bg-black px-2 py-0.5 border border-neutral-700">Contacts</strong>
+                        {language === 'ua' ? ' (або contacts).' : ' (or contacts).'}
+                      </p>
+                      <p className="text-neutral-300 text-xs sm:text-sm mt-1">
+                        {language === 'ua'
+                          ? '2. Натисніть кнопку "Скопіювати шаблон Contacts", виберіть клітинку A1 і вставте (Ctrl+V / Cmd+V).'
+                          : '2. Click "Copy Contacts Template", select cell A1, and paste (Ctrl+V / Cmd+V).'}
+                      </p>
+                      <p className="text-neutral-400 text-xs mt-1">
+                        {language === 'ua'
+                          ? '3. З цієї вкладки зчитуються виключно прямі контакти та адреса/локація для футера та меню сайту.'
+                          : '3. This tab strictly supplies direct contact channels and location/address for the footer and navigation.'}
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleCopyContactsTsv}
+                      className="px-4 py-2.5 bg-[#f4f4f0] text-black hover:bg-white transition-all font-mono text-xs uppercase tracking-wider font-semibold flex items-center gap-2 cursor-pointer shrink-0 shadow"
+                    >
+                      {copiedContactsTsv ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                      <span>
+                        {copiedContactsTsv
+                          ? (language === 'ua' ? 'Скопійовано!' : 'Copied!')
+                          : (language === 'ua' ? 'Скопіювати шаблон Contacts' : 'Copy Contacts Template')}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Structure preview table */}
+                <div>
+                  <h5 className="font-mono text-xs uppercase tracking-widest text-neutral-400 mb-3">
+                    {language === 'ua' ? 'Поля вкладки Contacts (key | ua | en):' : 'Contacts Tab Fields (key | ua | en):'}
+                  </h5>
+                  <div className="border border-neutral-800 bg-neutral-950 font-mono text-xs overflow-x-auto">
+                    <table className="w-full text-left">
+                      <thead className="bg-neutral-900 border-b border-neutral-800 text-neutral-400">
+                        <tr>
+                          <th className="p-2.5">key</th>
+                          <th className="p-2.5">ua</th>
+                          <th className="p-2.5">en</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-900 text-neutral-300">
+                        {contactsPreviewRows.map(row => (
+                          <tr key={row.key} className="hover:bg-neutral-900/50">
+                            <td className="p-2.5 font-bold text-emerald-400">{row.key}</td>
+                            <td className="p-2.5 max-w-[280px] truncate">{row.valUa}</td>
+                            <td className="p-2.5 max-w-[280px] truncate">{row.valEn}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="text-[11px] font-mono text-neutral-500 mt-2">
+                    {language === 'ua'
+                      ? 'Всі поля підтримують двомовність. Зміна email або посилань одразу оновлює меню "IS", футер і копіювання контактів.'
+                      : 'All fields support bilingual texts. Modifying emails or social links dynamically updates the "IS" menu, footer, and clipboard action.'}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {activeTab === 'general' && (
               <div className="space-y-6">
                 <div className="bg-neutral-900/80 border border-neutral-800 p-5 space-y-3">
@@ -493,8 +606,8 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-neutral-400 font-mono">
                     {language === 'ua'
-                      ? 'Повний код скрипта для оновлення (підтримує Projects, General_Data, Experience, Testimonials, Legal_And_Banners):'
-                      : 'Complete script code to paste (supports Projects, General_Data, Experience, Testimonials, Legal_And_Banners):'}
+                      ? 'Повний код скрипта для оновлення (підтримує Projects, General_Data, Contacts, Experience, Testimonials, Legal_And_Banners):'
+                      : 'Complete script code to paste (supports Projects, General_Data, Contacts, Experience, Testimonials, Legal_And_Banners):'}
                   </p>
                   <button
                     type="button"

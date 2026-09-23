@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { ArrowUpRight, Sparkles, Box, BookOpen, Layers, Images, ExternalLink } from 'lucide-react';
 import { Project, Language } from '../types';
+import { getLocalizedText } from '../utils/i18n';
 
 interface ProjectCardProps {
   project: Project;
@@ -199,7 +200,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
               {project.title}
             </h3>
             <p className="text-neutral-400 text-xs sm:text-sm font-light mt-1.5 line-clamp-2 leading-relaxed">
-              {project.tagline[language]}
+              {getLocalizedText(project.tagline, language, { ua: '', en: '' })}
             </p>
           </div>
 

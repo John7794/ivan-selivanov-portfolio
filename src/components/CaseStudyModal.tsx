@@ -5,6 +5,7 @@ import { Project, Language, Testimonial } from '../types';
 import { Interactive3DViewer } from './Interactive3DViewer';
 import { BookSpreadViewer } from './BookSpreadViewer';
 import { formatImageUrl } from '../services/googleSheets';
+import { getLocalizedText } from '../utils/i18n';
 
 interface CaseStudyModalProps {
   project: Project | null;
@@ -222,20 +223,20 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
             {/* Header / Hero */}
             <div className="space-y-6 border-b border-neutral-800 pb-12">
               <p className="font-mono text-xs uppercase tracking-widest text-neutral-400">
-                {project.categoryLabel[language]} — {project.timeline}
+                {getLocalizedText(project.categoryLabel, language, { ua: 'UI/UX Продукт', en: 'UI/UX Product' })} — {project.timeline}
               </p>
               <h1 className="text-3xl sm:text-5xl md:text-6xl font-medium tracking-tight uppercase leading-[0.95]">
                 {project.title}
               </h1>
               <p className="text-xl md:text-2xl text-neutral-300 max-w-3xl font-light leading-snug">
-                {project.tagline[language]}
+                {getLocalizedText(project.tagline, language, { ua: '', en: '' })}
               </p>
 
               {/* Meta Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-6 font-mono text-xs border-t border-neutral-800/80">
                 <div>
                   <span className="text-neutral-500 uppercase tracking-wider block mb-1">Role</span>
-                  <span className="text-neutral-200">{project.role[language]}</span>
+                  <span className="text-neutral-200">{getLocalizedText(project.role, language, { ua: 'Lead Designer', en: 'Lead Designer' })}</span>
                 </div>
                 <div>
                   <span className="text-neutral-500 uppercase tracking-wider block mb-1">Timeline</span>
@@ -488,9 +489,9 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
 
             {/* Strategic Product Pillars: Challenge -> Solution -> Impact */}
             {(() => {
-              const challengeText = project.problemStatement?.[language] || project.problemStatement?.ua || project.problemStatement?.en || '';
-              const solutionText = project.solution?.[language] || project.solution?.ua || project.solution?.en || '';
-              const impactText = project.businessImpact?.[language] || project.businessImpact?.ua || project.businessImpact?.en || '';
+              const challengeText = getLocalizedText(project.problemStatement, language, { ua: '', en: '' });
+              const solutionText = getLocalizedText(project.solution, language, { ua: '', en: '' });
+              const impactText = getLocalizedText(project.businessImpact, language, { ua: '', en: '' });
               const hasPillars = Boolean(challengeText || solutionText || impactText);
 
               if (!hasPillars) return null;

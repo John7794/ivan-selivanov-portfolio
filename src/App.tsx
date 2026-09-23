@@ -3,11 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
 import { ArrowDown, SlidersHorizontal, Sparkles, Filter, Columns3, LayoutGrid } from 'lucide-react';
-import { Project, ProjectCategory, ProjectStatus, Language } from './types';
+import { Project, ProjectCategory, ProjectStatus, Language, FilterOption } from './types';
 import { getStoredData, PortfolioData, syncWithGoogleSheets } from './services/googleSheets';
+import { DEFAULT_SETTINGS } from './data/defaultData';
+import { getLocalizedText } from './utils/i18n';
 import { Navbar } from './components/Navbar';
 import { ProjectCard } from './components/ProjectCard';
 import { CaseStudyModal } from './components/CaseStudyModal';
@@ -119,26 +121,144 @@ export default function App() {
     }
   };
 
-  // Filter projects based on Category & Status
-  const filteredProjects = data.projects.filter(p => {
-    const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
-    const matchesStatus = selectedStatus === 'all' || p.status === selectedStatus;
-    return matchesCategory && matchesStatus;
-  });
+  // Dynamic Categories derived directly from Google Sheets Projects & custom tabs
+  const categoryLabels = useMemo(() => {
+    const list: FilterOption[] = [
+      { id: 'all', ua: 'Всі напрямки', en: 'All Disciplines' }
+    ];
 
-  const categoryLabels: { id: ProjectCategory; ua: string; en: string }[] = [
-    { id: 'all', ua: 'Всі напрямки', en: 'All Disciplines' },
-    { id: 'ui-ux', ua: 'UI/UX Продукт', en: 'UI/UX Product' },
-    { id: '3d-render', ua: '3D Рендери', en: '3D Renders' },
-    { id: 'book-design', ua: 'Книжковий дизайн', en: 'Book Design' },
-    { id: 'branding', ua: 'Айдентика & Постери', en: 'Identity & Posters' },
-  ];
+    // 1. If explicit categories sheet was provided
+    if (data.categories && data.categories.length > 0) {
+      data.categories.forEach(cat => {
+        if (!list.some(item => item.id === cat.id)) {
+          list.push(cat);
+        }
+      });
+    }
 
-  const statusLabels: { id: ProjectStatus; ua: string; en: string }[] = [
-    { id: 'all', ua: 'Всі статуси', en: 'All' },
-    { id: 'realized', ua: 'Реалізовані (Продакшн)', en: 'Production' },
-    { id: 'concept', ua: 'Концепти & R&D', en: 'Concept' },
-  ];
+    // 2. Scan every project from table to guarantee all existing disciplines are present
+    const seenCatIds = new Set(list.map(c => c.id));
+    data.projects.forEach(p => {
+      const catId = p.category;
+      if (catId && !seenCatIds.has(catId)) {
+        seenCatIds.add(catId);
+        list.push({
+          id: catId,
+          ua: p.categoryLabel?.ua || catId,
+          en: p.categoryLabel?.en || catId
+        });
+      }
+    });
+
+    // 3. Fallback defaults if no projects loaded yet
+    if (list.length === 1) {
+      list.push(
+        { id: 'ui-ux', ua: 'UI/UX Продукт', en: 'UI/UX Product' },
+        { id: '3d-render', ua: '3D Рендери', en: '3D Renders' },
+        { id: 'book-design', ua: 'Книжковий дизайн', en: 'Book Design' },
+        { id: 'branding', ua: 'Айдентика & Постери', en: 'Identity & Posters' }
+      );
+    }
+
+    return list;
+  }, [data.projects, data.categories]);
+
+  // Dynamic Statuses derived directly from Google Sheets Projects & custom tabs
+  const statusLabels = useMemo(() => {
+    const list: FilterOption[] = [
+      { id: 'all', ua: 'Всі статуси', en: 'All' }
+    ];
+
+    // 1. If explicit statuses sheet was provided
+    if (data.statuses && data.statuses.length > 0) {
+      data.statuses.forEach(st => {
+        if (!list.some(item => item.id === st.id)) {
+          list.push(st);
+        }
+      });
+    }
+
+    // 2. Scan every project from table to guarantee all existing statuses are present
+    const seenStatusIds = new Set(list.map(s => s.id));
+    data.projects.forEach(p => {
+      const stId = p.status;
+      if (stId && !seenStatusIds.has(stId)) {
+        seenStatusIds.add(stId);
+        const uaDefault = stId === 'realized' ? 'Реалізовані (Продакшн)' : stId === 'concept' ? 'Концепти & R&D' : stId;
+        const enDefault = stId === 'realized' ? 'Production' : stId === 'concept' ? 'Concept & R&D' : stId;
+        list.push({
+          id: stId,
+          ua: p.statusLabel?.ua || uaDefault,
+          en: p.statusLabel?.en || enDefault
+        });
+      }
+    });
+
+    // 3. Fallback defaults
+    if (list.length === 1) {
+      list.push(
+        { id: 'realized', ua: 'Реалізовані (Продакшн)', en: 'Production' },
+        { id: 'concept', ua: 'Концепти & R&D', en: 'Concept & R&D' }
+      );
+    }
+
+    return list;
+  }, [data.projects, data.statuses]);
+
+  // Auto-reset filter if active selection is no longer present
+  useEffect(() => {
+    if (selectedCategory !== 'all' && !categoryLabels.some(c => c.id === selectedCategory)) {
+      setSelectedCategory('all');
+    }
+  }, [categoryLabels, selectedCategory]);
+
+  useEffect(() => {
+    if (selectedStatus !== 'all' && !statusLabels.some(s => s.id === selectedStatus)) {
+      setSelectedStatus('all');
+    }
+  }, [statusLabels, selectedStatus]);
+
+  // Filter projects based on Category & Status with resilient fuzzy matching
+  const filteredProjects = useMemo(() => {
+    const normalize = (str: string | undefined) => {
+      if (!str) return '';
+      return str.toLowerCase().trim().replace(/[\s\-_/\\&()]+/g, '');
+    };
+
+    return data.projects.filter(p => {
+      // Category match
+      let matchesCategory = selectedCategory === 'all';
+      if (!matchesCategory) {
+        const normSelected = normalize(selectedCategory);
+        const normCat = normalize(p.category);
+        const normUa = normalize(p.categoryLabel?.ua);
+        const normEn = normalize(p.categoryLabel?.en);
+        matchesCategory = normCat === normSelected || 
+                          normUa === normSelected || 
+                          normEn === normSelected ||
+                          (normSelected.includes('ui') && normCat.includes('ui')) ||
+                          (normSelected.includes('3d') && normCat.includes('3d')) ||
+                          (normSelected.includes('book') && (normCat.includes('book') || normUa.includes('книг'))) ||
+                          (normSelected.includes('brand') && (normCat.includes('brand') || normUa.includes('айдент')));
+      }
+
+      // Status match
+      let matchesStatus = selectedStatus === 'all';
+      if (!matchesStatus) {
+        const normSelected = normalize(selectedStatus);
+        const normStatus = normalize(p.status);
+        const normUa = normalize(p.statusLabel?.ua);
+        const normEn = normalize(p.statusLabel?.en);
+        matchesStatus = normStatus === normSelected || 
+                        normUa === normSelected || 
+                        normEn === normSelected ||
+                        (normSelected.includes('realiz') && (normStatus.includes('realiz') || normStatus.includes('prod') || normUa.includes('продакшн'))) ||
+                        (normSelected.includes('concept') && (normStatus.includes('concept') || normUa.includes('концепт')));
+      }
+
+      return matchesCategory && matchesStatus;
+    });
+  }, [data.projects, selectedCategory, selectedStatus]);
 
   const activeTestimonial = activeProject?.testimonialId
     ? data.testimonials.find(t => t.id === activeProject.testimonialId)
@@ -156,8 +276,9 @@ export default function App() {
       <Navbar
         language={language}
         onLanguageChange={setLanguage}
-        name={data.settings.name[language]}
+        name={getLocalizedText(data.settings.name, language, DEFAULT_SETTINGS.name)}
         settings={data.settings}
+        contacts={data.contacts}
         onOpenLegal={(doc) => setLegalDoc(doc)}
         onOpenCookies={() => setIsCookieBannerOpen(true)}
       />
@@ -213,15 +334,15 @@ export default function App() {
           <div className="mb-6 flex flex-wrap items-center gap-3 text-xs font-mono uppercase tracking-widest text-neutral-400">
             <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-emerald-400 font-semibold">
-              {data.settings.heroTag ? data.settings.heroTag[language] : (language === 'ua' ? 'Готовий до співпраці' : 'Available for work')}
+              {getLocalizedText(data.settings.heroTag, language, DEFAULT_SETTINGS.heroTag || { ua: 'Готовий до співпраці', en: 'Available for work' })}
             </span>
             <span className="text-neutral-600 hidden sm:inline">|</span>
             <span className="text-neutral-300">
-              {data.settings.title[language] || (language === 'ua' ? 'Артдиректор & UI/UX Архітектор' : 'Art Director & UI/UX Architect')}
+              {getLocalizedText(data.settings.title, language, DEFAULT_SETTINGS.title)}
             </span>
             <span className="text-neutral-600 hidden sm:inline">|</span>
             <span className="hidden sm:inline text-neutral-500">
-              {data.settings.location[language] || (language === 'ua' ? 'Львів, Україна (Доступний по всьому світу)' : 'Lviv, Ukraine (Available Worldwide)')}
+              {getLocalizedText(data.settings.location, language, DEFAULT_SETTINGS.location)}
             </span>
           </div>
 
@@ -258,7 +379,7 @@ export default function App() {
               </motion.div>
 
               <p className="text-lg sm:text-xl md:text-2xl max-w-xl font-light leading-snug text-neutral-300 pointer-events-auto min-h-[75px] sm:min-h-[84px] md:min-h-[100px]">
-                {data.settings.bioShort[language]}
+                {getLocalizedText(data.settings.bioShort, language, DEFAULT_SETTINGS.bioShort)}
               </p>
 
               <div className="flex items-center gap-6 pointer-events-auto mt-2">
@@ -422,10 +543,24 @@ export default function App() {
               </div>
             )
           ) : (
-            <div className="py-24 text-center border border-neutral-900 p-12 text-neutral-500 font-mono text-sm">
-              {language === 'ua'
-                ? 'За вибраними критеріями проєктів не знайдено.'
-                : 'No projects match the selected criteria.'}
+            <div className="py-20 text-center border border-neutral-900 bg-neutral-950/40 p-8 sm:p-12 text-neutral-400 font-mono text-sm space-y-4">
+              <p>
+                {language === 'ua'
+                  ? 'За вибраними критеріями проєктів не знайдено.'
+                  : 'No projects match the selected criteria.'}
+              </p>
+              {(selectedCategory !== 'all' || selectedStatus !== 'all') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCategory('all');
+                    setSelectedStatus('all');
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-2 border border-neutral-700 hover:border-white bg-neutral-900 hover:bg-neutral-800 text-white text-xs uppercase tracking-wider font-mono cursor-pointer transition-colors"
+                >
+                  <span>{language === 'ua' ? 'Скинути фільтри' : 'Reset filters'}</span>
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -452,6 +587,7 @@ export default function App() {
       {/* Massive Footer with legal modals trigger */}
       <Footer
         settings={data.settings}
+        contacts={data.contacts}
         language={language}
         onOpenLegal={(doc) => setLegalDoc(doc)}
         onOpenCookies={() => setIsCookieBannerOpen(true)}
