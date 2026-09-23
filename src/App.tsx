@@ -30,6 +30,7 @@ export default function App() {
   const [layoutMode, setLayoutMode] = useState<'bento-masonry' | 'bento-grid'>('bento-masonry');
   const [legalDoc, setLegalDoc] = useState<LegalDocType | null>(null);
   const [isSheetsModalOpen, setIsSheetsModalOpen] = useState(false);
+  const [isCookieBannerOpen, setIsCookieBannerOpen] = useState(false);
 
   // Interactive subtle grid spotlight on mouse move
   const [heroMousePos, setHeroMousePos] = useState({ x: -1000, y: -1000 });
@@ -73,6 +74,8 @@ export default function App() {
         setLegalDoc('privacy');
       } else if (hash === '#terms' || hash === '#terms-of-use' || hash === '#termsofuse' || hash === '#conditions') {
         setLegalDoc('terms');
+      } else if (hash === '#cookies' || hash === '#cookie') {
+        setIsCookieBannerOpen(true);
       } else if (hash === '#sheets' || hash === '#admin' || hash === '#sync') {
         setIsSheetsModalOpen(true);
       }
@@ -156,6 +159,7 @@ export default function App() {
         name={data.settings.name[language]}
         settings={data.settings}
         onOpenLegal={(doc) => setLegalDoc(doc)}
+        onOpenCookies={() => setIsCookieBannerOpen(true)}
       />
 
       {/* Hero Section with Interactive Ambient Grid */}
@@ -450,6 +454,7 @@ export default function App() {
         settings={data.settings}
         language={language}
         onOpenLegal={(doc) => setLegalDoc(doc)}
+        onOpenCookies={() => setIsCookieBannerOpen(true)}
       />
 
       {/* Case Study Deep Modal */}
@@ -479,11 +484,14 @@ export default function App() {
       {/* Floating Back to Top Button */}
       <BackToTop language={language} />
 
-      {/* Cookie & Compliance Banner */}
+      {/* Cookie & Compliance Banner with granular interactive toggles */}
       <CookieBanner
         language={language}
         cookieData={data.legalAndBanners?.cookieBanner}
         onOpenPrivacy={() => setLegalDoc('privacy')}
+        isOpen={isCookieBannerOpen}
+        isSuppressed={legalDoc !== null || activeProject !== null || isSheetsModalOpen}
+        onClose={() => setIsCookieBannerOpen(false)}
       />
 
       {/* Google Sheets Sync & Legal_And_Banners Management Modal */}

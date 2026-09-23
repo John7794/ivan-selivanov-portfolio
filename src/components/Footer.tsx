@@ -6,9 +6,10 @@ interface FooterProps {
   settings: GeneralSettings;
   language: Language;
   onOpenLegal?: (doc: 'privacy' | 'terms') => void;
+  onOpenCookies?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ settings, language, onOpenLegal }) => {
+export const Footer: React.FC<FooterProps> = ({ settings, language, onOpenLegal, onOpenCookies }) => {
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [kyivTime, setKyivTime] = useState('');
 
@@ -131,6 +132,15 @@ export const Footer: React.FC<FooterProps> = ({ settings, language, onOpenLegal 
       <div className="max-w-[1600px] mx-auto w-full flex flex-col md:flex-row justify-between items-center pt-8 mt-16 border-t border-[#0a0a0a]/20 font-mono text-xs uppercase tracking-widest text-neutral-500">
         <p>© {new Date().getFullYear()} {settings.name[language]}. {t.rights}</p>
         <div className="flex flex-wrap items-center gap-6 mt-4 md:mt-0">
+          {onOpenCookies && (
+            <button
+              type="button"
+              onClick={onOpenCookies}
+              className="hover:text-[#0a0a0a] transition-colors cursor-pointer"
+            >
+              {language === 'ua' ? 'Налаштування Cookies' : 'Cookie Settings'}
+            </button>
+          )}
           <button
             type="button"
             onClick={() => onOpenLegal ? onOpenLegal('privacy') : window.location.hash = 'privacy'}

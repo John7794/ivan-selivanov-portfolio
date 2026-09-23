@@ -19,6 +19,7 @@ interface NavbarProps {
   name: string;
   settings?: GeneralSettings;
   onOpenLegal?: (doc: 'privacy' | 'terms') => void;
+  onOpenCookies?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -26,7 +27,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLanguageChange,
   name,
   settings,
-  onOpenLegal
+  onOpenLegal,
+  onOpenCookies
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -385,6 +387,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                             className="hover:text-white transition-colors cursor-pointer"
                           >
                             {language === 'ua' ? 'Умови' : 'Terms'}
+                          </button>
+                        </>
+                      )}
+
+                      {onOpenCookies && (
+                        <>
+                          <span className="text-neutral-700">•</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              playClickSound();
+                              setIsMenuOpen(false);
+                              onOpenCookies();
+                            }}
+                            className="hover:text-white transition-colors cursor-pointer"
+                          >
+                            Cookies
                           </button>
                         </>
                       )}

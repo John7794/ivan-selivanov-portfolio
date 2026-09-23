@@ -115,6 +115,14 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
   const legalPreviewRows = [
     { key: 'cookie_title', label: language === 'ua' ? 'Заголовок Cookie-банера' : 'Cookie Banner Title', valUa: portfolioData.legalAndBanners.cookieBanner.title.ua, valEn: portfolioData.legalAndBanners.cookieBanner.title.en },
     { key: 'cookie_desc', label: language === 'ua' ? 'Текст опису Cookie' : 'Cookie Description', valUa: portfolioData.legalAndBanners.cookieBanner.description.ua, valEn: portfolioData.legalAndBanners.cookieBanner.description.en },
+    { key: 'cookie_essential_title', label: language === 'ua' ? 'Тогл 01: Назва' : 'Toggle 01: Title', valUa: portfolioData.legalAndBanners.cookieBanner.essentialTitle?.ua || 'Необхідні технічні дані', valEn: portfolioData.legalAndBanners.cookieBanner.essentialTitle?.en || 'Strictly Necessary Data' },
+    { key: 'cookie_essential_desc', label: language === 'ua' ? 'Тогл 01: Опис' : 'Toggle 01: Description', valUa: portfolioData.legalAndBanners.cookieBanner.essentialDesc?.ua || '', valEn: portfolioData.legalAndBanners.cookieBanner.essentialDesc?.en || '' },
+    { key: 'cookie_functional_title', label: language === 'ua' ? 'Тогл 02: Назва' : 'Toggle 02: Title', valUa: portfolioData.legalAndBanners.cookieBanner.functionalTitle?.ua || 'Функціональні параметри', valEn: portfolioData.legalAndBanners.cookieBanner.functionalTitle?.en || 'Functional Preferences' },
+    { key: 'cookie_functional_desc', label: language === 'ua' ? 'Тогл 02: Опис' : 'Toggle 02: Description', valUa: portfolioData.legalAndBanners.cookieBanner.functionalDesc?.ua || '', valEn: portfolioData.legalAndBanners.cookieBanner.functionalDesc?.en || '' },
+    { key: 'cookie_analytics_label', label: language === 'ua' ? 'Тогл 03: Назва' : 'Toggle 03: Title', valUa: portfolioData.legalAndBanners.cookieBanner.analyticsLabel.ua, valEn: portfolioData.legalAndBanners.cookieBanner.analyticsLabel.en },
+    { key: 'cookie_analytics_desc', label: language === 'ua' ? 'Тогл 03: Опис' : 'Toggle 03: Description', valUa: portfolioData.legalAndBanners.cookieBanner.analyticsDesc.ua, valEn: portfolioData.legalAndBanners.cookieBanner.analyticsDesc.en },
+    { key: 'cookie_personalization_title', label: language === 'ua' ? 'Тогл 04: Назва' : 'Toggle 04: Title', valUa: portfolioData.legalAndBanners.cookieBanner.personalizationTitle?.ua || 'Персоналізація перегляду', valEn: portfolioData.legalAndBanners.cookieBanner.personalizationTitle?.en || 'Experience Personalization' },
+    { key: 'cookie_personalization_desc', label: language === 'ua' ? 'Тогл 04: Опис' : 'Toggle 04: Description', valUa: portfolioData.legalAndBanners.cookieBanner.personalizationDesc?.ua || '', valEn: portfolioData.legalAndBanners.cookieBanner.personalizationDesc?.en || '' },
     { key: 'privacy_title', label: language === 'ua' ? 'Заголовок Політики' : 'Privacy Title', valUa: portfolioData.legalAndBanners.privacyPolicy.title.ua, valEn: portfolioData.legalAndBanners.privacyPolicy.title.en },
     { key: 'privacy_subtitle', label: language === 'ua' ? 'Підзаголовок Політики' : 'Privacy Subtitle', valUa: portfolioData.legalAndBanners.privacyPolicy.subtitle.ua, valEn: portfolioData.legalAndBanners.privacyPolicy.subtitle.en },
     { key: 'privacy_s1_title', label: language === 'ua' ? 'Політика // Розділ 01' : 'Privacy // Section 01', valUa: portfolioData.legalAndBanners.privacyPolicy.sections[0]?.title.ua, valEn: portfolioData.legalAndBanners.privacyPolicy.sections[0]?.title.en },
@@ -392,6 +400,47 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
                   </div>
                 )}
 
+                {portfolioData.hasLegalDataInEndpoint === false && (
+                  <div className="p-4 bg-amber-950/30 border border-amber-500/50 space-y-2 text-xs font-mono text-amber-200">
+                    <div className="flex items-center gap-2 font-bold text-amber-300">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>{language === 'ua' ? 'Поточний URL Apps Script ще не віддає Legal_And_Banners' : 'Active Apps Script URL has not delivered Legal_And_Banners yet'}</span>
+                    </div>
+                    <p className="text-neutral-300 font-sans text-xs leading-relaxed">
+                      {language === 'ua' ? (
+                        <>
+                          Google Apps Script повернув відповідь (ключі: <code className="text-white bg-black px-1">{portfolioData.rawEndpointResponseKeys?.join(', ')}</code>), але в ній відсутня секція <code className="text-white bg-black px-1">legalAndBanners</code>.
+                          <br />
+                          <strong>Два швидкі рішення:</strong>
+                          <br />
+                          1. <strong>Перенести рядок у General_Data:</strong> додайте рядок <code className="text-emerald-400 bg-black px-1">cookie_title</code> у вже працюючу вкладку <strong>General_Data</strong>. Вона зчитується автоматично без оновлення розгортань!
+                          <br />
+                          2. <strong>Оновити URL:</strong> якщо ви обрали «Нове розгортання» в Google, скопіюйте новий отриманий URL веб-додатка в поле вгорі.
+                        </>
+                      ) : (
+                        <>
+                          Google Apps Script returned keys: <code className="text-white bg-black px-1">{portfolioData.rawEndpointResponseKeys?.join(', ')}</code> without <code className="text-white bg-black px-1">legalAndBanners</code>.
+                          <br />
+                          1. Either paste <code className="text-emerald-400 bg-black px-1">cookie_title</code> directly into your active <strong>General_Data</strong> tab.
+                          <br />
+                          2. Or if you created a New Deployment, copy the newly issued Web App URL into the field above.
+                        </>
+                      )}
+                    </p>
+                    {endpointUrl && (
+                      <a
+                        href={endpointUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs text-amber-400 hover:text-white underline pt-1"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>{language === 'ua' ? 'Перевірити відповідь Google Apps Script у новій вкладці' : 'Check raw Google Apps Script JSON in new tab'}</span>
+                      </a>
+                    )}
+                  </div>
+                )}
+
                 <div className="border-t border-neutral-800 pt-4 font-mono text-xs text-neutral-400 space-y-2">
                   <div className="flex items-center justify-between">
                     <span>{language === 'ua' ? 'Джерело даних:' : 'Data Source:'}</span>
@@ -411,11 +460,41 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
 
             {activeTab === 'script' && (
               <div className="space-y-4">
+                {/* Critical Deployment Tip Alert */}
+                <div className="bg-amber-950/30 border border-amber-500/50 p-4 space-y-2 text-xs">
+                  <div className="flex items-center gap-2 text-amber-400 font-mono font-semibold uppercase tracking-wider">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{language === 'ua' ? 'Важливо: як опублікувати оновлення в Google Apps Script' : 'Crucial: How to publish updates in Google Apps Script'}</span>
+                  </div>
+                  <p className="text-neutral-300 leading-relaxed">
+                    {language === 'ua' ? (
+                      <>
+                        Якщо ви змінили код скрипта або додали нову вкладку, просто зберегти файл (Ctrl+S) <strong>недостатньо</strong> — веб-додаток продовжить віддавати старі дані.
+                        <br />
+                        <strong>Обов’язковий крок:</strong> в Apps Script натисніть{' '}
+                        <span className="text-amber-300 font-semibold">«Розгорнути» (Deploy) ➔ «Керування розгортаннями» (Manage deployments)</span> ➔ натисніть іконку <strong>Олівця (Редагувати)</strong> ➔ у випадаючому списку «Версія» виберіть <span className="text-emerald-400 font-semibold">«Нова версія» (New version)</span> ➔ натисніть <strong>«Розгорнути» (Deploy)</strong>.
+                      </>
+                    ) : (
+                      <>
+                        Saving changes in the editor (Ctrl+S) only saves the draft. The live web app URL continues serving the previous version.
+                        <br />
+                        <strong>Required step:</strong> in Apps Script click{' '}
+                        <span className="text-amber-300 font-semibold">Deploy ➔ Manage deployments</span> ➔ click the <strong>Pencil icon (Edit)</strong> ➔ under Version select <span className="text-emerald-400 font-semibold">New version</span> ➔ click <strong>Deploy</strong>.
+                      </>
+                    )}
+                  </p>
+                  <p className="text-[11px] font-mono text-neutral-400 pt-1 border-t border-neutral-800">
+                    💡 {language === 'ua' 
+                      ? 'Швидкий лайфхак: ви також можете вставити рядки cookie_* прямо в кінець вашої існуючої вкладки General_Data, і сайт зчитає їх автоматично!' 
+                      : 'Quick tip: You can also append the cookie_* rows directly into your existing General_Data sheet!'}
+                  </p>
+                </div>
+
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-neutral-400 font-mono">
                     {language === 'ua'
-                      ? 'Оновіть код у Extensions > Apps Script у вашій Гугл-таблиці (включає парсинг нової вкладки Legal_And_Banners):'
-                      : 'Update the code in Extensions > Apps Script of your Google Sheet (includes Legal_And_Banners parsing):'}
+                      ? 'Повний код скрипта для оновлення (підтримує Projects, General_Data, Experience, Testimonials, Legal_And_Banners):'
+                      : 'Complete script code to paste (supports Projects, General_Data, Experience, Testimonials, Legal_And_Banners):'}
                   </p>
                   <button
                     type="button"

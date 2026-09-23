@@ -526,28 +526,80 @@ export const DEFAULT_EXPERIENCE: ExperienceItem[] = [
 export const DEFAULT_LEGAL_AND_BANNERS: LegalAndBannersData = {
   cookieBanner: {
     title: {
-      ua: 'Конфіденційність & Cookies',
-      en: 'Privacy & Cookie Preferences'
+      ua: 'Конфіденційність & Обробка даних',
+      en: 'Privacy & Data Processing'
     },
     description: {
-      ua: 'Цей веб-сайт використовує виключно локальне сховище (LocalStorage) для збереження мови інтерфейсу (UA/EN), режиму сітки та мінімальної телеметрії рендерингу. Жодних сторонніх рекламних трекерів або продажу даних.',
-      en: 'This portfolio utilizes local browser storage strictly to preserve your selected interface language (UA/EN), grid layout density, and shader performance telemetry. Zero third-party ad trackers or commercial data sharing.'
+      ua: 'Цей веб-сайт використовує виключно безпечне локальне сховище вашого браузера (LocalStorage) для підтримки персональних налаштувань. Жодних сторонніх трекерів, спам-куків чи передачі даних третім особам.',
+      en: 'This portfolio utilizes minimal client-side browser storage (LocalStorage) strictly to retain your viewing preferences. Zero third-party ad pixels or commercial data harvesting.'
+    },
+    badge: {
+      ua: 'PRIVACY & COMPLIANCE // GDPR & ЗУ «ПРО ЗАХИСТ ПЕРСОНАЛЬНИХ ДАНИХ»',
+      en: 'PRIVACY & COMPLIANCE // GDPR & PRIVACY ACT'
+    },
+    configureBtn: {
+      ua: 'Налаштувати тогли',
+      en: 'Customize Toggles'
+    },
+    collapseBtn: {
+      ua: 'Згорнути',
+      en: 'Collapse'
+    },
+    essentialTitle: {
+      ua: 'Необхідні технічні дані',
+      en: 'Strictly Necessary Data'
+    },
+    essentialDesc: {
+      ua: 'Збереження обраної мови інтерфейсу (UA/EN), стану згоди та критичних параметрів сесії.',
+      en: 'Preserving chosen language (UA/EN), consent choices, and core session accessibility parameters.'
+    },
+    essentialStorage: {
+      ua: 'LocalStorage',
+      en: 'LocalStorage'
+    },
+    functionalTitle: {
+      ua: 'Функціональні параметри',
+      en: 'Functional Preferences'
+    },
+    functionalDesc: {
+      ua: 'Тактильний звуковий супровід кліків (Web Audio API), збереження вибраного вигляду проєктів (Каскад / Сітка).',
+      en: 'Tactile sound feedback for micro-interactions, layout view density memory (Masonry / Grid).'
+    },
+    functionalStorage: {
+      ua: 'LocalStorage / Audio API',
+      en: 'LocalStorage / Audio API'
     },
     analyticsLabel: {
-      ua: 'Аналітика рендерингу',
-      en: 'Render Telemetry'
+      ua: 'Телеметрія швидкодії',
+      en: 'Performance Telemetry'
     },
     analyticsDesc: {
-      ua: 'Анонімізовані метрики швидкості завантаження шейдерів та взаємодії з макетами для оптимізації UX.',
-      en: 'Anonymized shader frame rates and interaction metrics used exclusively for performance tuning.'
+      ua: 'Анонімізована діагностика швидкості ініціалізації WebGL-шейдерів та плавності анімацій (60 FPS).',
+      en: 'Anonymized monitoring of client shader frame rates and responsiveness to guarantee silky smooth rendering.'
+    },
+    analyticsStorage: {
+      ua: 'Client Runtime',
+      en: 'Client Runtime'
     },
     preferencesLabel: {
-      ua: 'Локальні параметри',
-      en: 'Client Preferences'
+      ua: 'Функціональні параметри',
+      en: 'Functional Preferences'
     },
     preferencesDesc: {
-      ua: 'Збереження активної мови та типу відображення (Каскад / Сітка) у вашому браузері.',
-      en: 'Persistent retention of active language and view density state within your browser.'
+      ua: 'Тактильний звуковий супровід кліків (Web Audio API), збереження вибраного вигляду проєктів (Каскад / Сітка).',
+      en: 'Tactile sound feedback for micro-interactions, layout view density memory (Masonry / Grid).'
+    },
+    personalizationTitle: {
+      ua: 'Персоналізація перегляду',
+      en: 'Experience Personalization'
+    },
+    personalizationDesc: {
+      ua: 'Запам’ятовування останніх переглянутих кейсів та збереженого масштабу зображень (Fill / Contain).',
+      en: 'Retaining previously viewed project deep-dives and preferred image viewport presentation modes.'
+    },
+    personalizationStorage: {
+      ua: 'LocalStorage Cache',
+      en: 'LocalStorage Cache'
     },
     acceptAll: {
       ua: 'Прийняти всі',
@@ -558,12 +610,12 @@ export const DEFAULT_LEGAL_AND_BANNERS: LegalAndBannersData = {
       en: 'Essential Only'
     },
     savePreferences: {
-      ua: 'Зберегти',
-      en: 'Save Preferences'
+      ua: 'Зберегти мій вибір',
+      en: 'Save Selected'
     },
     policyLink: {
-      ua: 'Політика',
-      en: 'Policy'
+      ua: 'Політика конфіденційності',
+      en: 'Privacy Policy'
     }
   },
   privacyPolicy: {

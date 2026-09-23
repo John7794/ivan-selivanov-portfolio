@@ -165,10 +165,23 @@ export interface LegalAndBannersData {
   cookieBanner: {
     title: { ua: string; en: string };
     description: { ua: string; en: string };
+    badge?: { ua: string; en: string };
+    configureBtn?: { ua: string; en: string };
+    collapseBtn?: { ua: string; en: string };
+    essentialTitle?: { ua: string; en: string };
+    essentialDesc?: { ua: string; en: string };
+    essentialStorage?: { ua: string; en: string };
+    functionalTitle?: { ua: string; en: string };
+    functionalDesc?: { ua: string; en: string };
+    functionalStorage?: { ua: string; en: string };
     analyticsLabel: { ua: string; en: string };
     analyticsDesc: { ua: string; en: string };
+    analyticsStorage?: { ua: string; en: string };
     preferencesLabel: { ua: string; en: string };
     preferencesDesc: { ua: string; en: string };
+    personalizationTitle?: { ua: string; en: string };
+    personalizationDesc?: { ua: string; en: string };
+    personalizationStorage?: { ua: string; en: string };
     acceptAll: { ua: string; en: string };
     onlyNecessary: { ua: string; en: string };
     savePreferences: { ua: string; en: string };

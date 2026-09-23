@@ -12,13 +12,28 @@ export interface PortfolioData {
   legalAndBanners: LegalAndBannersData;
   source: 'cache' | 'default' | 'live_sheets';
   lastSyncedAt: string;
+  hasLegalDataInEndpoint?: boolean;
+  rawEndpointResponseKeys?: string[];
 }
 
 export const DEFAULT_SHEETS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzWBH_tyMHYUEeaRM1u91hS1TWTKiQm3F2H6eFfQNN9oUBIKfbwZnF36kFERfZ9D1gLhA/exec';
 
-export function formatImageUrl(url: string | undefined | null, fallback?: string): string {
+export function formatImageUrl(url: any, fallback?: string): string {
   if (!url) return fallback || '';
-  const cleanUrl = url.trim();
+
+  let cleanUrl = '';
+  if (typeof url === 'string') {
+    cleanUrl = url.trim();
+  } else if (typeof url === 'object' && url !== null) {
+    const candidate = url.ua || url.en || url.url || url.src || '';
+    if (typeof candidate === 'string') {
+      cleanUrl = candidate.trim();
+    }
+  } else {
+    cleanUrl = String(url).trim();
+  }
+
+  if (!cleanUrl) return fallback || '';
   
   // Extract ID from any Google Drive link
   let fileId = '';
@@ -385,11 +400,25 @@ export function mapSettingsFromSheet(raw: any): GeneralSettings {
   const heroTagline = getLoc('heroTagline', getLoc('bioShort', DEFAULT_SETTINGS.bioShort));
   const location = getLoc('location', DEFAULT_SETTINGS.location);
 
-  const email = s.email || s.email_ua || s.email_en || DEFAULT_SETTINGS.email;
-  const telegram = s.telegram || s.telegram_ua || s.telegram_en || DEFAULT_SETTINGS.telegram;
-  const linkedin = s.linkedin || s.linkedin_ua || s.linkedin_en || DEFAULT_SETTINGS.linkedin;
-  const behance = s.behance || s.behance_ua || s.behance_en || DEFAULT_SETTINGS.behance;
-  const github = s.github || s.github_ua || s.github_en || DEFAULT_SETTINGS.github;
+  const getSingleStr = (key: string, fallback: string): string => {
+    const val = s[key];
+    if (typeof val === 'string' && val.trim() !== '') return val.trim();
+    if (typeof val === 'object' && val !== null) {
+      const candidate = val.ua || val.en || val.url || '';
+      if (typeof candidate === 'string' && candidate.trim() !== '') return candidate.trim();
+    }
+    const valUa = s[`${key}_ua`] || s[`${key}_UA`];
+    if (typeof valUa === 'string' && valUa.trim() !== '') return valUa.trim();
+    const valEn = s[`${key}_en`] || s[`${key}_EN`];
+    if (typeof valEn === 'string' && valEn.trim() !== '') return valEn.trim();
+    return fallback;
+  };
+
+  const email = getSingleStr('email', DEFAULT_SETTINGS.email);
+  const telegram = getSingleStr('telegram', DEFAULT_SETTINGS.telegram);
+  const linkedin = getSingleStr('linkedin', DEFAULT_SETTINGS.linkedin);
+  const behance = getSingleStr('behance', DEFAULT_SETTINGS.behance);
+  const github = getSingleStr('github', DEFAULT_SETTINGS.github);
 
   const heroImageRaw = s.heroImage || s.profileImage || (s.heroImage_ua || s.heroImage_en);
   const heroImage = formatImageUrl(heroImageRaw, DEFAULT_SETTINGS.heroImage);
@@ -460,34 +489,42 @@ export function mapSettingsFromSheet(raw: any): GeneralSettings {
 }
 
 
-export function mapLegalAndBannersFromSheet(raw: any): LegalAndBannersData {
-  if (!raw) return DEFAULT_LEGAL_AND_BANNERS;
-
+export function mapLegalAndBannersFromSheet(raw: any, fallbackRaw?: any): LegalAndBannersData {
   const dict: Record<string, any> = {};
 
-  if (Array.isArray(raw)) {
-    for (const row of raw) {
-      if (!row || typeof row !== 'object') continue;
-      const key = String(row.key || row.Key || row.id || row.Id || row.name || row.Name || '').trim();
-      if (!key) continue;
+  const processSource = (source: any) => {
+    if (!source) return;
+    if (Array.isArray(source)) {
+      for (const row of source) {
+        if (!row || typeof row !== 'object') continue;
+        const key = String(row.key || row.Key || row.id || row.Id || row.name || row.Name || '').trim();
+        if (!key) continue;
 
-      const uaVal = row.ua ?? row.UA ?? row.Ua ?? row.Ukrainian ?? row.value_ua ?? row.val_ua;
-      const enVal = row.en ?? row.EN ?? row.En ?? row.English ?? row.value_en ?? row.val_en;
+        const uaVal = row.ua ?? row.UA ?? row.Ua ?? row.Ukrainian ?? row.value_ua ?? row.val_ua;
+        const enVal = row.en ?? row.EN ?? row.En ?? row.English ?? row.value_en ?? row.val_en;
 
-      if (uaVal !== undefined || enVal !== undefined) {
-        dict[key] = {
-          ua: String(uaVal ?? ''),
-          en: String(enVal ?? uaVal ?? '')
-        };
-        dict[`${key}_ua`] = String(uaVal ?? '');
-        dict[`${key}_en`] = String(enVal ?? uaVal ?? '');
-      } else if (row.value !== undefined || row.Value !== undefined) {
-        dict[key] = row.value ?? row.Value;
+        if (uaVal !== undefined || enVal !== undefined) {
+          dict[key] = {
+            ua: String(uaVal ?? ''),
+            en: String(enVal ?? uaVal ?? '')
+          };
+          dict[`${key}_ua`] = String(uaVal ?? '');
+          dict[`${key}_en`] = String(enVal ?? uaVal ?? '');
+        } else if (row.value !== undefined || row.Value !== undefined) {
+          dict[key] = row.value ?? row.Value;
+        }
       }
+    } else if (typeof source === 'object') {
+      Object.assign(dict, source);
     }
-  } else if (typeof raw === 'object') {
-    Object.assign(dict, raw);
-  }
+  };
+
+  // 1. Process fallback (e.g. General_Data settings rows)
+  if (fallbackRaw) processSource(fallbackRaw);
+  // 2. Process primary legal data source (overwrites fallback if present)
+  if (raw) processSource(raw);
+
+  if (Object.keys(dict).length === 0) return DEFAULT_LEGAL_AND_BANNERS;
 
   const getI18n = (key: string, fallback: { ua: string; en: string }): { ua: string; en: string } => {
     if (dict[key] && typeof dict[key] === 'object' && ('ua' in dict[key] || 'en' in dict[key])) {
@@ -541,10 +578,23 @@ export function mapLegalAndBannersFromSheet(raw: any): LegalAndBannersData {
     cookieBanner: {
       title: getI18n('cookie_title', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.title),
       description: getI18n('cookie_desc', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.description),
+      badge: getI18n('cookie_badge', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.badge || { ua: 'PRIVACY & COMPLIANCE // GDPR & ЗУ «ПРО ЗАХИСТ ПЕРСОНАЛЬНИХ ДАНИХ»', en: 'PRIVACY & COMPLIANCE // GDPR & PRIVACY ACT' }),
+      configureBtn: getI18n('cookie_btn_configure', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.configureBtn || { ua: 'Налаштувати тогли', en: 'Customize Toggles' }),
+      collapseBtn: getI18n('cookie_btn_collapse', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.collapseBtn || { ua: 'Згорнути', en: 'Collapse' }),
+      essentialTitle: getI18n('cookie_essential_title', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.essentialTitle || { ua: 'Необхідні технічні дані', en: 'Strictly Necessary Data' }),
+      essentialDesc: getI18n('cookie_essential_desc', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.essentialDesc || { ua: 'Збереження обраної мови інтерфейсу (UA/EN), стану згоди та критичних параметрів сесії.', en: 'Preserving chosen language (UA/EN), consent choices, and core session accessibility parameters.' }),
+      essentialStorage: getI18n('cookie_essential_storage', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.essentialStorage || { ua: 'LocalStorage', en: 'LocalStorage' }),
+      functionalTitle: getI18n('cookie_functional_title', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.functionalTitle || { ua: 'Функціональні параметри', en: 'Functional Preferences' }),
+      functionalDesc: getI18n('cookie_functional_desc', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.functionalDesc || { ua: 'Тактильний звуковий супровід кліків (Web Audio API), збереження вибраного вигляду проєктів (Каскад / Сітка).', en: 'Tactile sound feedback for micro-interactions, layout view density memory (Masonry / Grid).' }),
+      functionalStorage: getI18n('cookie_functional_storage', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.functionalStorage || { ua: 'LocalStorage / Audio API', en: 'LocalStorage / Audio API' }),
       analyticsLabel: getI18n('cookie_analytics_label', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.analyticsLabel),
       analyticsDesc: getI18n('cookie_analytics_desc', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.analyticsDesc),
+      analyticsStorage: getI18n('cookie_analytics_storage', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.analyticsStorage || { ua: 'Client Runtime', en: 'Client Runtime' }),
       preferencesLabel: getI18n('cookie_preferences_label', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.preferencesLabel),
       preferencesDesc: getI18n('cookie_preferences_desc', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.preferencesDesc),
+      personalizationTitle: getI18n('cookie_personalization_title', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.personalizationTitle || { ua: 'Персоналізація перегляду', en: 'Experience Personalization' }),
+      personalizationDesc: getI18n('cookie_personalization_desc', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.personalizationDesc || { ua: 'Запам’ятовування останніх переглянутих кейсів та збереженого масштабу зображень (Fill / Contain).', en: 'Retaining previously viewed project deep-dives and preferred image viewport presentation modes.' }),
+      personalizationStorage: getI18n('cookie_personalization_storage', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.personalizationStorage || { ua: 'LocalStorage Cache', en: 'LocalStorage Cache' }),
       acceptAll: getI18n('cookie_btn_accept', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.acceptAll),
       onlyNecessary: getI18n('cookie_btn_necessary', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.onlyNecessary),
       savePreferences: getI18n('cookie_btn_save', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.savePreferences),
@@ -595,9 +645,9 @@ export function getStoredData(): PortfolioData {
         parsed.testimonials = parsed.testimonials.map(mapTestimonialFromSheet);
       }
       if (parsed.legalAndBanners) {
-        parsed.legalAndBanners = mapLegalAndBannersFromSheet(parsed.legalAndBanners);
+        parsed.legalAndBanners = mapLegalAndBannersFromSheet(parsed.legalAndBanners, parsed.settings);
       } else {
-        parsed.legalAndBanners = DEFAULT_LEGAL_AND_BANNERS;
+        parsed.legalAndBanners = mapLegalAndBannersFromSheet(parsed.settings);
       }
 
       return {
@@ -671,9 +721,17 @@ export async function syncWithGoogleSheets(endpointUrl: string = DEFAULT_SHEETS_
     ? mapSettingsFromSheet(json.settings)
     : DEFAULT_SETTINGS;
 
-  const parsedLegalAndBanners = json.legalAndBanners || json.legal || json.banners
-    ? mapLegalAndBannersFromSheet(json.legalAndBanners || json.legal || json.banners)
-    : DEFAULT_LEGAL_AND_BANNERS;
+  const parsedLegalAndBanners = mapLegalAndBannersFromSheet(
+    json.legalAndBanners || json.legal || json.banners,
+    json.settings
+  );
+
+  const hasLegalDataInEndpoint = Boolean(
+    (json.legalAndBanners && typeof json.legalAndBanners === 'object' && Object.keys(json.legalAndBanners).length > 0) ||
+    json.legal ||
+    json.banners ||
+    (json.settings && (json.settings.cookie_title || json.settings['cookie_title_ua'] || json.settings['cookie_title_UA']))
+  );
 
   const freshData: PortfolioData = {
     projects: parsedProjects,
@@ -682,7 +740,9 @@ export async function syncWithGoogleSheets(endpointUrl: string = DEFAULT_SHEETS_
     settings: parsedSettings,
     legalAndBanners: parsedLegalAndBanners,
     source: 'live_sheets',
-    lastSyncedAt: new Date().toISOString()
+    lastSyncedAt: new Date().toISOString(),
+    hasLegalDataInEndpoint,
+    rawEndpointResponseKeys: Object.keys(json)
   };
 
   saveStoredData(freshData);
@@ -710,15 +770,33 @@ export function getGoogleAppsScriptTemplate(): string {
 function doGet(e) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   
-  var projectsSheet = ss.getSheetByName("Projects") || ss.getSheetByName("projects");
-  var generalSheet = ss.getSheetByName("General_Data") || ss.getSheetByName("general_data") || ss.getSheetByName("General") || ss.getSheetByName("general");
-  var expSheet = ss.getSheetByName("Experience") || ss.getSheetByName("experience");
-  var testSheet = ss.getSheetByName("Testimonials") || ss.getSheetByName("testimonials");
-  var legalSheet = ss.getSheetByName("Legal_And_Banners") || ss.getSheetByName("legal_and_banners") || ss.getSheetByName("Legal") || ss.getSheetByName("legal") || ss.getSheetByName("Banners") || ss.getSheetByName("banners");
+  function findSheet(names) {
+    for (var i = 0; i < names.length; i++) {
+      var s = ss.getSheetByName(names[i]);
+      if (s) return s;
+    }
+    var allSheets = ss.getSheets();
+    for (var j = 0; j < allSheets.length; j++) {
+      var curClean = allSheets[j].getName().toLowerCase().replace(/[^a-z0-9]/g, '');
+      for (var k = 0; k < names.length; k++) {
+        if (curClean === names[k].toLowerCase().replace(/[^a-z0-9]/g, '')) {
+          return allSheets[j];
+        }
+      }
+    }
+    return null;
+  }
+  
+  var projectsSheet = findSheet(["Projects", "projects"]);
+  var generalSheet = findSheet(["General_Data", "general_data", "General", "general"]);
+  var expSheet = findSheet(["Experience", "experience"]);
+  var testSheet = findSheet(["Testimonials", "testimonials"]);
+  var legalSheet = findSheet(["Legal_And_Banners", "legal_and_banners", "Legal and Banners", "Legal", "legal", "Banners", "banners", "Cookies", "cookies"]);
   
   var result = {
     status: "ok",
     timestamp: new Date().toISOString(),
+    sheetId: ss.getId(),
     projects: parseSheetToObjects(projectsSheet),
     settings: parseGeneralSheet(generalSheet),
     experience: parseSheetToObjects(expSheet),
@@ -794,8 +872,8 @@ function parseLegalSheet(sheet) {
   
   var keyIdx = headers.indexOf("key");
   if (keyIdx === -1) keyIdx = 0;
-  var uaIdx = headers.indexOf("ua") !== -1 ? headers.indexOf("ua") : headers.indexOf("ukrainian");
-  var enIdx = headers.indexOf("en") !== -1 ? headers.indexOf("en") : headers.indexOf("english");
+  var uaIdx = headers.indexOf("ua") !== -1 ? headers.indexOf("ua") : (headers.indexOf("ukrainian") !== -1 ? headers.indexOf("ukrainian") : (headers.length > 1 ? 1 : -1));
+  var enIdx = headers.indexOf("en") !== -1 ? headers.indexOf("en") : (headers.indexOf("english") !== -1 ? headers.indexOf("english") : (headers.length > 2 ? 2 : -1));
   
   var result = {};
   
@@ -804,16 +882,12 @@ function parseLegalSheet(sheet) {
     var key = String(row[keyIdx] || "").trim();
     if (!key) continue;
     
-    if (uaIdx !== -1 && enIdx !== -1) {
-      result[key] = {
-        ua: String(row[uaIdx] !== undefined ? row[uaIdx] : ""),
-        en: String(row[enIdx] !== undefined ? row[enIdx] : "")
-      };
-      result[key + "_ua"] = String(row[uaIdx] !== undefined ? row[uaIdx] : "");
-      result[key + "_en"] = String(row[enIdx] !== undefined ? row[enIdx] : "");
-    } else {
-      result[key] = row[1];
-    }
+    var uaVal = (uaIdx !== -1 && row[uaIdx] !== undefined) ? String(row[uaIdx]) : "";
+    var enVal = (enIdx !== -1 && row[enIdx] !== undefined) ? String(row[enIdx]) : uaVal;
+    
+    result[key] = { ua: uaVal, en: enVal };
+    result[key + "_ua"] = uaVal;
+    result[key + "_en"] = enVal;
   }
   return result;
 }
@@ -861,13 +935,26 @@ export function getGeneralSheetTsvTemplate(): string {
 export function getLegalSheetTsvTemplate(): string {
   const d = DEFAULT_LEGAL_AND_BANNERS;
   const rows: [string, string, string][] = [
-    // Cookie Banner
+    // Cookie & Data Processing Banner
     ['cookie_title', d.cookieBanner.title.ua, d.cookieBanner.title.en],
     ['cookie_desc', d.cookieBanner.description.ua, d.cookieBanner.description.en],
+    ['cookie_badge', d.cookieBanner.badge?.ua || '', d.cookieBanner.badge?.en || ''],
+    ['cookie_btn_configure', d.cookieBanner.configureBtn?.ua || '', d.cookieBanner.configureBtn?.en || ''],
+    ['cookie_btn_collapse', d.cookieBanner.collapseBtn?.ua || '', d.cookieBanner.collapseBtn?.en || ''],
+    ['cookie_essential_title', d.cookieBanner.essentialTitle?.ua || '', d.cookieBanner.essentialTitle?.en || ''],
+    ['cookie_essential_desc', d.cookieBanner.essentialDesc?.ua || '', d.cookieBanner.essentialDesc?.en || ''],
+    ['cookie_essential_storage', d.cookieBanner.essentialStorage?.ua || 'LocalStorage', d.cookieBanner.essentialStorage?.en || 'LocalStorage'],
+    ['cookie_functional_title', d.cookieBanner.functionalTitle?.ua || '', d.cookieBanner.functionalTitle?.en || ''],
+    ['cookie_functional_desc', d.cookieBanner.functionalDesc?.ua || '', d.cookieBanner.functionalDesc?.en || ''],
+    ['cookie_functional_storage', d.cookieBanner.functionalStorage?.ua || 'LocalStorage / Audio API', d.cookieBanner.functionalStorage?.en || 'LocalStorage / Audio API'],
     ['cookie_analytics_label', d.cookieBanner.analyticsLabel.ua, d.cookieBanner.analyticsLabel.en],
     ['cookie_analytics_desc', d.cookieBanner.analyticsDesc.ua, d.cookieBanner.analyticsDesc.en],
+    ['cookie_analytics_storage', d.cookieBanner.analyticsStorage?.ua || 'Client Runtime', d.cookieBanner.analyticsStorage?.en || 'Client Runtime'],
     ['cookie_preferences_label', d.cookieBanner.preferencesLabel.ua, d.cookieBanner.preferencesLabel.en],
     ['cookie_preferences_desc', d.cookieBanner.preferencesDesc.ua, d.cookieBanner.preferencesDesc.en],
+    ['cookie_personalization_title', d.cookieBanner.personalizationTitle?.ua || '', d.cookieBanner.personalizationTitle?.en || ''],
+    ['cookie_personalization_desc', d.cookieBanner.personalizationDesc?.ua || '', d.cookieBanner.personalizationDesc?.en || ''],
+    ['cookie_personalization_storage', d.cookieBanner.personalizationStorage?.ua || 'LocalStorage Cache', d.cookieBanner.personalizationStorage?.en || 'LocalStorage Cache'],
     ['cookie_btn_accept', d.cookieBanner.acceptAll.ua, d.cookieBanner.acceptAll.en],
     ['cookie_btn_necessary', d.cookieBanner.onlyNecessary.ua, d.cookieBanner.onlyNecessary.en],
     ['cookie_btn_save', d.cookieBanner.savePreferences.ua, d.cookieBanner.savePreferences.en],
