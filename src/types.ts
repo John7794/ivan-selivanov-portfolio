@@ -111,6 +111,14 @@ export interface GeneralSettings {
     ua: string;
     en: string;
   };
+  heroTag?: {
+    ua: string;
+    en: string;
+  };
+  heroTagline?: {
+    ua: string;
+    en: string;
+  };
   location: {
     ua: string;
     en: string;
@@ -134,8 +142,57 @@ export interface GeneralSettings {
     card3Title: { ua: string; en: string };
     card3Desc: { ua: string; en: string };
     card4Title: { ua: string; en: string };
+    card4Desc?: { ua: string; en: string };
     heuristics: { ua: string[]; en: string[] };
     techStackTitle: { ua: string; en: string };
     techStackItems: string[];
+  };
+}
+
+export interface LegalSection {
+  id?: string;
+  title: {
+    ua: string;
+    en: string;
+  };
+  content: {
+    ua: string;
+    en: string;
+  };
+}
+
+export interface LegalAndBannersData {
+  cookieBanner: {
+    title: { ua: string; en: string };
+    description: { ua: string; en: string };
+    analyticsLabel: { ua: string; en: string };
+    analyticsDesc: { ua: string; en: string };
+    preferencesLabel: { ua: string; en: string };
+    preferencesDesc: { ua: string; en: string };
+    acceptAll: { ua: string; en: string };
+    onlyNecessary: { ua: string; en: string };
+    savePreferences: { ua: string; en: string };
+    policyLink: { ua: string; en: string };
+  };
+  privacyPolicy: {
+    title: { ua: string; en: string };
+    subtitle: { ua: string; en: string };
+    lastUpdated: { ua: string; en: string };
+    sections: LegalSection[];
+    contactEmail: string;
+    contactLocation: { ua: string; en: string };
+  };
+  termsOfUse: {
+    title: { ua: string; en: string };
+    subtitle: { ua: string; en: string };
+    lastUpdated: { ua: string; en: string };
+    sections: LegalSection[];
+    contactEmail: string;
+  };
+  announcementBanner: {
+    enabled: boolean;
+    badge: { ua: string; en: string };
+    text: { ua: string; en: string };
+    link?: string;
   };
 }

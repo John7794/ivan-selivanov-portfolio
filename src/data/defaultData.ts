@@ -1,4 +1,4 @@
-import { Project, ExperienceItem, Testimonial, GeneralSettings } from '../types';
+import { Project, ExperienceItem, Testimonial, GeneralSettings, LegalAndBannersData } from '../types';
 
 export const DEFAULT_SETTINGS: GeneralSettings = {
   name: {
@@ -10,16 +10,24 @@ export const DEFAULT_SETTINGS: GeneralSettings = {
     en: 'Art Director & UI/UX Architect'
   },
   bioShort: {
-    ua: 'Проєктую складні цифрові екосистеми, масштабовані дизайн-системи та виразні візуальні концепції на перетині швейцарської типографіки та продуктової логіки.',
-    en: 'Architecting complex digital ecosystems, scalable design systems, and expressive visual concepts at the intersection of Swiss typography and product logic.'
+    ua: 'Проєктую сучасні вебсайти та цифрові продукти, поєднуючи чисту візуальну естетику з продуманою логікою.',
+    en: 'I design modern websites and digital products, combining clean visual aesthetics with thoughtful logic.'
+  },
+  heroTag: {
+    ua: 'Готовий до співпраці',
+    en: 'Available for work'
+  },
+  heroTagline: {
+    ua: 'Проєктую сучасні вебсайти та цифрові продукти, поєднуючи чисту візуальну естетику з продуманою логікою.',
+    en: 'I design modern websites and digital products, combining clean visual aesthetics with thoughtful logic.'
   },
   location: {
     ua: 'Львів, Україна (Доступний по всьому світу)',
     en: 'Lviv, Ukraine (Available Worldwide)'
   },
-  email: 'ivan.selivanov.design@gmail.com',
+  email: 'ivanselivanov771994@gmail.com',
   telegram: 'https://t.me/ivanselivanov',
-  linkedin: 'https://linkedin.com/in/ivanselivanov',
+  linkedin: 'https://www.linkedin.com/in/ivan-selivanov-4bb884183/',
   behance: 'https://behance.net/ivanselivanov',
   github: 'https://github.com/ivanselivanov',
   heroImage: 'https://drive.google.com/uc?export=download&id=1jCDr21Fo4A_b8X4sIWeQHhOLG2LcJJnq',
@@ -27,52 +35,59 @@ export const DEFAULT_SETTINGS: GeneralSettings = {
   googleSheetId: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms',
   lastSyncedAt: 'Live Google Sheets Connected',
   expertise: {
-    heading: { ua: 'Експертиза & Архітектура', en: 'Expertise & Architecture' },
+    heading: { ua: 'Експертиза', en: 'Expertise' },
     subtitle: { 
-      ua: 'Поєднання строгості швейцарського дизайну, продуктової психології та сучасного інженерного стеку', 
-      en: 'Bridging Swiss rationalism, cognitive psychology, and cutting-edge engineering' 
+      ua: 'Мої ключові навички та напрямки роботи, в яких я створюю ефективні цифрові рішення.', 
+      en: 'My core skills and areas of focus where I create effective digital solutions.' 
     },
-    card1Title: { ua: 'Продуктовий UI/UX та Системи', en: 'Product UI/UX & Systems' },
+    card1Title: { ua: 'UI/UX Дизайн', en: 'UI/UX Design' },
     card1Desc: { 
-      ua: 'Проєктування складних B2B/Enterprise інтерфейсів, біржових терміналів, аналітичних систем та мобільних додатків. Повний цикл: від дослідження користувачів та CJM до масштабованих Design Tokens у Figma та коді.', 
-      en: 'Architecting complex B2B/Enterprise workspaces, trading terminals, and consumer platforms. End-to-end lifecycle: user research, journey mapping to production-ready design tokens in code.' 
+      ua: 'Проєктування зручних користувацьких інтерфейсів, створення прототипів та адаптивного дизайну з фокусом на користувацький досвід у Figma.', 
+      en: 'Designing intuitive user interfaces, creating prototypes, and responsive web design with a focus on user experience in Figma.' 
     },
-    card2Title: { ua: 'Швейцарська Типографіка', en: 'Swiss Typography & Grids' },
+    card2Title: { ua: 'Графічний дизайн', en: 'Graphic Design' },
     card2Desc: { 
-      ua: 'Математичні пропорційні сітки (DIN, ISO-216), робота з базовим інтерліньяжем, мікротипографіка та препрес-підготовка.', 
-      en: 'Rigid proportional grids (DIN canon), baseline rhythm synchronization, micro-typography, and high-spec prepress discipline.' 
+      ua: 'Створення логотипів, банерів та комп\'ютерної графіки. Застосування теорії кольору та основ композиції.', 
+      en: 'Creating logos, banners, and computer graphics. Applying color theory and composition fundamentals.' 
     },
-    card3Title: { ua: '3D & Просторові Концепти', en: '3D & Spatial Direction' },
+    card3Title: { ua: 'Веброзробка', en: 'Web Development' },
     card3Desc: { 
-      ua: 'Об’ємне моделювання, скульптурне освітлення та втілення статичних рендерів у живому веб-середовищі за допомогою шейдерів.', 
-      en: 'Volumetric exploration, sculptural lighting, and reviving static renders in live web environments using displacement shaders.' 
+      ua: 'Верстка лендингів та розробка сайтів з використанням HTML, CSS, JavaScript, робота з SVG та розгортання проєктів на Vercel.', 
+      en: 'Landing page markup and website development using HTML, CSS, JavaScript, working with SVG, and deploying projects on Vercel.' 
     },
-    card4Title: { ua: 'UX Евристики (Nielsen & Rams)', en: 'UX Heuristics & Principles' },
+    card4Title: { ua: 'Маркетинг та Аналітика', en: 'Marketing & Analytics' },
+    card4Desc: {
+      ua: 'Налаштування та оптимізація рекламних кампаній (Google Ads, Meta Ads) та вебаналітики через Google Tag Manager, робота з даними у Google Sheets.',
+      en: 'Setting up and optimizing advertising campaigns (Google Ads, Meta Ads) and web analytics via Google Tag Manager, working with data in Google Sheets.'
+    },
     heuristics: { 
       ua: [
-        'Прозорість системного статусу', 
-        'Консистентність та стандарти', 
-        'Менше дизайну — це більше дизайну', 
-        'Захист від критичних помилок'
+        'Дизайн інтерфейсів', 
+        'Візуальний дизайн', 
+        'Фронтенд', 
+        'Таргетинг'
       ], 
       en: [
-        'Visibility of system status', 
-        'Consistency and platform standards', 
-        'Good design is as little design as possible', 
-        'Error prevention over error recovery'
+        'Interface Design', 
+        'Visual Design', 
+        'Frontend', 
+        'Targeting'
       ] 
     },
-    techStackTitle: { ua: 'Технологічний стек', en: 'Technology Stack' },
+    techStackTitle: { ua: 'Інструменти та Технології', en: 'Tools & Technologies' },
     techStackItems: [
-      'Figma & Tokens Studio',
-      'Next.js 15 (App Router)',
-      'React 19 & TypeScript',
-      'Tailwind CSS v4',
-      'Motion & GSAP',
-      'Three.js & WebGL',
-      'Adobe InDesign & Prepress',
-      'Google Sheets API / Apps Script',
-      'Cinema 4D & Octane'
+      'Figma',
+      'HTML',
+      'CSS',
+      'JavaScript',
+      'Vercel',
+      'Google AI Studio',
+      'Google Ads',
+      'Meta Ads',
+      'Google Tag Manager',
+      'Google Sheets',
+      'SVG',
+      'Adobe Illustrator'
     ]
   }
 };
@@ -507,3 +522,230 @@ export const DEFAULT_EXPERIENCE: ExperienceItem[] = [
     technologies: ['Swiss Typography', 'Structural Semiotics', 'Grid Systems', 'Book Pre-press']
   }
 ];
+
+export const DEFAULT_LEGAL_AND_BANNERS: LegalAndBannersData = {
+  cookieBanner: {
+    title: {
+      ua: 'Конфіденційність & Cookies',
+      en: 'Privacy & Cookie Preferences'
+    },
+    description: {
+      ua: 'Цей веб-сайт використовує виключно локальне сховище (LocalStorage) для збереження мови інтерфейсу (UA/EN), режиму сітки та мінімальної телеметрії рендерингу. Жодних сторонніх рекламних трекерів або продажу даних.',
+      en: 'This portfolio utilizes local browser storage strictly to preserve your selected interface language (UA/EN), grid layout density, and shader performance telemetry. Zero third-party ad trackers or commercial data sharing.'
+    },
+    analyticsLabel: {
+      ua: 'Аналітика рендерингу',
+      en: 'Render Telemetry'
+    },
+    analyticsDesc: {
+      ua: 'Анонімізовані метрики швидкості завантаження шейдерів та взаємодії з макетами для оптимізації UX.',
+      en: 'Anonymized shader frame rates and interaction metrics used exclusively for performance tuning.'
+    },
+    preferencesLabel: {
+      ua: 'Локальні параметри',
+      en: 'Client Preferences'
+    },
+    preferencesDesc: {
+      ua: 'Збереження активної мови та типу відображення (Каскад / Сітка) у вашому браузері.',
+      en: 'Persistent retention of active language and view density state within your browser.'
+    },
+    acceptAll: {
+      ua: 'Прийняти всі',
+      en: 'Accept All'
+    },
+    onlyNecessary: {
+      ua: 'Лише необхідні',
+      en: 'Essential Only'
+    },
+    savePreferences: {
+      ua: 'Зберегти',
+      en: 'Save Preferences'
+    },
+    policyLink: {
+      ua: 'Політика',
+      en: 'Policy'
+    }
+  },
+  privacyPolicy: {
+    title: {
+      ua: 'Політика конфіденційності',
+      en: 'Privacy Policy'
+    },
+    subtitle: {
+      ua: 'Відповідно до Закону України «Про захист персональних даних» та Загального регламенту захисту даних (GDPR, EU 2016/679).',
+      en: 'Compliant with the EU General Data Protection Regulation (GDPR) and international privacy frameworks.'
+    },
+    lastUpdated: {
+      ua: 'Останнє оновлення: 2025 // Версія 2.4',
+      en: 'Last Updated: 2025 // Version 2.4'
+    },
+    contactEmail: 'ivan.selivanov.design@gmail.com',
+    contactLocation: {
+      ua: 'Львів, Україна',
+      en: 'Lviv, Ukraine'
+    },
+    sections: [
+      {
+        id: 's1',
+        title: {
+          ua: '01 // Загальні положення та Володілець',
+          en: '01 // Introduction & Controller'
+        },
+        content: {
+          ua: 'Ця Політика конфіденційності регламентує порядок обробки та захисту персональних даних користувачів персонального веб-сайту та цифрового портфоліо артдиректора й UI/UX дизайнера Івана Селіванова. Ми поважаємо вашу приватність і прагнемо забезпечити найвищий рівень безпеки та прозорості під час взаємодії з нашими ресурсами.',
+          en: 'This Privacy Policy governs the processing and safeguarding of personal data collected through the digital portfolio and portfolio website of Art Director & UI/UX Architect Ivan Selivanov. We hold user privacy to the highest standard and implement minimal-footprint data practices across all client-side and server-side components.'
+        }
+      },
+      {
+        id: 's2',
+        title: {
+          ua: '02 // Які дані ми збираємо',
+          en: '02 // Information Collected'
+        },
+        content: {
+          ua: 'Веб-сайт збирає мінімально необхідний обсяг інформації: прямі контактні дані (ім’я, email, повідомлення, які ви добровільно надсилаєте через форму зв’язку), технічні параметри відвідування (анонімізована роздільна здатність та тип браузера для оптимізації рендерингу) та локальні сховища (збереження мови UA/EN та сітки).',
+          en: 'We process only strictly necessary operational data: direct inquiry data (name, business email, and message contents when you reach out regarding commissions), technical telemetry (anonymized viewport dimensions and performance metrics for WebGL scaling), and local client state (language preference UA/EN and grid density).'
+        }
+      },
+      {
+        id: 's3',
+        title: {
+          ua: '03 // Мета та правові підстави обробки',
+          en: '03 // Purpose & Legal Basis'
+        },
+        content: {
+          ua: 'Обробка даних здійснюється виключно з метою: надання відповідей на ваші професійні запити щодо дизайну, замовлень та співпраці; коректного відображення інтерактивних прототипів та 3D-рендерів; забезпечення стабільної технічної роботи та синхронізації портфоліо з базою даних.',
+          en: 'Processing is anchored strictly in: responding to commercial inquiries and negotiating creative/technical service contracts; ensuring uninterrupted delivery of high-resolution interactive case studies; and maintaining web application security and responsiveness.'
+        }
+      },
+      {
+        id: 's4',
+        title: {
+          ua: '04 // Сторонні сервіси та безпека',
+          en: '04 // Third-Party Infrastructure'
+        },
+        content: {
+          ua: 'Сайт не передає ваші персональні дані маркетинговим агенціям і не використовує сторонні трекери. Для забезпечення роботи використовуються виключно надійні інфраструктурні провайдери: Google Cloud & Google Sheets API для синхронізації кейсів через зашифровані TLS 1.3 з’єднання та CDN з дотриманням ISO/IEC 27001.',
+          en: 'We do not sell, rent, or monetize your information. We rely solely on enterprise-grade infrastructure providers adhering to ISO/IEC 27001 standards: Google Cloud & Sheets API for encrypted TLS 1.3 data exchange, and high-speed CDNs for visual asset streaming.'
+        }
+      },
+      {
+        id: 's5',
+        title: {
+          ua: '05 // Ваші права (GDPR)',
+          en: '05 // Your Rights (GDPR)'
+        },
+        content: {
+          ua: 'Ви маєте право отримати інформацію про наявність та обсяг ваших даних, вимагати їх виправлення або повного видалення («право бути забутим»), а також відкликати згоду на комунікацію в будь-який момент, надіславши лист на контактний email.',
+          en: 'Under GDPR and applicable privacy legislation, you hold the right to access, correct, or request total erasure of any retained messages; object to data processing or withdraw contact consent at any point; or lodge a complaint with your supervisory authority.'
+        }
+      },
+      {
+        id: 's6',
+        title: {
+          ua: '06 // Контакти щодо конфіденційності',
+          en: '06 // Data Protection Contact'
+        },
+        content: {
+          ua: 'Якщо у вас виникли запитання щодо цієї Політики або захисту даних, звертайтесь безпосередньо: ivan.selivanov.design@gmail.com (Львів, Україна).',
+          en: 'For any privacy-related inquiries, data erasure requests, or audits, contact: ivan.selivanov.design@gmail.com (Location: Lviv, Ukraine).'
+        }
+      }
+    ]
+  },
+  termsOfUse: {
+    title: {
+      ua: 'Умови використання',
+      en: 'Terms of Use'
+    },
+    subtitle: {
+      ua: 'Правила доступу до інтелектуальної власності, візуальних матеріалів та інтерактивних систем портфоліо.',
+      en: 'Governing intellectual property rights, attribution requirements, and terms of portfolio access.'
+    },
+    lastUpdated: {
+      ua: 'Останнє оновлення: 2025 // Версія 2.4',
+      en: 'Last Updated: 2025 // Version 2.4'
+    },
+    contactEmail: 'ivan.selivanov.design@gmail.com',
+    sections: [
+      {
+        id: 't1',
+        title: {
+          ua: '01 // Авторське право та інтелектуальна власність',
+          en: '01 // Intellectual Property & Copyright'
+        },
+        content: {
+          ua: 'Усі матеріали сайту, включаючи графічні інтерфейси (UI), дизайн-системи, макети, типографічні композиції, 3D-моделі та рендери, вихідний код і фірмову монограму «IS», є об’єктами інтелектуальної власності Івана Селіванова або відповідних брендів-замовників. Всі права захищені Бернською конвенцією.',
+          en: 'All content hosted on this domain—including user interfaces (UI), user experience frameworks (UX), component design tokens, typographic layouts, 3D assets and renders, interactive canvas shaders, and the "IS" identity mark—is the exclusive intellectual property of Ivan Selivanov or respective commissioning partners.'
+        }
+      },
+      {
+        id: 't2',
+        title: {
+          ua: '02 // Дозволене використання',
+          en: '02 // Permitted Fair Use'
+        },
+        content: {
+          ua: 'Користувачам дозволяється переглядати матеріали в особистих ознайомчих, освітніх та рекрутингових цілях, а також ділитися прямими посиланнями на кейси з обов’язковим зазначенням авторства (Іван Селіванов / Ivan Selivanov).',
+          en: 'Visitors are granted a limited, revocable, non-exclusive license to review case studies for personal, educational, or professional evaluation, and share direct links with explicit attribution to Ivan Selivanov.'
+        }
+      },
+      {
+        id: 't3',
+        title: {
+          ua: '03 // Заборонені дії',
+          en: '03 // Prohibited Activities'
+        },
+        content: {
+          ua: 'Категорично заборонено копіювати або видавати за власні концепції (плагіат), використовувати матеріали сайту в комерційних продуктах або для продажу без письмового дозволу Автора, а також здійснювати автоматизований збір даних (scraping) для навчання AI-моделей.',
+          en: 'You explicitly agree not to reproduce or misrepresent any design concepts as your own work (strict anti-plagiarism), extract or sell graphical assets for commercial distribution without prior written consent, or execute automated scraping targeting AI training sets.'
+        }
+      },
+      {
+        id: 't4',
+        title: {
+          ua: '04 // Концептуальні проєкти та торговельні марки',
+          en: '04 // Trademarks & Third-Party Marks'
+        },
+        content: {
+          ua: 'Усі логотипи та торговельні марки третіх сторін, згадані в контексті кейсів, належать їхнім законним власникам і використовуються виключно в інформаційних цілях портфоліо (Fair Use).',
+          en: 'All third-party brand names, client emblems, and registered trademarks displayed within case studies are properties of their respective holders and referenced purely for professional retrospective and nominative fair use.'
+        }
+      },
+      {
+        id: 't5',
+        title: {
+          ua: '05 // Відмова від гарантій та обмеження відповідальності',
+          en: '05 // Warranty Disclaimer & Limitation of Liability'
+        },
+        content: {
+          ua: 'Сайт надається на умовах «як є» (AS IS). Автор не несе відповідальності за можливі тимчасові перебої в роботі хостингу або несумісність окремих WebGL-функцій із застарілими пристроями користувача.',
+          en: 'This portfolio is provided on an "AS IS" and "AS AVAILABLE" basis without warranties of any kind. The author assumes no liability for device-specific WebGL incompatibilities or external network latency.'
+        }
+      },
+      {
+        id: 't6',
+        title: {
+          ua: '06 // Ліцензування та комерційні запити',
+          en: '06 // Commissioning & Licensing Inquiries'
+        },
+        content: {
+          ua: 'Для придбання ліцензій на концептуальні розробки, замовлення оригінального дизайну або узгодження публікацій звертайтесь: ivan.selivanov.design@gmail.com.',
+          en: 'To acquire commercial rights, commission tailored design systems, or discuss publication features: ivan.selivanov.design@gmail.com.'
+        }
+      }
+    ]
+  },
+  announcementBanner: {
+    enabled: false,
+    badge: {
+      ua: 'СТАТУС // 2025',
+      en: 'STATUS // 2025'
+    },
+    text: {
+      ua: 'Доступний для нових викликів, дизайн-систем та артдирекшну',
+      en: 'Available for design systems, senior product architecture & art direction'
+    },
+    link: '#contact'
+  }
+};

@@ -15,6 +15,11 @@ import { BentoExpertise } from './components/BentoExpertise';
 import { ExperienceTimeline } from './components/ExperienceTimeline';
 import { CookieBanner } from './components/CookieBanner';
 import { Footer } from './components/Footer';
+import { BackToTop } from './components/BackToTop';
+import { LegalModal, LegalDocType } from './components/LegalModal';
+import { AnnouncementBanner } from './components/AnnouncementBanner';
+import { SheetsSyncModal } from './components/SheetsSyncModal';
+import { AnimatedDivider } from './components/AnimatedDivider';
 
 export default function App() {
   const [data, setData] = useState<PortfolioData>(() => getStoredData());
@@ -23,6 +28,8 @@ export default function App() {
   const [selectedStatus, setSelectedStatus] = useState<ProjectStatus>('all');
   const [activeProject, setActiveProject] = useState<Project | null>(null);
   const [layoutMode, setLayoutMode] = useState<'bento-masonry' | 'bento-grid'>('bento-masonry');
+  const [legalDoc, setLegalDoc] = useState<LegalDocType | null>(null);
+  const [isSheetsModalOpen, setIsSheetsModalOpen] = useState(false);
 
   // Interactive subtle grid spotlight on mouse move
   const [heroMousePos, setHeroMousePos] = useState({ x: -1000, y: -1000 });
@@ -58,7 +65,24 @@ export default function App() {
     }
   }, []);
 
-  // Keyboard shortcut (Esc for closing project modal)
+  // Listen for URL hash changes like #privacy, #terms, or #sheets
+  useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash.toLowerCase();
+      if (hash === '#privacy' || hash === '#privacypolicy' || hash === '#privacy-policy') {
+        setLegalDoc('privacy');
+      } else if (hash === '#terms' || hash === '#terms-of-use' || hash === '#termsofuse' || hash === '#conditions') {
+        setLegalDoc('terms');
+      } else if (hash === '#sheets' || hash === '#admin' || hash === '#sync') {
+        setIsSheetsModalOpen(true);
+      }
+    };
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
+
+  // Keyboard shortcut (Esc for closing project modal, Ctrl+Shift+S for sheets management)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
@@ -66,6 +90,9 @@ export default function App() {
       }
       if (e.key === 'Escape') {
         if (activeProject) setActiveProject(null);
+      } else if ((e.key === 'S' || e.key === 's') && (e.metaKey || e.ctrlKey) && e.shiftKey) {
+        e.preventDefault();
+        setIsSheetsModalOpen(prev => !prev);
       }
     };
 
@@ -116,11 +143,19 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-[#f4f4f0] font-sans selection:bg-[#f4f4f0] selection:text-[#0a0a0a] relative">
+      {/* Top Announcement Banner (synced with Google Sheets Legal_And_Banners tab) */}
+      <AnnouncementBanner
+        bannerData={data.legalAndBanners?.announcementBanner}
+        language={language}
+      />
+
       {/* Global Navigation */}
       <Navbar
         language={language}
         onLanguageChange={setLanguage}
         name={data.settings.name[language]}
+        settings={data.settings}
+        onOpenLegal={(doc) => setLegalDoc(doc)}
       />
 
       {/* Hero Section with Interactive Ambient Grid */}
@@ -171,14 +206,18 @@ export default function App() {
           className="z-10 w-full max-w-[1600px] mx-auto relative pt-12 lg:pt-24"
         >
           {/* Status badge */}
-          <div className="mb-6 flex items-center gap-3 text-xs font-mono uppercase tracking-widest text-neutral-400">
+          <div className="mb-6 flex flex-wrap items-center gap-3 text-xs font-mono uppercase tracking-widest text-neutral-400">
             <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>
-              {data.settings.title[language] || (language === 'ua' ? 'Відкритий для нових викликів' : 'Available for global inquiries')}
+            <span className="text-emerald-400 font-semibold">
+              {data.settings.heroTag ? data.settings.heroTag[language] : (language === 'ua' ? 'Готовий до співпраці' : 'Available for work')}
+            </span>
+            <span className="text-neutral-600 hidden sm:inline">|</span>
+            <span className="text-neutral-300">
+              {data.settings.title[language] || (language === 'ua' ? 'Артдиректор & UI/UX Архітектор' : 'Art Director & UI/UX Architect')}
             </span>
             <span className="text-neutral-600 hidden sm:inline">|</span>
             <span className="hidden sm:inline text-neutral-500">
-              {data.settings.location[language] || (language === 'ua' ? 'Львів — Remote / Worldwide' : 'Lviv — Remote / Worldwide')}
+              {data.settings.location[language] || (language === 'ua' ? 'Львів, Україна (Доступний по всьому світу)' : 'Lviv, Ukraine (Available Worldwide)')}
             </span>
           </div>
 
@@ -248,54 +287,61 @@ export default function App() {
       </section>
 
       {/* Selected Work Section */}
-      <section id="work" className="scroll-mt-20 py-24 px-6 lg:px-12 bg-[#0d0d0d] text-[#f4f4f0] border-t border-neutral-900">
+      <section id="work" className="scroll-mt-20 pt-8 pb-24 px-6 lg:px-12 bg-[#0d0d0d] text-[#f4f4f0] border-t border-neutral-900 relative">
         <div className="max-w-[1600px] mx-auto">
-          {/* Section Header, View Mode Switcher & Total Count */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-b border-neutral-800 pb-8">
-            <div>
-              <span className="font-mono text-xs uppercase tracking-widest text-neutral-400 block mb-2">
-                01 // INDEXED CASE STUDIES
-              </span>
-              <h2 className="text-4xl md:text-6xl font-medium tracking-tight uppercase">
-                {language === 'ua' ? 'Вибрані Роботи' : 'Selected Works'}
-              </h2>
-            </div>
+          {/* Sticky Section Header */}
+          <div className="sticky top-[58px] sm:top-[73px] z-30 bg-[#0d0d0d]/95 backdrop-blur-md -mx-6 px-6 lg:-mx-12 lg:px-12 pt-4 pb-0 mb-10 transition-all">
+            <div className="max-w-[1600px] mx-auto">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6">
+                <div>
+                  <span className="font-mono text-xs uppercase tracking-widest text-neutral-400 block mb-1">
+                    01 // INDEXED CASE STUDIES
+                  </span>
+                  <h2 className="text-3xl md:text-5xl font-medium tracking-tight uppercase">
+                    {language === 'ua' ? 'Вибрані Роботи' : 'Selected Works'}
+                  </h2>
+                </div>
 
-            <div className="flex items-center gap-4">
-              {/* Masonry vs Structured Grid View Toggle */}
-              <div className="flex items-center bg-neutral-900 border border-neutral-800 p-1 font-mono text-xs">
-                <button
-                  type="button"
-                  onClick={() => setLayoutMode('bento-masonry')}
-                  title={language === 'ua' ? 'Каскадний вигляд (Masonry)' : 'Masonry View'}
-                  className={`px-3 py-1.5 flex items-center gap-1.5 cursor-pointer transition-all ${
-                    layoutMode === 'bento-masonry'
-                      ? 'bg-[#f4f4f0] text-black font-semibold shadow-sm'
-                      : 'text-neutral-400 hover:text-white'
-                  }`}
-                >
-                  <Columns3 className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">{language === 'ua' ? 'Каскад' : 'Masonry'}</span>
-                </button>
+                <div className="flex items-center gap-4">
+                  {/* Masonry vs Structured Grid View Toggle */}
+                  <div className="flex items-center bg-neutral-900 border border-neutral-800 p-1 font-mono text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setLayoutMode('bento-masonry')}
+                      title={language === 'ua' ? 'Каскадний вигляд (Masonry)' : 'Masonry View'}
+                      className={`px-3 py-1.5 flex items-center gap-1.5 cursor-pointer transition-all ${
+                        layoutMode === 'bento-masonry'
+                          ? 'bg-[#f4f4f0] text-black font-semibold shadow-sm'
+                          : 'text-neutral-400 hover:text-white'
+                      }`}
+                    >
+                      <Columns3 className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">{language === 'ua' ? 'Каскад' : 'Masonry'}</span>
+                    </button>
 
-                <button
-                  type="button"
-                  onClick={() => setLayoutMode('bento-grid')}
-                  title={language === 'ua' ? 'Модульна сітка (Grid)' : 'Grid View'}
-                  className={`px-3 py-1.5 flex items-center gap-1.5 cursor-pointer transition-all ${
-                    layoutMode === 'bento-grid'
-                      ? 'bg-[#f4f4f0] text-black font-semibold shadow-sm'
-                      : 'text-neutral-400 hover:text-white'
-                  }`}
-                >
-                  <LayoutGrid className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">{language === 'ua' ? 'Сітка' : 'Grid'}</span>
-                </button>
+                    <button
+                      type="button"
+                      onClick={() => setLayoutMode('bento-grid')}
+                      title={language === 'ua' ? 'Модульна сітка (Grid)' : 'Grid View'}
+                      className={`px-3 py-1.5 flex items-center gap-1.5 cursor-pointer transition-all ${
+                        layoutMode === 'bento-grid'
+                          ? 'bg-[#f4f4f0] text-black font-semibold shadow-sm'
+                          : 'text-neutral-400 hover:text-white'
+                      }`}
+                    >
+                      <LayoutGrid className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">{language === 'ua' ? 'Сітка' : 'Grid'}</span>
+                    </button>
+                  </div>
+
+                  <span className="text-sm sm:text-base font-mono text-neutral-400 border-l border-neutral-800 pl-4">
+                    ( {filteredProjects.length < 10 ? `0${filteredProjects.length}` : filteredProjects.length} / {data.projects.length} )
+                  </span>
+                </div>
               </div>
 
-              <span className="text-sm sm:text-base font-mono text-neutral-400 border-l border-neutral-800 pl-4">
-                ( {filteredProjects.length < 10 ? `0${filteredProjects.length}` : filteredProjects.length} / {data.projects.length} )
-              </span>
+              {/* Animated divider line with gentle moving glint reflection */}
+              <AnimatedDivider />
             </div>
           </div>
 
@@ -399,10 +445,11 @@ export default function App() {
       {/* Experience Timeline */}
       <ExperienceTimeline experience={data.experience} language={language} />
 
-      {/* Massive Footer with discreet CMS trigger */}
+      {/* Massive Footer with legal modals trigger */}
       <Footer
         settings={data.settings}
         language={language}
+        onOpenLegal={(doc) => setLegalDoc(doc)}
       />
 
       {/* Case Study Deep Modal */}
@@ -415,8 +462,38 @@ export default function App() {
         onSelectProject={setActiveProject}
       />
 
+      {/* Legal Documents Modal ("Політика конфіденційності" & "Умови використання") */}
+      <LegalModal
+        isOpen={legalDoc !== null}
+        onClose={() => {
+          setLegalDoc(null);
+          if (window.location.hash === '#privacy' || window.location.hash === '#terms') {
+            history.replaceState(null, '', window.location.pathname + window.location.search);
+          }
+        }}
+        initialDoc={legalDoc || 'privacy'}
+        language={language}
+        legalData={data.legalAndBanners}
+      />
+
+      {/* Floating Back to Top Button */}
+      <BackToTop language={language} />
+
       {/* Cookie & Compliance Banner */}
-      <CookieBanner language={language} />
+      <CookieBanner
+        language={language}
+        cookieData={data.legalAndBanners?.cookieBanner}
+        onOpenPrivacy={() => setLegalDoc('privacy')}
+      />
+
+      {/* Google Sheets Sync & Legal_And_Banners Management Modal */}
+      <SheetsSyncModal
+        isOpen={isSheetsModalOpen}
+        onClose={() => setIsSheetsModalOpen(false)}
+        language={language}
+        portfolioData={data}
+        onDataUpdated={(fresh) => setData(fresh)}
+      />
     </div>
   );
 }

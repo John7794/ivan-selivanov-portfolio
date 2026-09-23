@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ArrowUpRight, Check, Copy, Laptop, Smartphone, ExternalLink, ChevronLeft, ChevronRight, Quote, Maximize2, Minimize2, Expand, Images } from 'lucide-react';
+import { X, ArrowUpRight, Check, Copy, Laptop, Smartphone, ExternalLink, ChevronLeft, ChevronRight, Quote, Maximize2, Minimize2, Expand, Images, ZoomIn, ZoomOut } from 'lucide-react';
 import { Project, Language, Testimonial } from '../types';
 import { Interactive3DViewer } from './Interactive3DViewer';
 import { BookSpreadViewer } from './BookSpreadViewer';
+import { formatImageUrl } from '../services/googleSheets';
 
 interface CaseStudyModalProps {
   project: Project | null;
@@ -27,21 +28,29 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
   const [fitMode, setFitMode] = useState<'fill' | 'fit'>('fill');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [fullscreenZoom, setFullscreenZoom] = useState(false);
 
   useEffect(() => {
     setActiveImageIndex(0);
+    setFullscreenZoom(false);
   }, [project?.id]);
 
   const allImages = React.useMemo(() => {
     if (!project) return [];
     const list: string[] = [];
-    if (project.thumbnailUrl) list.push(project.thumbnailUrl);
+    if (project.thumbnailUrl) {
+      const formatted = formatImageUrl(project.thumbnailUrl);
+      if (formatted) list.push(formatted);
+    }
     if (Array.isArray(project.galleryUrls)) {
       project.galleryUrls.forEach((url) => {
-        if (url && !list.includes(url)) list.push(url);
+        if (url) {
+          const formatted = formatImageUrl(url);
+          if (formatted && !list.includes(formatted)) list.push(formatted);
+        }
       });
     }
-    return list.length > 0 ? list : ['https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1600'];
+    return list.length > 0 ? list : ['https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=90&w=2400'];
   }, [project]);
 
   const currentImage = allImages[activeImageIndex] || allImages[0];
@@ -54,18 +63,35 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
     setActiveImageIndex((prev) => (prev + 1) % allImages.length);
   };
 
+  const currentIndex = project ? allProjects.findIndex(p => p.id === project.id) : 0;
+  const prevProject = allProjects.length > 0 ? allProjects[(currentIndex - 1 + allProjects.length) % allProjects.length] : null;
+  const nextProject = allProjects.length > 0 ? allProjects[(currentIndex + 1) % allProjects.length] : null;
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isFullscreen) {
-        setIsFullscreen(false);
-      } else if (isFullscreen) {
-        if (e.key === 'ArrowLeft') handlePrevImage();
-        if (e.key === 'ArrowRight') handleNextImage();
+      if (e.key === 'Escape') {
+        if (isFullscreen) {
+          setIsFullscreen(false);
+        } else {
+          onClose();
+        }
+      } else if (e.key === 'ArrowLeft') {
+        if (allImages.length > 1) {
+          handlePrevImage();
+        } else if (prevProject) {
+          onSelectProject(prevProject);
+        }
+      } else if (e.key === 'ArrowRight') {
+        if (allImages.length > 1) {
+          handleNextImage();
+        } else if (nextProject) {
+          onSelectProject(nextProject);
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isFullscreen, allImages.length]);
+  }, [isFullscreen, allImages.length, onClose, prevProject, nextProject]);
 
   if (!project) return null;
 
@@ -74,10 +100,6 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
     setCopiedHex(hex);
     setTimeout(() => setCopiedHex(null), 2000);
   };
-
-  const currentIndex = allProjects.findIndex(p => p.id === project.id);
-  const prevProject = allProjects[(currentIndex - 1 + allProjects.length) % allProjects.length];
-  const nextProject = allProjects[(currentIndex + 1) % allProjects.length];
 
   const t = {
     overview: language === 'ua' ? 'Огляд проєкту' : 'Project Overview',
@@ -101,7 +123,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/85 backdrop-blur-md p-2 sm:p-4 md:p-8">
+      <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto custom-scrollbar bg-black/85 backdrop-blur-md p-2 sm:p-4 md:p-8">
         {/* Modal Backdrop click */}
         <div className="fixed inset-0" onClick={onClose} />
 
@@ -114,48 +136,89 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
           className="relative w-full max-w-6xl bg-[#0e0e0e] text-[#f4f4f0] border border-neutral-800 shadow-2xl z-10 max-h-[92vh] flex flex-col overflow-hidden"
         >
           {/* Top Bar / Navigation */}
-          <div className="sticky top-0 z-40 bg-[#0e0e0e]/95 backdrop-blur-md border-b border-neutral-800 px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className="font-mono text-xs uppercase tracking-widest text-neutral-400">
-                CASE STUDY // {project.slug.toUpperCase()}
-              </span>
-              <span className={`px-2.5 py-0.5 text-[10px] font-mono uppercase tracking-wider ${
-                project.status === 'realized' ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-neutral-800 text-neutral-300 border border-neutral-700'
+          <div className="sticky top-0 z-40 bg-[#0e0e0e]/95 backdrop-blur-md border-b border-neutral-800 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  {project.status === 'realized' && (
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  )}
+                  <span className={`relative inline-flex rounded-full h-2 w-2 ${
+                    project.status === 'realized' ? 'bg-emerald-500' : 'bg-amber-500'
+                  }`}></span>
+                </span>
+                <span className="font-mono text-xs uppercase tracking-widest text-neutral-300 font-medium truncate max-w-[130px] sm:max-w-[240px] md:max-w-none">
+                  CASE STUDY // {project.slug.toUpperCase()}
+                </span>
+              </div>
+
+              <span className={`hidden xs:inline-flex px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider ${
+                project.status === 'realized'
+                  ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/80'
+                  : 'bg-neutral-900 text-neutral-400 border border-neutral-800'
               }`}>
                 {project.status === 'realized' ? (language === 'ua' ? 'Реалізовано' : 'Production') : (language === 'ua' ? 'Концепт' : 'Concept')}
               </span>
+
+              {allProjects.length > 0 && (
+                <span className="hidden md:inline-block font-mono text-[11px] text-neutral-500 border-l border-neutral-800 pl-3">
+                  {String(currentIndex + 1).padStart(2, '0')} / {String(allProjects.length).padStart(2, '0')}
+                </span>
+              )}
             </div>
 
-            <div className="flex items-center gap-4">
-              <div className="hidden sm:flex items-center gap-2 font-mono text-xs">
-                <button
-                  onClick={() => onSelectProject(prevProject)}
-                  className="px-2.5 py-1.5 border border-neutral-800 hover:border-neutral-600 flex items-center gap-1 cursor-pointer"
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              {project.liveLink && (
+                <a
+                  href={project.liveLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-800 hover:border-neutral-700 font-mono text-xs transition-colors"
+                  title={language === 'ua' ? 'Відкрити live проєкт' : 'Open live project'}
                 >
-                  <ChevronLeft className="w-3.5 h-3.5" />
-                  <span>{t.prev}</span>
-                </button>
-                <button
-                  onClick={() => onSelectProject(nextProject)}
-                  className="px-2.5 py-1.5 border border-neutral-800 hover:border-neutral-600 flex items-center gap-1 cursor-pointer"
-                >
-                  <span>{t.next}</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
+                  <span>Live</span>
+                  <ExternalLink className="w-3 h-3 text-cyan-400" />
+                </a>
+              )}
 
+              {/* Project Stepper */}
+              {prevProject && nextProject && (
+                <div className="flex items-center bg-neutral-900 border border-neutral-800 p-0.5 font-mono text-xs">
+                  <button
+                    onClick={() => onSelectProject(prevProject)}
+                    className="px-2 sm:px-2.5 py-1 text-neutral-400 hover:text-white hover:bg-neutral-800 flex items-center gap-1 cursor-pointer transition-colors"
+                    title={`${t.prev} (←)`}
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">{t.prev}</span>
+                  </button>
+                  <div className="w-[1px] h-3.5 bg-neutral-800 my-auto" />
+                  <button
+                    onClick={() => onSelectProject(nextProject)}
+                    className="px-2 sm:px-2.5 py-1 text-neutral-400 hover:text-white hover:bg-neutral-800 flex items-center gap-1 cursor-pointer transition-colors"
+                    title={`${t.next} (→)`}
+                  >
+                    <span className="hidden sm:inline">{t.next}</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+
+              {/* Close button with ESC hint */}
               <button
                 onClick={onClose}
-                className="w-8 h-8 rounded-full border border-neutral-700 hover:bg-neutral-800 flex items-center justify-center transition-colors cursor-pointer"
+                className="group flex items-center gap-1.5 pl-2.5 pr-2 py-1 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-600 text-neutral-400 hover:text-white transition-all cursor-pointer rounded-sm"
                 aria-label="Close modal"
+                title={language === 'ua' ? 'Закрити (ESC)' : 'Close (ESC)'}
               >
+                <span className="hidden md:inline font-mono text-[10px] text-neutral-500 group-hover:text-neutral-300">ESC</span>
                 <X className="w-4 h-4" />
               </button>
             </div>
           </div>
 
           {/* Scrollable Body */}
-          <div className="overflow-y-auto px-6 py-8 md:px-12 md:py-12 space-y-16">
+          <div className="overflow-y-auto custom-scrollbar px-6 py-8 md:px-12 md:py-12 space-y-16">
             {/* Header / Hero */}
             <div className="space-y-6 border-b border-neutral-800 pb-12">
               <p className="font-mono text-xs uppercase tracking-widest text-neutral-400">
@@ -340,9 +403,9 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                       className={`relative group/viewer w-full bg-neutral-950 transition-all ${
                         deviceView === 'desktop'
                           ? fitMode === 'fill'
-                            ? 'h-[550px] sm:h-[680px] md:h-[800px] overflow-y-auto overscroll-contain'
+                            ? 'h-[550px] sm:h-[680px] md:h-[800px] overflow-y-auto overscroll-contain custom-scrollbar'
                             : 'aspect-[16/10] max-h-[75vh] flex items-center justify-center p-2'
-                          : 'h-full overflow-y-auto rounded-2xl overscroll-contain'
+                          : 'h-full overflow-y-auto rounded-2xl overscroll-contain custom-scrollbar'
                       }`}
                     >
                       {/* Interactive Next/Prev arrows on hover inside viewer */}
@@ -370,6 +433,12 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                       <img
                         src={currentImage}
                         alt={`${project.title} - screen ${activeImageIndex + 1}`}
+                        loading="eager"
+                        decoding="async"
+                        style={{
+                          transform: 'translateZ(0)',
+                          backfaceVisibility: 'hidden'
+                        }}
                         className={`transition-all ${
                           deviceView === 'desktop'
                             ? fitMode === 'fill'
@@ -391,7 +460,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                     <span>{language === 'ua' ? 'Макети проєкту:' : 'Project screens:'}</span>
                   </div>
 
-                  <div className="flex items-center gap-2 overflow-x-auto max-w-full pb-1 sm:pb-0">
+                  <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar max-w-full pb-1 sm:pb-0">
                     {allImages.map((imgUrl, i) => (
                       <button
                         key={i}
@@ -721,6 +790,21 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
             </div>
 
             <div className="flex items-center gap-3">
+              {/* Zoom 100% / Fit Toggle */}
+              <button
+                type="button"
+                onClick={() => setFullscreenZoom(!fullscreenZoom)}
+                className={`p-1.5 border font-mono text-xs flex items-center gap-1.5 cursor-pointer transition-colors ${
+                  fullscreenZoom
+                    ? 'bg-neutral-800 text-white border-neutral-600'
+                    : 'bg-neutral-900 text-neutral-400 hover:text-white border-neutral-800 hover:border-neutral-700'
+                }`}
+                title={fullscreenZoom ? (language === 'ua' ? 'Вмістити у вікно' : 'Fit to window') : (language === 'ua' ? '100% Масштаб (чіткість)' : '100% Actual size')}
+              >
+                {fullscreenZoom ? <ZoomOut className="w-3.5 h-3.5 text-cyan-400" /> : <ZoomIn className="w-3.5 h-3.5" />}
+                <span className="hidden sm:inline">{fullscreenZoom ? '100%' : 'FIT'}</span>
+              </button>
+
               {allImages.length > 1 && (
                 <div className="flex items-center gap-1 font-mono text-xs bg-neutral-900 border border-neutral-800 p-0.5">
                   <button
@@ -759,7 +843,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
 
           {/* Lightbox Main Image & Floating Arrows */}
           <div
-            className="flex-1 w-full h-full overflow-auto flex items-start sm:items-center justify-center relative select-none"
+            className="flex-1 w-full h-full overflow-auto custom-scrollbar flex items-start sm:items-center justify-center relative select-none"
             onClick={(e) => e.stopPropagation()}
           >
             {allImages.length > 1 && (
@@ -789,14 +873,25 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
               key={currentImage}
               src={currentImage}
               alt={`${project.title} - screen ${activeImageIndex + 1}`}
-              className="max-w-full h-auto max-h-none sm:max-h-[82vh] object-contain mx-auto shadow-2xl rounded-sm transition-opacity duration-200"
+              loading="eager"
+              decoding="async"
+              style={{
+                transform: 'translateZ(0)',
+                backfaceVisibility: 'hidden'
+              }}
+              className={`transition-all duration-200 mx-auto shadow-2xl rounded-sm ${
+                fullscreenZoom
+                  ? 'max-w-none w-auto h-auto cursor-zoom-out'
+                  : 'max-w-full h-auto max-h-none sm:max-h-[82vh] object-contain cursor-zoom-in'
+              }`}
+              onClick={() => setFullscreenZoom(!fullscreenZoom)}
             />
           </div>
 
           {/* Bottom Thumbnail Navigation in Fullscreen */}
           {allImages.length > 1 && (
             <div
-              className="mt-2 flex items-center justify-center gap-2 overflow-x-auto py-2 select-none"
+              className="mt-2 flex items-center justify-center gap-2 overflow-x-auto custom-scrollbar py-2 select-none"
               onClick={(e) => e.stopPropagation()}
             >
               {allImages.map((url, i) => (

@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Shield, Check, X, ChevronRight } from 'lucide-react';
-import { Language } from '../types';
+import { Shield } from 'lucide-react';
+import { Language, LegalAndBannersData } from '../types';
 import { playClickSound } from '../utils/audio';
 
 interface CookieBannerProps {
   language: Language;
+  cookieData?: LegalAndBannersData['cookieBanner'];
+  onOpenPrivacy?: () => void;
 }
 
-export const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
+export const CookieBanner: React.FC<CookieBannerProps> = ({ language, cookieData, onOpenPrivacy }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
 
@@ -34,6 +36,19 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
 
   if (!isVisible) return null;
 
+  const title = cookieData?.title[language] || (language === 'ua' ? 'Конфіденційність & Cookies' : 'Privacy & Cookie Preferences');
+  const desc = cookieData?.description[language] || (language === 'ua'
+    ? 'Цей веб-сайт використовує виключно локальне сховище (LocalStorage) для збереження мови інтерфейсу (UA/EN), режиму сітки та мінімальної телеметрії рендерингу. Жодних сторонніх рекламних трекерів або продажу даних.'
+    : 'This portfolio utilizes local browser storage strictly to preserve your selected interface language (UA/EN), grid layout density, and shader performance telemetry. Zero third-party ad trackers or commercial data sharing.');
+
+  const acceptAllText = cookieData?.acceptAll[language] || (language === 'ua' ? 'Прийняти всі' : 'Accept All');
+  const essentialOnlyText = cookieData?.onlyNecessary[language] || (language === 'ua' ? 'Лише необхідні' : 'Essential Only');
+  const policyLinkText = cookieData?.policyLink[language] || (language === 'ua' ? 'Політика' : 'Policy');
+  const analyticsLabel = cookieData?.analyticsLabel[language] || (language === 'ua' ? 'Аналітика рендерингу' : 'Render Telemetry');
+  const analyticsDesc = cookieData?.analyticsDesc[language] || (language === 'ua' ? 'Анонімізовані метрики швидкості завантаження шейдерів' : 'Anonymized shader frame rates');
+  const preferencesLabel = cookieData?.preferencesLabel[language] || (language === 'ua' ? 'Локальні параметри' : 'Client Preferences');
+  const preferencesDesc = cookieData?.preferencesDesc[language] || (language === 'ua' ? 'Збереження активної мови та типу сітки' : 'Language and grid density state');
+
   return (
     <AnimatePresence>
       <motion.div
@@ -49,50 +64,65 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({ language }) => {
               PRIVACY & COMPLIANCE // GDPR & ЗУ «ПРО ЗАХИСТ ПЕРСОНАЛЬНИХ ДАНИХ»
             </span>
             <h4 className="text-sm font-medium uppercase tracking-tight text-white mt-0.5">
-              {language === 'ua' ? 'Конфіденційність & Файли Cookie' : 'Data Privacy & Analytical Cookies'}
+              {title}
             </h4>
           </div>
         </div>
 
         <p className="text-xs text-neutral-400 font-light leading-relaxed mb-4">
-          {language === 'ua'
-            ? 'Ми використовуємо анонімні технічні та аналітичні файли cookie для покращення взаємодії, вимірювання залученості з 3D-шейдерами та забезпечення швидкої роботи сайту.'
-            : 'We utilize strictly essential and aggregated telemetry cookies to benchmark WebGL performance and optimize user journeys, without storing personal identifiable tracking data.'}
+          {desc}
         </p>
 
         {showDetails && (
-          <div className="text-[11px] font-mono text-neutral-400 border-t border-neutral-800 pt-3 mb-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <span>● Essential Security & Local Storage:</span>
-              <span className="text-emerald-400">Mandatory</span>
+          <div className="text-[11px] font-mono text-neutral-400 border-t border-neutral-800 pt-3 mb-4 space-y-2.5">
+            <div>
+              <div className="flex items-center justify-between text-white font-medium">
+                <span>● {preferencesLabel}:</span>
+                <span className="text-emerald-400">LocalStorage</span>
+              </div>
+              <p className="text-[10px] text-neutral-500 mt-0.5">{preferencesDesc}</p>
             </div>
-            <div className="flex items-center justify-between">
-              <span>● GTM WebGL / Scroll Telemetry:</span>
-              <span className="text-neutral-300">Optional</span>
+            <div>
+              <div className="flex items-center justify-between text-white font-medium">
+                <span>● {analyticsLabel}:</span>
+                <span className="text-neutral-400">Optional</span>
+              </div>
+              <p className="text-[10px] text-neutral-500 mt-0.5">{analyticsDesc}</p>
             </div>
           </div>
         )}
 
         <div className="flex items-center justify-between gap-3 pt-2">
-          <button
-            onClick={() => setShowDetails(!showDetails)}
-            className="text-[11px] font-mono text-neutral-400 hover:text-white underline cursor-pointer"
-          >
-            {showDetails ? (language === 'ua' ? 'Згорнути' : 'Less') : (language === 'ua' ? 'Параметри' : 'Preferences')}
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowDetails(!showDetails)}
+              className="text-[11px] font-mono text-neutral-400 hover:text-white underline cursor-pointer"
+            >
+              {showDetails ? (language === 'ua' ? 'Згорнути' : 'Less') : (language === 'ua' ? 'Параметри' : 'Preferences')}
+            </button>
+            {onOpenPrivacy && (
+              <button
+                type="button"
+                onClick={onOpenPrivacy}
+                className="text-[11px] font-mono text-neutral-400 hover:text-emerald-400 underline cursor-pointer"
+              >
+                {policyLinkText}
+              </button>
+            )}
+          </div>
 
           <div className="flex items-center gap-2 font-mono text-xs">
             <button
               onClick={handleAcceptEssential}
-              className="px-3 py-1.5 border border-neutral-700 hover:border-neutral-500 text-neutral-300 cursor-pointer"
+              className="px-3 py-1.5 border border-neutral-700 hover:border-neutral-500 text-neutral-300 cursor-pointer transition-colors"
             >
-              {language === 'ua' ? 'Тільки базові' : 'Essential Only'}
+              {essentialOnlyText}
             </button>
             <button
               onClick={handleAcceptAll}
-              className="px-4 py-1.5 bg-[#f4f4f0] text-black font-semibold hover:bg-white cursor-pointer"
+              className="px-4 py-1.5 bg-[#f4f4f0] text-black font-semibold hover:bg-white cursor-pointer transition-colors"
             >
-              {language === 'ua' ? 'Прийняти всі' : 'Accept All'}
+              {acceptAllText}
             </button>
           </div>
         </div>

@@ -1,5 +1,5 @@
-import { Project, ExperienceItem, Testimonial, GeneralSettings } from '../types';
-import { DEFAULT_PROJECTS, DEFAULT_EXPERIENCE, DEFAULT_TESTIMONIALS, DEFAULT_SETTINGS } from '../data/defaultData';
+import { Project, ExperienceItem, Testimonial, GeneralSettings, LegalAndBannersData } from '../types';
+import { DEFAULT_PROJECTS, DEFAULT_EXPERIENCE, DEFAULT_TESTIMONIALS, DEFAULT_SETTINGS, DEFAULT_LEGAL_AND_BANNERS } from '../data/defaultData';
 
 const CACHE_KEY = 'ivan_portfolio_sheets_data';
 const SETTINGS_KEY = 'ivan_portfolio_settings';
@@ -9,36 +9,58 @@ export interface PortfolioData {
   experience: ExperienceItem[];
   testimonials: Testimonial[];
   settings: GeneralSettings;
+  legalAndBanners: LegalAndBannersData;
   source: 'cache' | 'default' | 'live_sheets';
   lastSyncedAt: string;
 }
 
 export const DEFAULT_SHEETS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzWBH_tyMHYUEeaRM1u91hS1TWTKiQm3F2H6eFfQNN9oUBIKfbwZnF36kFERfZ9D1gLhA/exec';
 
-function formatImageUrl(url: string | undefined | null, fallback?: string): string {
+export function formatImageUrl(url: string | undefined | null, fallback?: string): string {
   if (!url) return fallback || '';
+  const cleanUrl = url.trim();
   
   // Extract ID from any Google Drive link
   let fileId = '';
   
   const driveRegex = /drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/;
-  const match = url.match(driveRegex);
+  const match = cleanUrl.match(driveRegex);
   if (match && match[1]) fileId = match[1];
   
   const openRegex = /drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/;
-  const openMatch = url.match(openRegex);
+  const openMatch = cleanUrl.match(openRegex);
   if (openMatch && openMatch[1]) fileId = openMatch[1];
   
   const ucRegex = /drive\.google\.com\/uc\?.*id=([a-zA-Z0-9_-]+)/;
-  const ucMatch = url.match(ucRegex);
+  const ucMatch = cleanUrl.match(ucRegex);
   if (ucMatch && ucMatch[1]) fileId = ucMatch[1];
+
+  const lhMatch = cleanUrl.match(/googleusercontent\.com\/d\/([a-zA-Z0-9_-]+)/);
+  if (lhMatch && lhMatch[1]) fileId = lhMatch[1];
+
+  const thumbMatch = cleanUrl.match(/drive\.google\.com\/thumbnail\?id=([a-zA-Z0-9_-]+)/);
+  if (thumbMatch && thumbMatch[1]) fileId = thumbMatch[1];
   
   if (fileId) {
-    // lh3.googleusercontent.com/d/ is the most reliable endpoint for embedding Drive images in <img> tags
-    return `https://lh3.googleusercontent.com/d/${fileId}`;
+    // =s0 instructs Google's edge CDN to render the image in full crystal-clear native resolution, preventing blurry previews
+    return `https://lh3.googleusercontent.com/d/${fileId}=s0`;
   }
 
-  return url;
+  // Optimize Unsplash images for crisp retina displays
+  if (cleanUrl.includes('images.unsplash.com')) {
+    let upgraded = cleanUrl;
+    if (upgraded.includes('w=')) {
+      upgraded = upgraded.replace(/w=\d+/, 'w=3200');
+    } else {
+      upgraded += '&w=3200';
+    }
+    if (upgraded.includes('q=')) {
+      upgraded = upgraded.replace(/q=\d+/, 'q=95');
+    }
+    return upgraded;
+  }
+
+  return cleanUrl;
 }
 
 function isLocalizedObj(val: any): boolean {
@@ -302,21 +324,52 @@ function mapTestimonialFromSheet(t: any, idx: number): Testimonial {
   };
 }
 
-function mapSettingsFromSheet(raw: any): GeneralSettings {
-  let s = raw;
-  
-  // If the sheet comes as an array of rows (e.g. key, value_ua, value_en), transform it into a flat map
+export function mapSettingsFromSheet(raw: any): GeneralSettings {
+  if (!raw) return DEFAULT_SETTINGS;
+
+  let s: Record<string, any> = {};
+
+  // If the sheet comes as an array of rows (e.g. key, ua, en or key, value)
   if (Array.isArray(raw)) {
     s = raw.reduce((acc, row) => {
-      if (row && row.key) {
-        // Fallbacks: if value_ua/value_en is not present, check ua/en, then value
-        acc[`${row.key}_ua`] = row.value_ua || row.ua || row.value;
-        acc[`${row.key}_en`] = row.value_en || row.en || row.value;
-        acc[row.key] = row.value || row.value_ua || row.ua;
+      if (row && (row.key || row.Key)) {
+        const k = String(row.key || row.Key).trim();
+        const uaVal = row.ua !== undefined ? row.ua : (row.UA !== undefined ? row.UA : (row.value_ua !== undefined ? row.value_ua : row.value));
+        const enVal = row.en !== undefined ? row.en : (row.EN !== undefined ? row.EN : (row.value_en !== undefined ? row.value_en : row.value));
+        acc[`${k}_ua`] = uaVal;
+        acc[`${k}_en`] = enVal;
+        acc[k] = { ua: uaVal, en: enVal };
+        if (row.value !== undefined && row.ua === undefined) {
+          acc[k] = row.value;
+        }
       }
       return acc;
-    }, {});
+    }, {} as Record<string, any>);
+  } else if (typeof raw === 'object') {
+    s = { ...raw };
   }
+
+  const getLoc = (key: string, fallback: { ua: string; en: string }): { ua: string; en: string } => {
+    const val = s[key];
+    if (isLocalizedObj(val)) {
+      return {
+        ua: val.ua !== undefined && String(val.ua).trim() !== '' ? String(val.ua).trim() : fallback.ua,
+        en: val.en !== undefined && String(val.en).trim() !== '' ? String(val.en).trim() : fallback.en
+      };
+    }
+    const valUa = s[`${key}_ua`] || s[`${key}_UA`];
+    const valEn = s[`${key}_en`] || s[`${key}_EN`];
+    if ((valUa !== undefined && String(valUa).trim() !== '') || (valEn !== undefined && String(valEn).trim() !== '')) {
+      return {
+        ua: valUa !== undefined && String(valUa).trim() !== '' ? String(valUa).trim() : (valEn ? String(valEn).trim() : fallback.ua),
+        en: valEn !== undefined && String(valEn).trim() !== '' ? String(valEn).trim() : (valUa ? String(valUa).trim() : fallback.en)
+      };
+    }
+    if (typeof val === 'string' && val.trim() !== '') {
+      return { ua: val.trim(), en: val.trim() };
+    }
+    return fallback;
+  };
 
   const parseList = (val: any, fallback: string[]): string[] => {
     if (Array.isArray(val)) return val;
@@ -326,91 +379,197 @@ function mapSettingsFromSheet(raw: any): GeneralSettings {
     return fallback;
   };
 
+  const name = getLoc('name', DEFAULT_SETTINGS.name);
+  const title = getLoc('title', DEFAULT_SETTINGS.title);
+  const heroTag = getLoc('heroTag', DEFAULT_SETTINGS.heroTag || { ua: 'Готовий до співпраці', en: 'Available for work' });
+  const heroTagline = getLoc('heroTagline', getLoc('bioShort', DEFAULT_SETTINGS.bioShort));
+  const location = getLoc('location', DEFAULT_SETTINGS.location);
+
+  const email = s.email || s.email_ua || s.email_en || DEFAULT_SETTINGS.email;
+  const telegram = s.telegram || s.telegram_ua || s.telegram_en || DEFAULT_SETTINGS.telegram;
+  const linkedin = s.linkedin || s.linkedin_ua || s.linkedin_en || DEFAULT_SETTINGS.linkedin;
+  const behance = s.behance || s.behance_ua || s.behance_en || DEFAULT_SETTINGS.behance;
+  const github = s.github || s.github_ua || s.github_en || DEFAULT_SETTINGS.github;
+
+  const heroImageRaw = s.heroImage || s.profileImage || (s.heroImage_ua || s.heroImage_en);
+  const heroImage = formatImageUrl(heroImageRaw, DEFAULT_SETTINGS.heroImage);
+
+  // Expertise fields
+  const expHeading = getLoc('expertise_heading', DEFAULT_SETTINGS.expertise!.heading);
+  const expSubtitle = getLoc('expertise_subtitle', DEFAULT_SETTINGS.expertise!.subtitle);
+  const card1Title = getLoc('expertise_card1_title', DEFAULT_SETTINGS.expertise!.card1Title);
+  const card1Desc = {
+    ua: stripFigJam(getLoc('expertise_card1_desc', DEFAULT_SETTINGS.expertise!.card1Desc).ua),
+    en: stripFigJam(getLoc('expertise_card1_desc', DEFAULT_SETTINGS.expertise!.card1Desc).en)
+  };
+  const card2Title = getLoc('expertise_card2_title', DEFAULT_SETTINGS.expertise!.card2Title);
+  const card2Desc = getLoc('expertise_card2_desc', DEFAULT_SETTINGS.expertise!.card2Desc);
+  const card3Title = getLoc('expertise_card3_title', DEFAULT_SETTINGS.expertise!.card3Title);
+  const card3Desc = getLoc('expertise_card3_desc', DEFAULT_SETTINGS.expertise!.card3Desc);
+  const card4Title = getLoc('expertise_card4_title', DEFAULT_SETTINGS.expertise!.card4Title);
+  const card4Desc = getLoc('expertise_card4_desc', DEFAULT_SETTINGS.expertise!.card4Desc || {
+    ua: 'Налаштування та оптимізація рекламних кампаній (Google Ads, Meta Ads) та вебаналітики через Google Tag Manager, робота з даними у Google Sheets.',
+    en: 'Setting up and optimizing advertising campaigns (Google Ads, Meta Ads) and web analytics via Google Tag Manager, working with data in Google Sheets.'
+  });
+
+  const h1 = getLoc('expertise_h1', { ua: DEFAULT_SETTINGS.expertise!.heuristics.ua[0], en: DEFAULT_SETTINGS.expertise!.heuristics.en[0] });
+  const h2 = getLoc('expertise_h2', { ua: DEFAULT_SETTINGS.expertise!.heuristics.ua[1], en: DEFAULT_SETTINGS.expertise!.heuristics.en[1] });
+  const h3 = getLoc('expertise_h3', { ua: DEFAULT_SETTINGS.expertise!.heuristics.ua[2], en: DEFAULT_SETTINGS.expertise!.heuristics.en[2] });
+  const h4 = getLoc('expertise_h4', { ua: DEFAULT_SETTINGS.expertise!.heuristics.ua[3], en: DEFAULT_SETTINGS.expertise!.heuristics.en[3] });
+
+  const techTitle = getLoc('expertise_tech_title', DEFAULT_SETTINGS.expertise!.techStackTitle);
+  const techItemsRaw = s.expertise_tech_items || (s.expertise_tech_items_ua || s.expertise_tech_items_en) || s.expertise_techStackItems || s.techStackItems;
+  const techItems = parseList(techItemsRaw, DEFAULT_SETTINGS.expertise!.techStackItems)
+    .filter((item: string) => !item.toLowerCase().includes('figjam'));
+
   return {
-    name: isLocalizedObj(s.name) ? s.name : {
-      ua: s.name_ua || s.name || DEFAULT_SETTINGS.name.ua,
-      en: s.name_en || s.name || DEFAULT_SETTINGS.name.en
-    },
-    title: isLocalizedObj(s.title) ? s.title : {
-      ua: s.heroTag_ua || s.heroTitle || s.title_ua || s.title || DEFAULT_SETTINGS.title.ua,
-      en: s.heroTag_en || s.heroTitle || s.title_en || s.title || DEFAULT_SETTINGS.title.en
-    },
-    bioShort: isLocalizedObj(s.bioShort) ? s.bioShort : {
-      ua: s.heroTagline_ua || s.bio_ua || s.bioShort || DEFAULT_SETTINGS.bioShort.ua,
-      en: s.heroTagline_en || s.bio_en || s.bioShort || DEFAULT_SETTINGS.bioShort.en
-    },
-    location: isLocalizedObj(s.location) ? s.location : {
-      ua: s.location_ua || s.location || DEFAULT_SETTINGS.location.ua,
-      en: s.location_en || s.location || DEFAULT_SETTINGS.location.en
-    },
-    email: s.email || DEFAULT_SETTINGS.email,
-    telegram: s.telegram || DEFAULT_SETTINGS.telegram,
-    linkedin: s.linkedin || DEFAULT_SETTINGS.linkedin,
-    behance: s.behance || DEFAULT_SETTINGS.behance,
-    github: s.github || DEFAULT_SETTINGS.github,
-    heroImage: formatImageUrl(s.heroImage || s.profileImage, DEFAULT_SETTINGS.heroImage),
+    name,
+    title,
+    bioShort: heroTagline,
+    heroTag,
+    heroTagline,
+    location,
+    email,
+    telegram,
+    linkedin,
+    behance,
+    github,
+    heroImage,
     appsScriptUrl: s.appsScriptUrl || DEFAULT_SETTINGS.appsScriptUrl,
     googleSheetId: s.googleSheetId || DEFAULT_SETTINGS.googleSheetId,
     lastSyncedAt: new Date().toLocaleTimeString('en-GB'),
     expertise: {
-      heading: {
-        ua: s.expertise_heading_ua || DEFAULT_SETTINGS.expertise!.heading.ua,
-        en: s.expertise_heading_en || DEFAULT_SETTINGS.expertise!.heading.en
-      },
-      subtitle: {
-        ua: s.expertise_subtitle_ua || DEFAULT_SETTINGS.expertise!.subtitle.ua,
-        en: s.expertise_subtitle_en || DEFAULT_SETTINGS.expertise!.subtitle.en
-      },
-      card1Title: {
-        ua: s.expertise_card1_title_ua || DEFAULT_SETTINGS.expertise!.card1Title.ua,
-        en: s.expertise_card1_title_en || DEFAULT_SETTINGS.expertise!.card1Title.en
-      },
-      card1Desc: {
-        ua: stripFigJam(s.expertise_card1_desc_ua || DEFAULT_SETTINGS.expertise!.card1Desc.ua),
-        en: stripFigJam(s.expertise_card1_desc_en || DEFAULT_SETTINGS.expertise!.card1Desc.en)
-      },
-      card2Title: {
-        ua: s.expertise_card2_title_ua || DEFAULT_SETTINGS.expertise!.card2Title.ua,
-        en: s.expertise_card2_title_en || DEFAULT_SETTINGS.expertise!.card2Title.en
-      },
-      card2Desc: {
-        ua: s.expertise_card2_desc_ua || DEFAULT_SETTINGS.expertise!.card2Desc.ua,
-        en: s.expertise_card2_desc_en || DEFAULT_SETTINGS.expertise!.card2Desc.en
-      },
-      card3Title: {
-        ua: s.expertise_card3_title_ua || DEFAULT_SETTINGS.expertise!.card3Title.ua,
-        en: s.expertise_card3_title_en || DEFAULT_SETTINGS.expertise!.card3Title.en
-      },
-      card3Desc: {
-        ua: s.expertise_card3_desc_ua || DEFAULT_SETTINGS.expertise!.card3Desc.ua,
-        en: s.expertise_card3_desc_en || DEFAULT_SETTINGS.expertise!.card3Desc.en
-      },
-      card4Title: {
-        ua: s.expertise_card4_title_ua || DEFAULT_SETTINGS.expertise!.card4Title.ua,
-        en: s.expertise_card4_title_en || DEFAULT_SETTINGS.expertise!.card4Title.en
-      },
+      heading: expHeading,
+      subtitle: expSubtitle,
+      card1Title,
+      card1Desc,
+      card2Title,
+      card2Desc,
+      card3Title,
+      card3Desc,
+      card4Title,
+      card4Desc,
       heuristics: {
-        ua: [
-          s.expertise_h1_ua || DEFAULT_SETTINGS.expertise!.heuristics.ua[0],
-          s.expertise_h2_ua || DEFAULT_SETTINGS.expertise!.heuristics.ua[1],
-          s.expertise_h3_ua || DEFAULT_SETTINGS.expertise!.heuristics.ua[2],
-          s.expertise_h4_ua || DEFAULT_SETTINGS.expertise!.heuristics.ua[3]
-        ],
-        en: [
-          s.expertise_h1_en || DEFAULT_SETTINGS.expertise!.heuristics.en[0],
-          s.expertise_h2_en || DEFAULT_SETTINGS.expertise!.heuristics.en[1],
-          s.expertise_h3_en || DEFAULT_SETTINGS.expertise!.heuristics.en[2],
-          s.expertise_h4_en || DEFAULT_SETTINGS.expertise!.heuristics.en[3]
-        ]
+        ua: [h1.ua, h2.ua, h3.ua, h4.ua],
+        en: [h1.en, h2.en, h3.en, h4.en]
       },
-      techStackTitle: {
-        ua: s.expertise_tech_title_ua || DEFAULT_SETTINGS.expertise!.techStackTitle.ua,
-        en: s.expertise_tech_title_en || DEFAULT_SETTINGS.expertise!.techStackTitle.en
-      },
-      techStackItems: parseList(
-        s.expertise_tech_items || s.expertise_techStackItems || s.techStackItems,
-        DEFAULT_SETTINGS.expertise!.techStackItems
-      ).filter((item: string) => !item.toLowerCase().includes('figjam'))
+      techStackTitle: techTitle,
+      techStackItems: techItems
+    }
+  };
+}
+
+
+export function mapLegalAndBannersFromSheet(raw: any): LegalAndBannersData {
+  if (!raw) return DEFAULT_LEGAL_AND_BANNERS;
+
+  const dict: Record<string, any> = {};
+
+  if (Array.isArray(raw)) {
+    for (const row of raw) {
+      if (!row || typeof row !== 'object') continue;
+      const key = String(row.key || row.Key || row.id || row.Id || row.name || row.Name || '').trim();
+      if (!key) continue;
+
+      const uaVal = row.ua ?? row.UA ?? row.Ua ?? row.Ukrainian ?? row.value_ua ?? row.val_ua;
+      const enVal = row.en ?? row.EN ?? row.En ?? row.English ?? row.value_en ?? row.val_en;
+
+      if (uaVal !== undefined || enVal !== undefined) {
+        dict[key] = {
+          ua: String(uaVal ?? ''),
+          en: String(enVal ?? uaVal ?? '')
+        };
+        dict[`${key}_ua`] = String(uaVal ?? '');
+        dict[`${key}_en`] = String(enVal ?? uaVal ?? '');
+      } else if (row.value !== undefined || row.Value !== undefined) {
+        dict[key] = row.value ?? row.Value;
+      }
+    }
+  } else if (typeof raw === 'object') {
+    Object.assign(dict, raw);
+  }
+
+  const getI18n = (key: string, fallback: { ua: string; en: string }): { ua: string; en: string } => {
+    if (dict[key] && typeof dict[key] === 'object' && ('ua' in dict[key] || 'en' in dict[key])) {
+      return {
+        ua: String(dict[key].ua || fallback.ua).trim(),
+        en: String(dict[key].en || fallback.en).trim()
+      };
+    }
+    const ua = dict[`${key}_ua`] ?? dict[`${key}_UA`] ?? (typeof dict[key] === 'string' ? dict[key] : fallback.ua);
+    const en = dict[`${key}_en`] ?? dict[`${key}_EN`] ?? (typeof dict[key] === 'string' ? dict[key] : fallback.en);
+    return {
+      ua: String(ua || fallback.ua).trim(),
+      en: String(en || fallback.en).trim()
+    };
+  };
+
+  const getStr = (key: string, fallback: string): string => {
+    const val = dict[key] ?? dict[key.toLowerCase()];
+    return val !== undefined && val !== null ? String(val).trim() : fallback;
+  };
+
+  const getBool = (key: string, fallback: boolean): boolean => {
+    const val = dict[key] ?? dict[key.toLowerCase()];
+    if (val === undefined || val === null) return fallback;
+    if (typeof val === 'boolean') return val;
+    const str = String(val).toLowerCase().trim();
+    return str === 'true' || str === '1' || str === 'yes' || str === 'так';
+  };
+
+  const defaultPrivacySections = DEFAULT_LEGAL_AND_BANNERS.privacyPolicy.sections;
+  const privacySections = defaultPrivacySections.map((defSec, idx) => {
+    const num = idx + 1;
+    return {
+      id: defSec.id || `s${num}`,
+      title: getI18n(`privacy_s${num}_title`, defSec.title),
+      content: getI18n(`privacy_s${num}_content`, defSec.content)
+    };
+  });
+
+  const defaultTermsSections = DEFAULT_LEGAL_AND_BANNERS.termsOfUse.sections;
+  const termsSections = defaultTermsSections.map((defSec, idx) => {
+    const num = idx + 1;
+    return {
+      id: defSec.id || `t${num}`,
+      title: getI18n(`terms_s${num}_title`, defSec.title),
+      content: getI18n(`terms_s${num}_content`, defSec.content)
+    };
+  });
+
+  return {
+    cookieBanner: {
+      title: getI18n('cookie_title', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.title),
+      description: getI18n('cookie_desc', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.description),
+      analyticsLabel: getI18n('cookie_analytics_label', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.analyticsLabel),
+      analyticsDesc: getI18n('cookie_analytics_desc', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.analyticsDesc),
+      preferencesLabel: getI18n('cookie_preferences_label', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.preferencesLabel),
+      preferencesDesc: getI18n('cookie_preferences_desc', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.preferencesDesc),
+      acceptAll: getI18n('cookie_btn_accept', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.acceptAll),
+      onlyNecessary: getI18n('cookie_btn_necessary', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.onlyNecessary),
+      savePreferences: getI18n('cookie_btn_save', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.savePreferences),
+      policyLink: getI18n('cookie_link_policy', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.policyLink)
+    },
+    privacyPolicy: {
+      title: getI18n('privacy_title', DEFAULT_LEGAL_AND_BANNERS.privacyPolicy.title),
+      subtitle: getI18n('privacy_subtitle', DEFAULT_LEGAL_AND_BANNERS.privacyPolicy.subtitle),
+      lastUpdated: getI18n('privacy_last_updated', DEFAULT_LEGAL_AND_BANNERS.privacyPolicy.lastUpdated),
+      sections: privacySections,
+      contactEmail: getStr('privacy_contact_email', DEFAULT_LEGAL_AND_BANNERS.privacyPolicy.contactEmail),
+      contactLocation: getI18n('privacy_contact_location', DEFAULT_LEGAL_AND_BANNERS.privacyPolicy.contactLocation)
+    },
+    termsOfUse: {
+      title: getI18n('terms_title', DEFAULT_LEGAL_AND_BANNERS.termsOfUse.title),
+      subtitle: getI18n('terms_subtitle', DEFAULT_LEGAL_AND_BANNERS.termsOfUse.subtitle),
+      lastUpdated: getI18n('terms_last_updated', DEFAULT_LEGAL_AND_BANNERS.termsOfUse.lastUpdated),
+      sections: termsSections,
+      contactEmail: getStr('terms_contact_email', DEFAULT_LEGAL_AND_BANNERS.termsOfUse.contactEmail)
+    },
+    announcementBanner: {
+      enabled: getBool('announcement_enabled', DEFAULT_LEGAL_AND_BANNERS.announcementBanner.enabled),
+      badge: getI18n('announcement_badge', DEFAULT_LEGAL_AND_BANNERS.announcementBanner.badge),
+      text: getI18n('announcement_text', DEFAULT_LEGAL_AND_BANNERS.announcementBanner.text),
+      link: getStr('announcement_link', DEFAULT_LEGAL_AND_BANNERS.announcementBanner.link || '#contact')
     }
   };
 }
@@ -435,6 +594,11 @@ export function getStoredData(): PortfolioData {
       if (Array.isArray(parsed.testimonials)) {
         parsed.testimonials = parsed.testimonials.map(mapTestimonialFromSheet);
       }
+      if (parsed.legalAndBanners) {
+        parsed.legalAndBanners = mapLegalAndBannersFromSheet(parsed.legalAndBanners);
+      } else {
+        parsed.legalAndBanners = DEFAULT_LEGAL_AND_BANNERS;
+      }
 
       return {
         ...parsed,
@@ -450,6 +614,7 @@ export function getStoredData(): PortfolioData {
     experience: DEFAULT_EXPERIENCE,
     testimonials: DEFAULT_TESTIMONIALS,
     settings: DEFAULT_SETTINGS,
+    legalAndBanners: DEFAULT_LEGAL_AND_BANNERS,
     source: 'default',
     lastSyncedAt: new Date().toISOString()
   };
@@ -506,11 +671,16 @@ export async function syncWithGoogleSheets(endpointUrl: string = DEFAULT_SHEETS_
     ? mapSettingsFromSheet(json.settings)
     : DEFAULT_SETTINGS;
 
+  const parsedLegalAndBanners = json.legalAndBanners || json.legal || json.banners
+    ? mapLegalAndBannersFromSheet(json.legalAndBanners || json.legal || json.banners)
+    : DEFAULT_LEGAL_AND_BANNERS;
+
   const freshData: PortfolioData = {
     projects: parsedProjects,
     experience: parsedExperience,
     testimonials: parsedTestimonials,
     settings: parsedSettings,
+    legalAndBanners: parsedLegalAndBanners,
     source: 'live_sheets',
     lastSyncedAt: new Date().toISOString()
   };
@@ -525,28 +695,35 @@ export async function syncWithGoogleSheets(endpointUrl: string = DEFAULT_SHEETS_
 export function getGoogleAppsScriptTemplate(): string {
   return `/**
  * Google Apps Script for Ivan Selivanov Portfolio Sync
- * 1. Open your Google Sheet with tabs: "Projects", "General_Data", "Experience", "Testimonials"
- * 2. Go to Extensions > Apps Script
- * 3. Paste this code and click Deploy > New deployment > Web app
- * 4. Execute as: Me, Who has access: Anyone
- * 5. Copy the Web app URL and paste it in the portfolio's "Database Sync" panel!
+ * Tabs supported:
+ * 1. "Projects"
+ * 2. "General_Data" (columns: key, ua, en)
+ * 3. "Experience"
+ * 4. "Testimonials"
+ * 5. "Legal_And_Banners" (columns: key, ua, en)
+ * 
+ * Deployment:
+ * Extensions > Apps Script > Paste this code > Deploy > New deployment > Web app
+ * Execute as: Me, Who has access: Anyone
  */
 
 function doGet(e) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   
-  var projectsSheet = ss.getSheetByName("Projects");
-  var generalSheet = ss.getSheetByName("General_Data");
-  var expSheet = ss.getSheetByName("Experience");
-  var testSheet = ss.getSheetByName("Testimonials");
+  var projectsSheet = ss.getSheetByName("Projects") || ss.getSheetByName("projects");
+  var generalSheet = ss.getSheetByName("General_Data") || ss.getSheetByName("general_data") || ss.getSheetByName("General") || ss.getSheetByName("general");
+  var expSheet = ss.getSheetByName("Experience") || ss.getSheetByName("experience");
+  var testSheet = ss.getSheetByName("Testimonials") || ss.getSheetByName("testimonials");
+  var legalSheet = ss.getSheetByName("Legal_And_Banners") || ss.getSheetByName("legal_and_banners") || ss.getSheetByName("Legal") || ss.getSheetByName("legal") || ss.getSheetByName("Banners") || ss.getSheetByName("banners");
   
   var result = {
     status: "ok",
     timestamp: new Date().toISOString(),
     projects: parseSheetToObjects(projectsSheet),
-    settings: parseKeyValueSheet(generalSheet),
+    settings: parseGeneralSheet(generalSheet),
     experience: parseSheetToObjects(expSheet),
-    testimonials: parseSheetToObjects(testSheet)
+    testimonials: parseSheetToObjects(testSheet),
+    legalAndBanners: parseLegalSheet(legalSheet)
   };
   
   return ContentService.createTextOutput(JSON.stringify(result))
@@ -557,7 +734,7 @@ function parseSheetToObjects(sheet) {
   if (!sheet) return [];
   var data = sheet.getDataRange().getValues();
   if (data.length <= 1) return [];
-  var headers = data[0];
+  var headers = data[0].map(function(h) { return String(h).trim(); });
   var rows = [];
   
   for (var i = 1; i < data.length; i++) {
@@ -565,7 +742,6 @@ function parseSheetToObjects(sheet) {
     var obj = {};
     for (var j = 0; j < headers.length; j++) {
       var val = row[j];
-      // Auto parse JSON columns
       if (typeof val === 'string' && (val.startsWith('{') || val.startsWith('['))) {
         try { val = JSON.parse(val); } catch(e) {}
       }
@@ -576,16 +752,183 @@ function parseSheetToObjects(sheet) {
   return rows;
 }
 
-function parseKeyValueSheet(sheet) {
+function parseGeneralSheet(sheet) {
   if (!sheet) return {};
   var data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return {};
+  var headers = data[0].map(function(h) { return String(h).toLowerCase().trim(); });
+  
+  var keyIdx = headers.indexOf("key");
+  if (keyIdx === -1) keyIdx = 0;
+  var uaIdx = headers.indexOf("ua") !== -1 ? headers.indexOf("ua") : headers.indexOf("ukrainian");
+  var enIdx = headers.indexOf("en") !== -1 ? headers.indexOf("en") : headers.indexOf("english");
+  var valIdx = headers.indexOf("value") !== -1 ? headers.indexOf("value") : 1;
+  
   var settings = {};
+  
   for (var i = 1; i < data.length; i++) {
-    var key = data[i][0];
-    var val = data[i][1];
-    if (key) settings[key] = val;
+    var row = data[i];
+    var key = String(row[keyIdx] || "").trim();
+    if (!key) continue;
+    
+    // Support unified 3-column key | ua | en format
+    if (uaIdx !== -1 && enIdx !== -1) {
+      var uaVal = row[uaIdx] !== undefined ? row[uaIdx] : "";
+      var enVal = row[enIdx] !== undefined ? row[enIdx] : "";
+      settings[key] = { ua: uaVal, en: enVal };
+      settings[key + "_ua"] = uaVal;
+      settings[key + "_en"] = enVal;
+    } else {
+      // Support 2-column key | value format
+      settings[key] = row[valIdx];
+    }
   }
   return settings;
 }
+
+function parseLegalSheet(sheet) {
+  if (!sheet) return {};
+  var data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return {};
+  var headers = data[0].map(function(h) { return String(h).toLowerCase().trim(); });
+  
+  var keyIdx = headers.indexOf("key");
+  if (keyIdx === -1) keyIdx = 0;
+  var uaIdx = headers.indexOf("ua") !== -1 ? headers.indexOf("ua") : headers.indexOf("ukrainian");
+  var enIdx = headers.indexOf("en") !== -1 ? headers.indexOf("en") : headers.indexOf("english");
+  
+  var result = {};
+  
+  for (var i = 1; i < data.length; i++) {
+    var row = data[i];
+    var key = String(row[keyIdx] || "").trim();
+    if (!key) continue;
+    
+    if (uaIdx !== -1 && enIdx !== -1) {
+      result[key] = {
+        ua: String(row[uaIdx] !== undefined ? row[uaIdx] : ""),
+        en: String(row[enIdx] !== undefined ? row[enIdx] : "")
+      };
+      result[key + "_ua"] = String(row[uaIdx] !== undefined ? row[uaIdx] : "");
+      result[key + "_en"] = String(row[enIdx] !== undefined ? row[enIdx] : "");
+    } else {
+      result[key] = row[1];
+    }
+  }
+  return result;
+}
 `;
+}
+
+/**
+ * Generates copy-pasteable TSV data for the "General_Data" tab in Google Sheets with lowercase headers: key, ua, en
+ */
+export function getGeneralSheetTsvTemplate(): string {
+  const rows: [string, string, string][] = [
+    ['key', 'ua', 'en'],
+    ['name', 'Іван Селіванов', 'Ivan Selivanov'],
+    ['title', 'Артдиректор & UI/UX Архітектор', 'Art Director & UI/UX Architect'],
+    ['heroImage', '', ''],
+    ['heroTag', 'Готовий до співпраці', 'Available for work'],
+    ['heroTagline', 'Проєктую сучасні вебсайти та цифрові продукти, поєднуючи чисту візуальну естетику з продуманою логікою.', 'I design modern websites and digital products, combining clean visual aesthetics with thoughtful logic.'],
+    ['location', 'Львів, Україна (Доступний по всьому світу)', 'Lviv, Ukraine (Available Worldwide)'],
+    ['email', 'ivanselivanov771994@gmail.com', 'ivanselivanov771994@gmail.com'],
+    ['linkedin', 'https://www.linkedin.com/in/ivan-selivanov-4bb884183/', 'https://www.linkedin.com/in/ivan-selivanov-4bb884183/'],
+    ['expertise_heading', 'Експертиза', 'Expertise'],
+    ['expertise_subtitle', 'Мої ключові навички та напрямки роботи, в яких я створюю ефективні цифрові рішення.', 'My core skills and areas of focus where I create effective digital solutions.'],
+    ['expertise_card1_title', 'UI/UX Дизайн', 'UI/UX Design'],
+    ['expertise_card1_desc', 'Проєктування зручних користувацьких інтерфейсів, створення прототипів та адаптивного дизайну з фокусом на користувацький досвід у Figma.', 'Designing intuitive user interfaces, creating prototypes, and responsive web design with a focus on user experience in Figma.'],
+    ['expertise_card2_title', 'Графічний дизайн', 'Graphic Design'],
+    ['expertise_card2_desc', 'Створення логотипів, банерів та комп\'ютерної графіки. Застосування теорії кольору та основ композиції.', 'Creating logos, banners, and computer graphics. Applying color theory and composition fundamentals.'],
+    ['expertise_card3_title', 'Веброзробка', 'Web Development'],
+    ['expertise_card3_desc', 'Верстка лендингів та розробка сайтів з використанням HTML, CSS, JavaScript, робота з SVG та розгортання проєктів на Vercel.', 'Landing page markup and website development using HTML, CSS, JavaScript, working with SVG, and deploying projects on Vercel.'],
+    ['expertise_card4_title', 'Маркетинг та Аналітика', 'Marketing & Analytics'],
+    ['expertise_card4_desc', 'Налаштування та оптимізація рекламних кампаній (Google Ads, Meta Ads) та вебаналітики через Google Tag Manager, робота з даними у Google Sheets.', 'Setting up and optimizing advertising campaigns (Google Ads, Meta Ads) and web analytics via Google Tag Manager, working with data in Google Sheets.'],
+    ['expertise_h1', 'Дизайн інтерфейсів', 'Interface Design'],
+    ['expertise_h2', 'Візуальний дизайн', 'Visual Design'],
+    ['expertise_h3', 'Фронтенд', 'Frontend'],
+    ['expertise_h4', 'Таргетинг', 'Targeting'],
+    ['expertise_tech_title', 'Інструменти та Технології', 'Tools & Technologies'],
+    ['expertise_tech_items', 'Figma, HTML, CSS, JavaScript, Vercel, Google AI Studio, Google Ads, Meta Ads, Google Tag Manager, Google Sheets, SVG, Adobe Illustrator', 'Figma, HTML, CSS, JavaScript, Vercel, Google AI Studio, Google Ads, Meta Ads, Google Tag Manager, Google Sheets, SVG, Adobe Illustrator']
+  ];
+
+  return rows.map(r => r.join('\t')).join('\n');
+}
+
+/**
+ * Generates copy-pasteable TSV data for the "Legal_And_Banners" tab in Google Sheets
+ */
+export function getLegalSheetTsvTemplate(): string {
+  const d = DEFAULT_LEGAL_AND_BANNERS;
+  const rows: [string, string, string][] = [
+    // Cookie Banner
+    ['cookie_title', d.cookieBanner.title.ua, d.cookieBanner.title.en],
+    ['cookie_desc', d.cookieBanner.description.ua, d.cookieBanner.description.en],
+    ['cookie_analytics_label', d.cookieBanner.analyticsLabel.ua, d.cookieBanner.analyticsLabel.en],
+    ['cookie_analytics_desc', d.cookieBanner.analyticsDesc.ua, d.cookieBanner.analyticsDesc.en],
+    ['cookie_preferences_label', d.cookieBanner.preferencesLabel.ua, d.cookieBanner.preferencesLabel.en],
+    ['cookie_preferences_desc', d.cookieBanner.preferencesDesc.ua, d.cookieBanner.preferencesDesc.en],
+    ['cookie_btn_accept', d.cookieBanner.acceptAll.ua, d.cookieBanner.acceptAll.en],
+    ['cookie_btn_necessary', d.cookieBanner.onlyNecessary.ua, d.cookieBanner.onlyNecessary.en],
+    ['cookie_btn_save', d.cookieBanner.savePreferences.ua, d.cookieBanner.savePreferences.en],
+    ['cookie_link_policy', d.cookieBanner.policyLink.ua, d.cookieBanner.policyLink.en],
+
+    // Privacy Policy
+    ['privacy_title', d.privacyPolicy.title.ua, d.privacyPolicy.title.en],
+    ['privacy_subtitle', d.privacyPolicy.subtitle.ua, d.privacyPolicy.subtitle.en],
+    ['privacy_last_updated', d.privacyPolicy.lastUpdated.ua, d.privacyPolicy.lastUpdated.en],
+    ['privacy_contact_email', d.privacyPolicy.contactEmail, d.privacyPolicy.contactEmail],
+    ['privacy_contact_location', d.privacyPolicy.contactLocation.ua, d.privacyPolicy.contactLocation.en],
+
+    ['privacy_s1_title', d.privacyPolicy.sections[0].title.ua, d.privacyPolicy.sections[0].title.en],
+    ['privacy_s1_content', d.privacyPolicy.sections[0].content.ua, d.privacyPolicy.sections[0].content.en],
+
+    ['privacy_s2_title', d.privacyPolicy.sections[1].title.ua, d.privacyPolicy.sections[1].title.en],
+    ['privacy_s2_content', d.privacyPolicy.sections[1].content.ua, d.privacyPolicy.sections[1].content.en],
+
+    ['privacy_s3_title', d.privacyPolicy.sections[2].title.ua, d.privacyPolicy.sections[2].title.en],
+    ['privacy_s3_content', d.privacyPolicy.sections[2].content.ua, d.privacyPolicy.sections[2].content.en],
+
+    ['privacy_s4_title', d.privacyPolicy.sections[3].title.ua, d.privacyPolicy.sections[3].title.en],
+    ['privacy_s4_content', d.privacyPolicy.sections[3].content.ua, d.privacyPolicy.sections[3].content.en],
+
+    ['privacy_s5_title', d.privacyPolicy.sections[4].title.ua, d.privacyPolicy.sections[4].title.en],
+    ['privacy_s5_content', d.privacyPolicy.sections[4].content.ua, d.privacyPolicy.sections[4].content.en],
+
+    ['privacy_s6_title', d.privacyPolicy.sections[5].title.ua, d.privacyPolicy.sections[5].title.en],
+    ['privacy_s6_content', d.privacyPolicy.sections[5].content.ua, d.privacyPolicy.sections[5].content.en],
+
+    // Terms of Use
+    ['terms_title', d.termsOfUse.title.ua, d.termsOfUse.title.en],
+    ['terms_subtitle', d.termsOfUse.subtitle.ua, d.termsOfUse.subtitle.en],
+    ['terms_last_updated', d.termsOfUse.lastUpdated.ua, d.termsOfUse.lastUpdated.en],
+    ['terms_contact_email', d.termsOfUse.contactEmail, d.termsOfUse.contactEmail],
+
+    ['terms_s1_title', d.termsOfUse.sections[0].title.ua, d.termsOfUse.sections[0].title.en],
+    ['terms_s1_content', d.termsOfUse.sections[0].content.ua, d.termsOfUse.sections[0].content.en],
+
+    ['terms_s2_title', d.termsOfUse.sections[1].title.ua, d.termsOfUse.sections[1].title.en],
+    ['terms_s2_content', d.termsOfUse.sections[1].content.ua, d.termsOfUse.sections[1].content.en],
+
+    ['terms_s3_title', d.termsOfUse.sections[2].title.ua, d.termsOfUse.sections[2].title.en],
+    ['terms_s3_content', d.termsOfUse.sections[2].content.ua, d.termsOfUse.sections[2].content.en],
+
+    ['terms_s4_title', d.termsOfUse.sections[3].title.ua, d.termsOfUse.sections[3].title.en],
+    ['terms_s4_content', d.termsOfUse.sections[3].content.ua, d.termsOfUse.sections[3].content.en],
+
+    ['terms_s5_title', d.termsOfUse.sections[4].title.ua, d.termsOfUse.sections[4].title.en],
+    ['terms_s5_content', d.termsOfUse.sections[4].content.ua, d.termsOfUse.sections[4].content.en],
+
+    ['terms_s6_title', d.termsOfUse.sections[5].title.ua, d.termsOfUse.sections[5].title.en],
+    ['terms_s6_content', d.termsOfUse.sections[5].content.ua, d.termsOfUse.sections[5].content.en],
+
+    // Announcement Banner
+    ['announcement_enabled', String(d.announcementBanner.enabled), String(d.announcementBanner.enabled)],
+    ['announcement_badge', d.announcementBanner.badge.ua, d.announcementBanner.badge.en],
+    ['announcement_text', d.announcementBanner.text.ua, d.announcementBanner.text.en],
+    ['announcement_link', d.announcementBanner.link || '#contact', d.announcementBanner.link || '#contact']
+  ];
+
+  const escapeTsv = (str: string) => str.replace(/\t/g, ' ').replace(/\n/g, ' ');
+  return ['key\tua\ten', ...rows.map(r => `${r[0]}\t${escapeTsv(r[1])}\t${escapeTsv(r[2])}`)].join('\n');
 }

@@ -5,9 +5,10 @@ import { GeneralSettings, Language } from '../types';
 interface FooterProps {
   settings: GeneralSettings;
   language: Language;
+  onOpenLegal?: (doc: 'privacy' | 'terms') => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ settings, language }) => {
+export const Footer: React.FC<FooterProps> = ({ settings, language, onOpenLegal }) => {
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [kyivTime, setKyivTime] = useState('');
 
@@ -129,9 +130,21 @@ export const Footer: React.FC<FooterProps> = ({ settings, language }) => {
       {/* Sub-footer */}
       <div className="max-w-[1600px] mx-auto w-full flex flex-col md:flex-row justify-between items-center pt-8 mt-16 border-t border-[#0a0a0a]/20 font-mono text-xs uppercase tracking-widest text-neutral-500">
         <p>© {new Date().getFullYear()} {settings.name[language]}. {t.rights}</p>
-        <div className="flex gap-6 mt-4 md:mt-0">
-          <a href="#contact" className="hover:text-[#0a0a0a] transition-colors">{t.privacy}</a>
-          <a href="#contact" className="hover:text-[#0a0a0a] transition-colors">{t.terms}</a>
+        <div className="flex flex-wrap items-center gap-6 mt-4 md:mt-0">
+          <button
+            type="button"
+            onClick={() => onOpenLegal ? onOpenLegal('privacy') : window.location.hash = 'privacy'}
+            className="hover:text-[#0a0a0a] transition-colors cursor-pointer"
+          >
+            {t.privacy}
+          </button>
+          <button
+            type="button"
+            onClick={() => onOpenLegal ? onOpenLegal('terms') : window.location.hash = 'terms'}
+            className="hover:text-[#0a0a0a] transition-colors cursor-pointer"
+          >
+            {t.terms}
+          </button>
         </div>
       </div>
     </footer>

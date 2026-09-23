@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Briefcase, GraduationCap, Sparkles } from 'lucide-react';
 import { ExperienceItem, Language } from '../types';
+import { AnimatedDivider } from './AnimatedDivider';
 
 interface ExperienceTimelineProps {
   experience: ExperienceItem[];
@@ -39,7 +40,7 @@ export const ExperienceTimeline: React.FC<ExperienceTimelineProps> = ({ experien
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
-      className="relative py-24 px-6 lg:px-12 border-t border-neutral-900 bg-[#0a0a0a] text-[#f4f4f0]"
+      className="relative scroll-mt-20 pt-8 pb-24 px-6 lg:px-12 border-t border-neutral-900 bg-[#0a0a0a] text-[#f4f4f0]"
     >
       {/* Subtle background ambient grid with softened spotlight */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -77,16 +78,22 @@ export const ExperienceTimeline: React.FC<ExperienceTimelineProps> = ({ experien
       </div>
 
       <div className="max-w-[1600px] mx-auto relative z-10">
-        <div className="mb-16">
-          <span className="font-mono text-xs uppercase tracking-widest text-neutral-400 block mb-3">
-            03 // TRACK RECORD
-          </span>
-          <h2 className="text-4xl md:text-6xl font-medium tracking-tight uppercase">
-            {t.title}
-          </h2>
-          <p className="text-neutral-400 text-lg md:text-xl font-light mt-4 max-w-2xl">
-            {t.subtitle}
-          </p>
+        {/* Sticky Section Header */}
+        <div className="sticky top-[58px] sm:top-[73px] z-30 bg-[#0a0a0a]/95 backdrop-blur-md -mx-6 px-6 lg:-mx-12 lg:px-12 pt-4 pb-0 mb-12 transition-all">
+          <div className="max-w-[1600px] mx-auto pb-6">
+            <span className="font-mono text-xs uppercase tracking-widest text-neutral-400 block mb-1">
+              03 // TRACK RECORD
+            </span>
+            <h2 className="text-3xl md:text-5xl font-medium tracking-tight uppercase">
+              {t.title}
+            </h2>
+            <p className="text-neutral-400 text-sm md:text-base font-light mt-2 max-w-2xl">
+              {t.subtitle}
+            </p>
+          </div>
+
+          {/* Animated divider line with gentle moving glint reflection */}
+          <AnimatedDivider />
         </div>
 
         {/* Timeline List */}

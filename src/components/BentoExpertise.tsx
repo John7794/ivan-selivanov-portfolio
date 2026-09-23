@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Layout, Type, Box, Cpu, Compass, CheckCircle2 } from 'lucide-react';
 import { Language, GeneralSettings } from '../types';
 import { DEFAULT_SETTINGS } from '../data/defaultData';
+import { AnimatedDivider } from './AnimatedDivider';
 
 interface BentoExpertiseProps {
   language: Language;
@@ -40,19 +41,24 @@ export const BentoExpertise: React.FC<BentoExpertiseProps> = ({ language, expert
   const technologies = rawTechnologies.filter(tech => !tech.toLowerCase().includes('figjam'));
 
   return (
-    <section id="expertise" className="py-24 px-6 lg:px-12 border-t border-neutral-900 bg-[#080808] text-[#f4f4f0]">
+    <section id="expertise" className="scroll-mt-20 pt-8 pb-24 px-6 lg:px-12 border-t border-neutral-900 bg-[#080808] text-[#f4f4f0] relative">
       <div className="max-w-[1600px] mx-auto">
-        {/* Section Header */}
-        <div className="mb-16">
-          <span className="font-mono text-xs uppercase tracking-widest text-neutral-400 block mb-3">
-            02 // METHODOLOGY & CAPABILITIES
-          </span>
-          <h2 className="text-4xl md:text-6xl font-medium tracking-tight uppercase">
-            {t.heading}
-          </h2>
-          <p className="text-neutral-400 text-lg md:text-xl font-light mt-4 max-w-2xl">
-            {t.subtitle}
-          </p>
+        {/* Sticky Section Header */}
+        <div className="sticky top-[58px] sm:top-[73px] z-30 bg-[#080808]/95 backdrop-blur-md -mx-6 px-6 lg:-mx-12 lg:px-12 pt-4 pb-0 mb-12 transition-all">
+          <div className="max-w-[1600px] mx-auto pb-6">
+            <span className="font-mono text-xs uppercase tracking-widest text-neutral-400 block mb-1">
+              02 // METHODOLOGY & CAPABILITIES
+            </span>
+            <h2 className="text-3xl md:text-5xl font-medium tracking-tight uppercase">
+              {t.heading}
+            </h2>
+            <p className="text-neutral-400 text-sm md:text-base font-light mt-2 max-w-2xl">
+              {t.subtitle}
+            </p>
+          </div>
+
+          {/* Animated divider line with gentle moving glint reflection */}
+          <AnimatedDivider />
         </div>
 
         {/* Bento Grid */}
@@ -151,13 +157,18 @@ export const BentoExpertise: React.FC<BentoExpertiseProps> = ({ language, expert
             </div>
 
             <div className="flex-1">
-              <h3 className="text-2xl font-medium uppercase tracking-tight mb-4">
+              <h3 className="text-2xl font-medium uppercase tracking-tight mb-2">
                 {t.card4Title}
               </h3>
-              <ul className="space-y-2 text-xs font-mono text-neutral-400">
+              {data.card4Desc && (
+                <p className="text-neutral-400 font-light text-xs leading-relaxed mb-3">
+                  {removeFigJam(data.card4Desc[language])}
+                </p>
+              )}
+              <ul className="space-y-1.5 text-xs font-mono text-neutral-300">
                 {t.heuristics.map((h, i) => (
                   <li key={i} className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-neutral-500 shrink-0" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                     <span>{h}</span>
                   </li>
                 ))}
