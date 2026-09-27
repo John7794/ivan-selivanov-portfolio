@@ -46,12 +46,13 @@ export const Footer: React.FC<FooterProps> = ({ settings, contacts, language, on
     setTimeout(() => setCopiedEmail(false), 2000);
   };
 
+  const ui = settings.ui;
   const t = {
-    haveProject: language === 'ua' ? 'Маєте амбітний проєкт?' : 'Have an ambitious project?',
-    letsTalk: language === 'ua' ? 'Обговорити' : "Let's Talk",
-    emailLabel: language === 'ua' ? 'Прямий контакт' : 'Direct Inquiries',
-    socialLabel: language === 'ua' ? 'Мережі' : 'Networks',
-    locationLabel: language === 'ua' ? 'Локальний час' : 'Local Time',
+    haveProject: getLocalizedText(ui?.contactHeading, language, { ua: 'Маєте амбітний проєкт?', en: 'Have an ambitious project?' }),
+    letsTalk: getLocalizedText(ui?.contactCta, language, { ua: 'Обговорити', en: "Let's Talk" }),
+    emailLabel: getLocalizedText(ui?.contactEmailLabel, language, { ua: 'Прямий контакт', en: 'Direct Inquiries' }),
+    socialLabel: getLocalizedText(ui?.contactSocialLabel, language, { ua: 'Мережі', en: 'Networks' }),
+    locationLabel: getLocalizedText(ui?.contactLocationLabel, language, { ua: 'Локальний час', en: 'Local Time' }),
     copyHint: language === 'ua' ? 'Клікніть, щоб скопіювати' : 'Click to copy email',
     copied: language === 'ua' ? 'Скопійовано!' : 'Email copied!',
     privacy: language === 'ua' ? 'Політика конфіденційності' : 'Privacy Policy',
@@ -163,9 +164,11 @@ export const Footer: React.FC<FooterProps> = ({ settings, contacts, language, on
               <Clock className="w-5 h-5 text-neutral-500" />
               <span>Lviv // {kyivTime || '00:00:00'}</span>
             </div>
-            <p className="text-sm font-mono text-neutral-500 mt-1">
-              {getLocalizedText(contacts?.address || contacts?.location || settings.location, language, { ua: 'Львів, Україна (Доступний по всьому світу)', en: 'Lviv, Ukraine (Available Worldwide)' })}
-            </p>
+            {Boolean(getLocalizedText(contacts?.address || contacts?.location || settings.location, language).trim()) && (
+              <p className="text-sm font-mono text-neutral-500 mt-1">
+                {getLocalizedText(contacts?.address || contacts?.location || settings.location, language)}
+              </p>
+            )}
           </div>
         </div>
       </div>

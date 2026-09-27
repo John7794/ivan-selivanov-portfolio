@@ -12,7 +12,12 @@ export interface FilterOption {
 export interface Project {
   id: string;
   slug: string;
-  title: string;
+  title: string | {
+    ua: string;
+    en: string;
+  };
+  title_ua?: string;
+  title_en?: string;
   category: string;
   categoryLabel: {
     ua: string;
@@ -20,6 +25,10 @@ export interface Project {
   };
   status: string;
   statusLabel?: {
+    ua: string;
+    en: string;
+  };
+  statusBadgeLabel?: {
     ua: string;
     en: string;
   };
@@ -49,19 +58,19 @@ export interface Project {
     ua: string;
     en: string;
   };
-  metrics?: {
-    value: string;
-    label: { ua: string; en: string };
-  }[];
   toolsUsed: string[];
   designSystem: {
-    fonts: string[];
-    colors: { name: string; hex: string }[];
+    fonts: string[] | { ua: string[]; en: string[] };
+    fontsDescription?: { ua: string; en: string };
+    colors: { name: string | { ua: string; en: string }; hex: string }[];
+    colorsDescription?: { ua: string; en: string };
     gridType?: string;
   };
   thumbnailUrl: string;
   galleryUrls: string[];
   liveLink?: string;
+  figmaUrl?: string;
+  figmaEmbedUrl?: string;
   isFeatured: boolean;
   sortOrder: number;
   testimonialId?: string;
@@ -171,6 +180,60 @@ export interface GeneralSettings {
     contactsTitle?: { ua: string; en: string };
     copyBtn?: { ua: string; en: string };
     copiedBtn?: { ua: string; en: string };
+  };
+  ui?: {
+    heroCta?: { ua: string; en: string };
+    workIndex?: { ua: string; en: string };
+    workTitle?: { ua: string; en: string };
+    layoutCascade?: { ua: string; en: string };
+    layoutGrid?: { ua: string; en: string };
+    filterCategoryLabel?: { ua: string; en: string };
+    filterCategoryAll?: { ua: string; en: string };
+    filterStatusLabel?: { ua: string; en: string };
+    filterStatusAll?: { ua: string; en: string };
+    expertiseIndex?: { ua: string; en: string };
+    quoteText?: { ua: string; en: string };
+    quoteAuthor?: { ua: string; en: string };
+    experienceIndex?: { ua: string; en: string };
+    experienceTitle?: { ua: string; en: string };
+    experienceSubtitle?: { ua: string; en: string };
+    contactHeading?: { ua: string; en: string };
+    contactCta?: { ua: string; en: string };
+    contactEmailLabel?: { ua: string; en: string };
+    contactSocialLabel?: { ua: string; en: string };
+    contactLocationLabel?: { ua: string; en: string };
+    // Portfolio & Case Study Modal UI strings
+    modalCaseStudy?: { ua: string; en: string };
+    modalPrev?: { ua: string; en: string };
+    modalNext?: { ua: string; en: string };
+    modalClose?: { ua: string; en: string };
+    modalLive?: { ua: string; en: string };
+    modalRole?: { ua: string; en: string };
+    modalTimeline?: { ua: string; en: string };
+    modalCategory?: { ua: string; en: string };
+    modalDeliverables?: { ua: string; en: string };
+    modalInteractiveExperience?: { ua: string; en: string };
+    modalMaxSpace?: { ua: string; en: string };
+    modalFitFrame?: { ua: string; en: string };
+    modalFullscreen?: { ua: string; en: string };
+    modalOverview?: { ua: string; en: string };
+    modalChallenge?: { ua: string; en: string };
+    modalSolution?: { ua: string; en: string };
+    modalImpact?: { ua: string; en: string };
+    modalDesignSystem?: { ua: string; en: string };
+    modalFonts?: { ua: string; en: string };
+    modalColors?: { ua: string; en: string };
+    modalGrid?: { ua: string; en: string };
+    modalTools?: { ua: string; en: string };
+    modalClientReview?: { ua: string; en: string };
+    modalVisitLive?: { ua: string; en: string };
+    modalCopied?: { ua: string; en: string };
+    modalArtifacts?: { ua: string; en: string };
+    // Card & Badge UI strings
+    badgeFeatured?: { ua: string; en: string };
+    badgeConcept?: { ua: string; en: string };
+    badgeProduction?: { ua: string; en: string };
+    cardViewCase?: { ua: string; en: string };
   };
 }
 

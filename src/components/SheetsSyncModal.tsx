@@ -12,7 +12,8 @@ import {
   FileText, 
   CheckCircle2, 
   AlertCircle,
-  Mail 
+  Mail,
+  Briefcase
 } from 'lucide-react';
 import { Language, LegalAndBannersData } from '../types';
 import { 
@@ -20,6 +21,7 @@ import {
   getLegalSheetTsvTemplate, 
   getGeneralSheetTsvTemplate,
   getContactsSheetTsvTemplate,
+  generateProjectsTSV,
   syncWithGoogleSheets, 
   PortfolioData 
 } from '../services/googleSheets';
@@ -39,7 +41,9 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
   portfolioData,
   onDataUpdated
 }) => {
-  const [activeTab, setActiveTab] = useState<'contacts' | 'general' | 'legal' | 'sync' | 'script'>('contacts');
+  const [activeTab, setActiveTab] = useState<'projects' | 'contacts' | 'general' | 'legal' | 'sync' | 'script'>('projects');
+  const [copiedProjectsHeaders, setCopiedProjectsHeaders] = useState(false);
+  const [copiedProjectsTsv, setCopiedProjectsTsv] = useState(false);
   const [copiedTsv, setCopiedTsv] = useState(false);
   const [copiedGeneralTsv, setCopiedGeneralTsv] = useState(false);
   const [copiedContactsTsv, setCopiedContactsTsv] = useState(false);
@@ -52,6 +56,21 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
   });
 
   if (!isOpen) return null;
+
+  const projectsHeadersRow = 'id\ttitle_ua\ttitle_en\tyear\tclient\trole_ua\trole_en\tcategory\tstatus\tfeatured\tthumbnailUrl\theroImage\tliveLink\tfigmaUrl\tfigmaEmbedUrl\ttagline_ua\ttagline_en\toverview_ua\toverview_en\tmetrics\ttools\tpalette\tchallenge_ua\tchallenge_en\tsolution_ua\tsolution_en\timpact_ua\timpact_en\tfonts_ua\tfonts_en\tcolors_ua\tcolors_en';
+
+  const handleCopyProjectsHeaders = () => {
+    navigator.clipboard.writeText(projectsHeadersRow);
+    setCopiedProjectsHeaders(true);
+    setTimeout(() => setCopiedProjectsHeaders(false), 2200);
+  };
+
+  const handleCopyProjectsTsv = () => {
+    const tsv = generateProjectsTSV(portfolioData.projects);
+    navigator.clipboard.writeText(tsv);
+    setCopiedProjectsTsv(true);
+    setTimeout(() => setCopiedProjectsTsv(false), 2200);
+  };
 
   const handleCopyContactsTsv = () => {
     const tsv = getContactsSheetTsvTemplate();
@@ -123,7 +142,38 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
     { key: 'menu_system_title', label: language === 'ua' ? 'Меню: Шапка' : 'Menu: System Title', valUa: portfolioData.settings.menu?.systemTitle?.ua || 'IS // СИСТЕМА НАВІГАЦІЇ', valEn: portfolioData.settings.menu?.systemTitle?.en || 'IS // NAVIGATION SYSTEM' },
     { key: 'menu_item1_title', label: language === 'ua' ? 'Меню: Пункт 1' : 'Menu: Item 1', valUa: portfolioData.settings.menu?.item1Title?.ua || 'Проєкти', valEn: portfolioData.settings.menu?.item1Title?.en || 'Selected Work' },
     { key: 'menu_item1_desc', label: language === 'ua' ? 'Меню: Опис 1' : 'Menu: Desc 1', valUa: portfolioData.settings.menu?.item1Desc?.ua || 'Вибрані кейси & інтерфейси', valEn: portfolioData.settings.menu?.item1Desc?.en || 'Featured cases & digital products' },
-    { key: 'menu_contacts_title', label: language === 'ua' ? 'Меню: Заголовок контактів' : 'Menu: Contacts Heading', valUa: portfolioData.settings.menu?.contactsTitle?.ua || 'Прямі контакти:', valEn: portfolioData.settings.menu?.contactsTitle?.en || 'Direct Channels:' }
+    { key: 'menu_contacts_title', label: language === 'ua' ? 'Меню: Заголовок контактів' : 'Menu: Contacts Heading', valUa: portfolioData.settings.menu?.contactsTitle?.ua || 'Прямі контакти:', valEn: portfolioData.settings.menu?.contactsTitle?.en || 'Direct Channels:' },
+    { key: 'hero_cta_btn', label: language === 'ua' ? 'Кнопка "Дослідити кейси"' : 'Hero CTA Button', valUa: portfolioData.settings.ui?.heroCta?.ua || 'Дослідити кейси', valEn: portfolioData.settings.ui?.heroCta?.en || 'Explore Portfolio' },
+    { key: 'work_index', label: language === 'ua' ? 'Індекс розділу робіт' : 'Work Section Index', valUa: portfolioData.settings.ui?.workIndex?.ua || '01 // INDEXED CASE STUDIES', valEn: portfolioData.settings.ui?.workIndex?.en || '01 // INDEXED CASE STUDIES' },
+    { key: 'work_title', label: language === 'ua' ? 'Заголовок "Вибрані Роботи"' : 'Work Section Title', valUa: portfolioData.settings.ui?.workTitle?.ua || 'Вибрані Роботи', valEn: portfolioData.settings.ui?.workTitle?.en || 'Selected Works' },
+    { key: 'layout_cascade', label: language === 'ua' ? 'Кнопка "Каскад"' : 'Layout Masonry', valUa: portfolioData.settings.ui?.layoutCascade?.ua || 'Каскад', valEn: portfolioData.settings.ui?.layoutCascade?.en || 'Masonry' },
+    { key: 'layout_grid', label: language === 'ua' ? 'Кнопка "Сітка"' : 'Layout Grid', valUa: portfolioData.settings.ui?.layoutGrid?.ua || 'Сітка', valEn: portfolioData.settings.ui?.layoutGrid?.en || 'Grid' },
+    { key: 'filter_category_label', label: language === 'ua' ? 'Мітка "Напрямок:"' : 'Filter Category Label', valUa: portfolioData.settings.ui?.filterCategoryLabel?.ua || 'Напрямок:', valEn: portfolioData.settings.ui?.filterCategoryLabel?.en || 'Discipline:' },
+    { key: 'filter_category_all', label: language === 'ua' ? 'Фільтр "Всі напрямки"' : 'Filter Category All', valUa: portfolioData.settings.ui?.filterCategoryAll?.ua || 'Всі напрямки', valEn: portfolioData.settings.ui?.filterCategoryAll?.en || 'All Disciplines' },
+    { key: 'filter_status_label', label: language === 'ua' ? 'Мітка "Статус:"' : 'Filter Status Label', valUa: portfolioData.settings.ui?.filterStatusLabel?.ua || 'Статус:', valEn: portfolioData.settings.ui?.filterStatusLabel?.en || 'Status:' },
+    { key: 'filter_status_all', label: language === 'ua' ? 'Фільтр "Всі статуси"' : 'Filter Status All', valUa: portfolioData.settings.ui?.filterStatusAll?.ua || 'Всі статуси', valEn: portfolioData.settings.ui?.filterStatusAll?.en || 'All' },
+    { key: 'expertise_index', label: language === 'ua' ? 'Індекс розділу експертизи' : 'Expertise Section Index', valUa: portfolioData.settings.ui?.expertiseIndex?.ua || '02 // METHODOLOGY & CAPABILITIES', valEn: portfolioData.settings.ui?.expertiseIndex?.en || '02 // METHODOLOGY & CAPABILITIES' },
+    { key: 'experience_index', label: language === 'ua' ? 'Індекс розділу досвіду' : 'Experience Section Index', valUa: portfolioData.settings.ui?.experienceIndex?.ua || '03 // TRACK RECORD', valEn: portfolioData.settings.ui?.experienceIndex?.en || '03 // TRACK RECORD' },
+    { key: 'experience_title', label: language === 'ua' ? 'Заголовок "Кар’єрний Шлях"' : 'Experience Title', valUa: portfolioData.settings.ui?.experienceTitle?.ua || 'Кар’єрний Шлях & Досвід', valEn: portfolioData.settings.ui?.experienceTitle?.en || 'Career Track & Background' },
+    { key: 'contact_heading', label: language === 'ua' ? 'Футер: "Маєте амбітний проєкт?"' : 'Footer Heading', valUa: portfolioData.settings.ui?.contactHeading?.ua || 'Маєте амбітний проєкт?', valEn: portfolioData.settings.ui?.contactHeading?.en || 'Have an ambitious project?' },
+    { key: 'contact_cta', label: language === 'ua' ? 'Футер: "Обговорити"' : 'Footer CTA', valUa: portfolioData.settings.ui?.contactCta?.ua || 'Обговорити', valEn: portfolioData.settings.ui?.contactCta?.en || "Let's Talk" },
+    { key: 'modal_case_study', label: language === 'ua' ? 'Модалка: Шапка' : 'Modal: Header Label', valUa: portfolioData.settings.ui?.modalCaseStudy?.ua || 'CASE STUDY //', valEn: portfolioData.settings.ui?.modalCaseStudy?.en || 'CASE STUDY //' },
+    { key: 'modal_prev', label: language === 'ua' ? 'Модалка: Кнопка Попередній' : 'Modal: Prev Button', valUa: portfolioData.settings.ui?.modalPrev?.ua || 'Попередній', valEn: portfolioData.settings.ui?.modalPrev?.en || 'Previous' },
+    { key: 'modal_next', label: language === 'ua' ? 'Модалка: Кнопка Наступний' : 'Modal: Next Button', valUa: portfolioData.settings.ui?.modalNext?.ua || 'Наступний', valEn: portfolioData.settings.ui?.modalNext?.en || 'Next' },
+    { key: 'modal_close', label: language === 'ua' ? 'Модалка: Закрити (ESC)' : 'Modal: Close Button', valUa: portfolioData.settings.ui?.modalClose?.ua || 'Закрити', valEn: portfolioData.settings.ui?.modalClose?.en || 'Close' },
+    { key: 'modal_role', label: language === 'ua' ? 'Модалка: Мітка "Роль"' : 'Modal: Role Label', valUa: portfolioData.settings.ui?.modalRole?.ua || 'Роль', valEn: portfolioData.settings.ui?.modalRole?.en || 'Role' },
+    { key: 'modal_timeline', label: language === 'ua' ? 'Модалка: Мітка "Період"' : 'Modal: Timeline Label', valUa: portfolioData.settings.ui?.modalTimeline?.ua || 'Період', valEn: portfolioData.settings.ui?.modalTimeline?.en || 'Timeline' },
+    { key: 'modal_category', label: language === 'ua' ? 'Модалка: Мітка "Категорія"' : 'Modal: Category Label', valUa: portfolioData.settings.ui?.modalCategory?.ua || 'Категорія', valEn: portfolioData.settings.ui?.modalCategory?.en || 'Category' },
+    { key: 'modal_deliverables', label: language === 'ua' ? 'Модалка: Мітка "Результати"' : 'Modal: Deliverables Label', valUa: portfolioData.settings.ui?.modalDeliverables?.ua || 'Результати', valEn: portfolioData.settings.ui?.modalDeliverables?.en || 'Deliverables' },
+    { key: 'modal_interactive_title', label: language === 'ua' ? 'Модалка: Заголовок інтерактиву' : 'Modal: Interactive Title', valUa: portfolioData.settings.ui?.modalInteractiveExperience?.ua || 'INTERACTIVE VISUAL EXPERIENCE', valEn: portfolioData.settings.ui?.modalInteractiveExperience?.en || 'INTERACTIVE VISUAL EXPERIENCE' },
+    { key: 'modal_fullscreen', label: language === 'ua' ? 'Модалка: Кнопка "На весь екран"' : 'Modal: Fullscreen Button', valUa: portfolioData.settings.ui?.modalFullscreen?.ua || 'На весь екран', valEn: portfolioData.settings.ui?.modalFullscreen?.en || 'Fullscreen' },
+    { key: 'modal_max_space', label: language === 'ua' ? 'Модалка: "Максимум місця"' : 'Modal: Max Space', valUa: portfolioData.settings.ui?.modalMaxSpace?.ua || 'Максимум місця', valEn: portfolioData.settings.ui?.modalMaxSpace?.en || 'Max space' },
+    { key: 'modal_fit_frame', label: language === 'ua' ? 'Модалка: "Вписати в екран"' : 'Modal: Fit Frame', valUa: portfolioData.settings.ui?.modalFitFrame?.ua || 'Вписати в екран', valEn: portfolioData.settings.ui?.modalFitFrame?.en || 'Fit frame' },
+    { key: 'modal_visit_live', label: language === 'ua' ? 'Модалка: "Відвідати живий сайт"' : 'Modal: Visit Live', valUa: portfolioData.settings.ui?.modalVisitLive?.ua || 'Переглянути Live Проєкт', valEn: portfolioData.settings.ui?.modalVisitLive?.en || 'Explore Live Interface' },
+    { key: 'badge_featured', label: language === 'ua' ? 'Бейдж картки "★ Флагман"' : 'Card Badge "★ Featured"', valUa: portfolioData.settings.ui?.badgeFeatured?.ua || 'Флагман', valEn: portfolioData.settings.ui?.badgeFeatured?.en || 'Featured' },
+    { key: 'badge_concept', label: language === 'ua' ? 'Бейдж картки "Концепт"' : 'Card Badge "Concept"', valUa: portfolioData.settings.ui?.badgeConcept?.ua || 'Концепт', valEn: portfolioData.settings.ui?.badgeConcept?.en || 'Concept' },
+    { key: 'badge_production', label: language === 'ua' ? 'Бейдж картки "Продакшн"' : 'Card Badge "Production"', valUa: portfolioData.settings.ui?.badgeProduction?.ua || 'Продакшн', valEn: portfolioData.settings.ui?.badgeProduction?.en || 'Production' },
+    { key: 'card_view_case', label: language === 'ua' ? 'Кнопка на картці "Відкрити кейс"' : 'Card Hover Button "View Case"', valUa: portfolioData.settings.ui?.cardViewCase?.ua || 'Відкрити кейс', valEn: portfolioData.settings.ui?.cardViewCase?.en || 'View Case' }
   ];
 
   const legalPreviewRows = [
@@ -193,6 +243,19 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
           <div className="flex border-b border-neutral-800 bg-neutral-950 px-6 font-mono text-xs overflow-x-auto">
             <button
               type="button"
+              onClick={() => setActiveTab('projects')}
+              className={`px-4 py-3 flex items-center gap-2 border-b-2 font-medium cursor-pointer transition-colors shrink-0 ${
+                activeTab === 'projects'
+                  ? 'border-emerald-400 text-white bg-neutral-900/60'
+                  : 'border-transparent text-neutral-400 hover:text-neutral-200'
+              }`}
+            >
+              <Briefcase className="w-3.5 h-3.5" />
+              <span>{language === 'ua' ? 'Вкладка Projects' : 'Projects Tab'}</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => setActiveTab('contacts')}
               className={`px-4 py-3 flex items-center gap-2 border-b-2 font-medium cursor-pointer transition-colors shrink-0 ${
                 activeTab === 'contacts'
@@ -259,6 +322,77 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
 
           {/* Tab Content */}
           <div className="overflow-y-auto custom-scrollbar p-6 space-y-6 text-sm">
+            {activeTab === 'projects' && (
+              <div className="space-y-6">
+                <div className="bg-neutral-900/80 border border-neutral-800 p-5 space-y-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                      <h4 className="font-mono text-xs uppercase tracking-widest text-emerald-400 font-semibold">
+                        {language === 'ua' ? 'Вкладка "Projects" (Усі кейси та роботи)' : '"Projects" Tab (All Cases & Works)'}
+                      </h4>
+                      <p className="text-neutral-300 text-xs sm:text-sm mt-1 leading-relaxed">
+                        {language === 'ua'
+                          ? 'Колонка ролі тепер підтримується: додайте "role_ua" та "role_en" (або просто "role" для обох мов). Вона автоматично відображається в блоці Role у перегляді кейсу.'
+                          : 'Role column is now fully supported: add "role_ua" & "role_en" (or single "role" for both). It displays inside the Role block in the case study view.'}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={handleCopyProjectsHeaders}
+                        className="px-3 py-2 bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700 font-mono text-xs uppercase tracking-wider font-semibold flex items-center gap-2 cursor-pointer shadow"
+                        title={language === 'ua' ? 'Скопіювати лише рядок назв колонок' : 'Copy only the header row'}
+                      >
+                        {copiedProjectsHeaders ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                        <span>
+                          {copiedProjectsHeaders
+                            ? (language === 'ua' ? 'Заголовки скопійовано!' : 'Headers Copied!')
+                            : (language === 'ua' ? 'Скопіювати рядок колонок' : 'Copy Header Row')}
+                        </span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleCopyProjectsTsv}
+                        className="px-4 py-2 bg-[#f4f4f0] text-black hover:bg-white transition-all font-mono text-xs uppercase tracking-wider font-semibold flex items-center gap-2 cursor-pointer shadow"
+                      >
+                        {copiedProjectsTsv ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                        <span>
+                          {copiedProjectsTsv
+                            ? (language === 'ua' ? 'Кейси скопійовано!' : 'Projects Copied!')
+                            : (language === 'ua' ? 'Скопіювати шаблон Projects' : 'Copy Projects Template')}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-neutral-800">
+                    <p className="text-neutral-400 text-xs mb-2 font-mono">
+                      {language === 'ua' ? 'Повний перелік колонок вкладки Projects:' : 'Complete list of columns for Projects tab:'}
+                    </p>
+                    <div className="p-3 bg-black border border-neutral-800 font-mono text-xs text-neutral-300 overflow-x-auto whitespace-pre select-all">
+                      {projectsHeadersRow}
+                    </div>
+                    <div className="mt-3 text-xs text-neutral-400 space-y-1">
+                      <p>
+                        <strong className="text-emerald-400">role_ua / role_en</strong> — {language === 'ua' ? 'Ваша посада чи роль у проєкті окремо українською та англійською (наприклад: "Провідний дизайнер" / "Lead Designer"). Також підтримується спільна колонка "role".' : 'Your position or role in the project.'}
+                      </p>
+                      <p>
+                        <strong className="text-[#0acf83]">figmaUrl / figmaEmbedUrl</strong> — {language === 'ua' ? 'Посилання на макет або інтерактивний прототип Figma (наприклад: https://www.figma.com/design/... або https://embed.figma.com/proto/...). Забезпечує інтерактивний перегляд та кнопку переходу в сам макет.' : 'URL to Figma file or prototype. Enables interactive Figma prototype preview and direct open button.'}
+                      </p>
+                      <p>
+                        <strong className="text-emerald-400">fonts_ua / fonts_en</strong> — {language === 'ua' ? 'Шрифтові гарнітури та їх призначення двома мовами (наприклад, "Druk Wide (Акцентний), Inter (Тіло)" / "Druk Wide (Display), Inter (Body)"). Також підтримується спільна колонка "fonts".' : 'Bilingual typography specimens. Single "fonts" is also supported.'}
+                      </p>
+                      <p>
+                        <strong className="text-emerald-400">colors_ua / colors_en</strong> — {language === 'ua' ? 'Назви кольорових токенів та HEX-коди (наприклад, "Вугільний: #0F0F11, Електрик: #00E5FF" / "Carbon: #0F0F11, Electric: #00E5FF"). Також підтримуються спільні "colors" або "palette".' : 'Bilingual color palette with names and HEX codes. Single "colors" or "palette" also supported.'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {activeTab === 'contacts' && (
               <div className="space-y-6">
                 <div className="bg-neutral-900/80 border border-neutral-800 p-5 space-y-3">

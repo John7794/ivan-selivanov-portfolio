@@ -90,18 +90,57 @@ body::-webkit-scrollbar-thumb:hover {
   scrollbar-width: none;
 }
 
-.text-stroke-light {
-  color: transparent;
+.hero-monument-title,
+.hero-monument-title * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  pointer-events: none !important;
+}
+
+/* Bulletproof outline text using CSS pseudo-elements:
+   Pseudo-element content cannot be selected by browser selection engines,
+   meaning Chromium/Safari never disable text-stroke or turn text black on selection! */
+.text-stroke-layer {
+  position: relative;
+  display: inline-block;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  pointer-events: none !important;
+}
+
+.text-stroke-layer::before {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
   -webkit-text-stroke: 1.5px #f4f4f0;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  pointer-events: none !important;
+}
+
+.text-stroke-light {
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  -webkit-text-stroke: 1.5px #f4f4f0;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  pointer-events: none !important;
 }
 
 @media (min-width: 640px) {
+  .text-stroke-layer::before,
   .text-stroke-light {
     -webkit-text-stroke: 2px #f4f4f0;
   }
 }
 
 @media (min-width: 1024px) {
+  .text-stroke-layer::before,
   .text-stroke-light {
     -webkit-text-stroke: 3px #f4f4f0;
   }

@@ -103,6 +103,68 @@ export const DEFAULT_SETTINGS: GeneralSettings = {
     contactsTitle: { ua: 'Прямі контакти:', en: 'Direct Channels:' },
     copyBtn: { ua: 'Копія', en: 'Copy' },
     copiedBtn: { ua: 'Копія!', en: 'Copied!' }
+  },
+  ui: {
+    heroCta: { ua: 'Дослідити кейси', en: 'Explore Portfolio' },
+    workIndex: { ua: '01 // INDEXED CASE STUDIES', en: '01 // INDEXED CASE STUDIES' },
+    workTitle: { ua: 'Вибрані Роботи', en: 'Selected Works' },
+    layoutCascade: { ua: 'Каскад', en: 'Masonry' },
+    layoutGrid: { ua: 'Сітка', en: 'Grid' },
+    filterCategoryLabel: { ua: 'Напрямок:', en: 'Discipline:' },
+    filterCategoryAll: { ua: 'Всі напрямки', en: 'All Disciplines' },
+    filterStatusLabel: { ua: 'Статус:', en: 'Status:' },
+    filterStatusAll: { ua: 'Всі статуси', en: 'All' },
+    expertiseIndex: { ua: '02 // METHODOLOGY & CAPABILITIES', en: '02 // METHODOLOGY & CAPABILITIES' },
+    quoteText: { 
+      ua: '"Good design is as little design as possible. It concentrates on the essential aspects, and the products are not burdened with non-essentials."', 
+      en: '"Good design is as little design as possible. It concentrates on the essential aspects, and the products are not burdened with non-essentials."' 
+    },
+    quoteAuthor: { 
+      ua: '— Dieter Rams (Ten Principles for Good Design)', 
+      en: '— Dieter Rams (Ten Principles for Good Design)' 
+    },
+    experienceIndex: { ua: '03 // TRACK RECORD', en: '03 // TRACK RECORD' },
+    experienceTitle: { ua: 'Кар’єрний Шлях & Досвід', en: 'Career Track & Background' },
+    experienceSubtitle: { 
+      ua: 'Хронологія комерційних проєктів, артдирекції та фундаментальної академічної школи', 
+      en: 'Timeline of design leadership, commercial execution, and academic honors' 
+    },
+    contactHeading: { ua: 'Маєте амбітний проєкт?', en: 'Have an ambitious project?' },
+    contactCta: { ua: 'Обговорити', en: "Let's Talk" },
+    contactEmailLabel: { ua: 'Прямий контакт', en: 'Direct Inquiries' },
+    contactSocialLabel: { ua: 'Мережі', en: 'Networks' },
+    contactLocationLabel: { ua: 'Локальний час', en: 'Local Time' },
+    // Portfolio & Case Study Modal UI strings
+    modalCaseStudy: { ua: 'CASE STUDY //', en: 'CASE STUDY //' },
+    modalPrev: { ua: 'Попередній', en: 'Previous' },
+    modalNext: { ua: 'Наступний', en: 'Next' },
+    modalClose: { ua: 'Закрити', en: 'Close' },
+    modalLive: { ua: 'Live', en: 'Live' },
+    modalRole: { ua: 'Роль', en: 'Role' },
+    modalTimeline: { ua: 'Період', en: 'Timeline' },
+    modalCategory: { ua: 'Категорія', en: 'Category' },
+    modalDeliverables: { ua: 'Результати', en: 'Deliverables' },
+    modalInteractiveExperience: { ua: 'INTERACTIVE VISUAL EXPERIENCE', en: 'INTERACTIVE VISUAL EXPERIENCE' },
+    modalMaxSpace: { ua: 'Максимум місця', en: 'Max space' },
+    modalFitFrame: { ua: 'Вписати в екран', en: 'Fit frame' },
+    modalFullscreen: { ua: 'На весь екран', en: 'Fullscreen' },
+    modalOverview: { ua: 'Огляд проєкту', en: 'Project Overview' },
+    modalChallenge: { ua: 'Виклик & Проблема', en: 'The Challenge' },
+    modalSolution: { ua: 'Архітектурне Рішення', en: 'The Solution' },
+    modalImpact: { ua: 'Результати & Бізнес-Метрики', en: 'Business Impact & Metrics' },
+    modalDesignSystem: { ua: 'Дизайн-Система & Токени', en: 'Design Tokens & Typography' },
+    modalFonts: { ua: 'Шрифти', en: 'Typography' },
+    modalColors: { ua: 'Колірна палітра', en: 'Color Palette' },
+    modalGrid: { ua: 'Тип сітки', en: 'Grid Architecture' },
+    modalTools: { ua: 'Інструменти', en: 'Tooling' },
+    modalClientReview: { ua: 'Відгук замовника', en: 'Client Endorsement' },
+    modalVisitLive: { ua: 'Переглянути Live Проєкт', en: 'Explore Live Interface' },
+    modalCopied: { ua: 'Скопійовано', en: 'Copied' },
+    modalArtifacts: { ua: 'Екрани та Артефакти', en: 'Screens & Artifacts' },
+    badgeFeatured: { ua: 'Флагман', en: 'Featured' },
+    badgeConcept: { ua: 'Концепт', en: 'Concept' },
+    badgeProduction: { ua: 'Продакшн', en: 'Production' },
+    cardViewCase: { ua: 'Відкрити кейс', en: 'View Case' }
   }
 };
 
@@ -175,11 +237,6 @@ export const DEFAULT_PROJECTS: Project[] = [
       ua: 'Зниження часу виконання ордерів на 38%, підвищення задоволеності користувачів (CSAT) з 54% до 92%, успішне залучення $14M Series-A інвестицій за рахунок демонстрації продуктової зрілості.',
       en: '38% decrease in order entry latency, user satisfaction (CSAT) surged from 54% to 92%, and enabled a successful $14M Series-A funding round driven by enterprise product maturity.'
     },
-    metrics: [
-      { value: '-38%', label: { ua: 'Час виконання операцій', en: 'Execution Latency' } },
-      { value: '92%', label: { ua: 'CSAT Показник', en: 'CSAT Score' } },
-      { value: '$14M', label: { ua: 'Залучено інвестицій', en: 'Series-A Raised' } }
-    ],
     toolsUsed: ['Figma', 'React', 'Tailwind CSS', 'TypeScript', 'Tokens Studio'],
     designSystem: {
       fonts: ['PP Neue Montreal', 'JetBrains Mono'],
@@ -199,6 +256,8 @@ export const DEFAULT_PROJECTS: Project[] = [
       'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&q=80&w=1400'
     ],
     liveLink: 'https://aura-capital.demo',
+    figmaUrl: 'https://www.figma.com/design/sample-aura-liquidity-os',
+    figmaEmbedUrl: 'https://embed.figma.com/proto/aura-capital-liquidity-os?node-id=0-1&scaling=scale-down-store-width&content-scaling=fixed&page-id=0%3A1&embed-host=share',
     isFeatured: true,
     sortOrder: 1,
     testimonialId: 't-1'
@@ -223,26 +282,22 @@ export const DEFAULT_PROJECTS: Project[] = [
       en: 'Sculptural light exploration and architectural brutalism'
     },
     description: {
-      ua: 'Серія статичних високодеталізованих рендерів, які вивчають взаємодію масивних титанових і базальтових геометричних тіл із розсіяним атмосферним освітленням. Оживлено через WebGL шейдери деформації та паралакс глибини.',
-      en: 'A curated cycle of high-fidelity volumetric renders exploring the tension between monolithic basalt forms and diffuse directional radiance. Re-animated on the web using real-time canvas displacement and interactive lighting tilt.'
+      ua: 'Серія статичних високодеталізованих 3D-рендерів, які вивчають взаємодію масивних титанових і базальтових геометричних тіл із розсіяним атмосферним освітленням.',
+      en: 'A curated cycle of high-fidelity volumetric 3D renders exploring the tension between monolithic basalt forms and diffuse directional radiance.'
     },
     problemStatement: {
-      ua: 'Технічний виклик полягав у тому, що оригінальні 3D сцени (.c4d / .blend) були втрачені, залишилися лише бездоганні статичні TIFF рендери високої роздільної здатності. Необхідно було змусити статику дихати.',
-      en: 'Creative dilemma: original 3D geometry scene files were lost, leaving only pristine ultra-res 4K renders. The goal was to imbue flat raster graphics with visceral, reactive 3D spatial presence.'
+      ua: 'Створити виразну серію концептуальних візуальних робіт високої роздільної здатності для демонстрації роботи з формою, світлом і текстурою.',
+      en: 'Create a distinctive series of high-resolution conceptual visual artworks showcasing mastery over form, light, and material texture.'
     },
     solution: {
-      ua: 'Створено спеціальний WebGL-компонент із картою нормалей та мікродеформацією при переміщенні курсора. Додано оптичний ефект аберації лінзи та динамічний зум на скролі.',
-      en: 'Developed an interactive displacement shader using mouse coordinates as a virtual light and normal tilt engine. Paired with chromatic aberration edge shifts and scroll-driven scale choreography.'
+      ua: 'Ретельне моделювання геометрії, налаштування фізично коректних матеріалів та об\'ємного світла. Рендери оптимізовані для кристально чіткого перегляду в 4K.',
+      en: 'Physically based material shading, volumetric lighting passes, and color grading optimized for ultra-crisp 4K display.'
     },
     businessImpact: {
-      ua: 'Проєкт отримав відзнаку Behance Featured у категорії 3D Art та став візуальним референсом для стилістики двох міжнародних фінансових брендів.',
+      ua: 'Проєкт отримав відзнаку Behance Featured у категорії 3D Art та став візуальним референсом для стилістики двох міжнародних брендів.',
       en: 'Recognized as Behance Curated 3D Pick, establishing a signature aesthetic that generated 4 enterprise consulting inquiries.'
     },
-    metrics: [
-      { value: '4K', label: { ua: 'Роздільна здатність рендерів', en: 'Master Output Res' } },
-      { value: '60 FPS', label: { ua: 'Частота шейдерної анімації', en: 'WebGL Shader Rate' } }
-    ],
-    toolsUsed: ['Cinema 4D (Legacy)', 'Octane Render', 'WebGL', 'Framer Motion', 'Adobe Photoshop'],
+    toolsUsed: ['Cinema 4D', 'Octane Render', 'Adobe Photoshop'],
     designSystem: {
       fonts: ['Monument Extended', 'Neue Haas Grotesk'],
       colors: [
@@ -296,11 +351,6 @@ export const DEFAULT_PROJECTS: Project[] = [
       ua: 'Тираж 1,500 примірників розпродано за перші два тижні. Нагорода "Кращий книжковий дизайн року" на галузевому форумі.',
       en: 'Full 1,500 limited first edition sold out within 14 days; awarded Book Design of the Year by the National Graphic Syndicate.'
     },
-    metrics: [
-      { value: '240', label: { ua: 'Сторінок видання', en: 'Pages Designed' } },
-      { value: '11 pt', label: { ua: 'Базовий інтерліньяж', en: 'Rigid Baseline' } },
-      { value: '1,500', label: { ua: 'Тираж розпродано', en: 'Copies Sold Out' } }
-    ],
     toolsUsed: ['Adobe InDesign', 'Adobe Illustrator', 'Pre-Press Acrobat Pro', 'Enfocus PitStop'],
     designSystem: {
       fonts: ['Univers 55 Roman', 'Univers 65 Bold'],
@@ -356,10 +406,6 @@ export const DEFAULT_PROJECTS: Project[] = [
       ua: 'Концепт продемонстрував можливості скорочення часу виявлення збоїв у розподіленому тренуванні на 45% порівняно зі стандартними консолями.',
       en: 'Simulated 45% faster fault isolation in multi-GPU distributed runs compared to industry benchmark consoles.'
     },
-    metrics: [
-      { value: '45%', label: { ua: 'Швидша діагностика збоїв', en: 'Faster Issue Isolation' } },
-      { value: '100%', label: { ua: 'Dark Mode Контрастність (AAA)', en: 'WCAG AAA Contrast' } }
-    ],
     toolsUsed: ['Figma', 'Next.js', 'Lucide Icons', 'D3.js Topology Engine'],
     designSystem: {
       fonts: ['Geist Sans', 'Geist Mono'],
@@ -375,6 +421,9 @@ export const DEFAULT_PROJECTS: Project[] = [
       'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1400',
       'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&q=80&w=1400'
     ],
+    liveLink: 'https://synapse-cloud.demo',
+    figmaUrl: 'https://www.figma.com/design/synapse-neuromorphic-console',
+    figmaEmbedUrl: 'https://embed.figma.com/proto/synapse-neuromorphic-console?node-id=0-1&scaling=contain&embed-host=share',
     isFeatured: false,
     sortOrder: 4
   },
@@ -413,10 +462,6 @@ export const DEFAULT_PROJECTS: Project[] = [
       ua: 'Sold out фестивалю за 48 годин після запуску рекламної кампанії. Постери виставлялися в галереї сучасного мистецтва.',
       en: 'Festival tickets sold out within 48 hours of poster rollout; visual series selected for contemporary gallery exhibition.'
     },
-    metrics: [
-      { value: '48h', label: { ua: 'Повний Sold Out квитків', en: 'Total Sold Out Time' } },
-      { value: '12', label: { ua: 'Авторських постерів', en: 'Collector Edition Posters' } }
-    ],
     toolsUsed: ['Processing / p5.js', 'Adobe Illustrator', 'Custom Variable Font'],
     designSystem: {
       fonts: ['Kinetic Grotesk Display', 'Suisse Int’l'],

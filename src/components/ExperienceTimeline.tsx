@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Briefcase, GraduationCap, Sparkles } from 'lucide-react';
-import { ExperienceItem, Language } from '../types';
+import { ExperienceItem, Language, GeneralSettings } from '../types';
 import { AnimatedDivider } from './AnimatedDivider';
 import { getLocalizedText, getLocalizedArray } from '../utils/i18n';
 
 interface ExperienceTimelineProps {
   experience: ExperienceItem[];
   language: Language;
+  ui?: GeneralSettings['ui'];
 }
 
-export const ExperienceTimeline: React.FC<ExperienceTimelineProps> = ({ experience, language }) => {
+export const ExperienceTimeline: React.FC<ExperienceTimelineProps> = ({ experience, language, ui }) => {
   const [mousePos, setMousePos] = useState({ x: -1000, y: -1000 });
   const [isHovered, setIsHovered] = useState(false);
 
@@ -28,10 +29,15 @@ export const ExperienceTimeline: React.FC<ExperienceTimelineProps> = ({ experien
   };
 
   const t = {
-    title: language === 'ua' ? 'Кар’єрний Шлях & Досвід' : 'Career Track & Background',
-    subtitle: language === 'ua'
-      ? 'Хронологія комерційних проєктів, артдирекції та фундаментальної академічної школи'
-      : 'Timeline of design leadership, commercial execution, and academic honors',
+    index: getLocalizedText(ui?.experienceIndex, language, { ua: '03 // TRACK RECORD', en: '03 // TRACK RECORD' }),
+    title: getLocalizedText(ui?.experienceTitle, language, {
+      ua: 'Кар’єрний Шлях & Досвід',
+      en: 'Career Track & Background'
+    }),
+    subtitle: getLocalizedText(ui?.experienceSubtitle, language, {
+      ua: 'Хронологія комерційних проєктів, артдирекції та фундаментальної академічної школи',
+      en: 'Timeline of design leadership, commercial execution, and academic honors'
+    }),
     present: language === 'ua' ? 'Зараз' : 'Present'
   };
 
@@ -83,7 +89,7 @@ export const ExperienceTimeline: React.FC<ExperienceTimelineProps> = ({ experien
         <div className="sticky top-[58px] sm:top-[73px] z-30 bg-[#0a0a0a]/95 backdrop-blur-md -mx-6 px-6 lg:-mx-12 lg:px-12 pt-4 pb-0 mb-12 transition-all">
           <div className="max-w-[1600px] mx-auto pb-6">
             <span className="font-mono text-xs uppercase tracking-widest text-neutral-400 block mb-1">
-              03 // TRACK RECORD
+              {t.index}
             </span>
             <h2 className="text-3xl md:text-5xl font-medium tracking-tight uppercase">
               {t.title}

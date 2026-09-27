@@ -201,13 +201,13 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({
   return (
     <AnimatePresence>
       {isVisible && !isSuppressed && (
-        <div className="fixed inset-0 z-40 pointer-events-none flex items-end sm:items-end justify-start p-4 sm:p-6 lg:p-8">
+        <div className="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 lg:bottom-8 lg:left-8 z-[60] max-w-[calc(100vw-2rem)] sm:max-w-xl w-full pointer-events-none">
           <motion.div
             initial={{ opacity: 0, y: 30, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.97 }}
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="pointer-events-auto w-full max-w-xl bg-[#0c0c0c]/98 backdrop-blur-xl border border-neutral-800 text-[#f4f4f0] p-5 sm:p-6 shadow-2xl space-y-4"
+            className="pointer-events-auto w-full max-h-[calc(100vh-6rem)] sm:max-h-[calc(100vh-7rem)] overflow-y-auto bg-[#0c0c0c] border border-neutral-800 text-[#f4f4f0] p-5 sm:p-6 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.9)] space-y-4 rounded-sm"
           >
           {/* Header */}
           <div className="flex items-start justify-between gap-3 border-b border-neutral-900 pb-3">

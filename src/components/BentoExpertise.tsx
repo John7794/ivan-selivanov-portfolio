@@ -9,6 +9,7 @@ import { getLocalizedText, getLocalizedArray } from '../utils/i18n';
 interface BentoExpertiseProps {
   language: Language;
   expertise?: GeneralSettings['expertise'];
+  ui?: GeneralSettings['ui'];
 }
 
 // Helper to remove any FigJam mention from text
@@ -21,7 +22,7 @@ const removeFigJam = (text: string): string => {
     .trim();
 };
 
-export const BentoExpertise: React.FC<BentoExpertiseProps> = ({ language, expertise = DEFAULT_SETTINGS.expertise }) => {
+export const BentoExpertise: React.FC<BentoExpertiseProps> = ({ language, expertise = DEFAULT_SETTINGS.expertise, ui }) => {
   const data = expertise || DEFAULT_SETTINGS.expertise!;
   const def = DEFAULT_SETTINGS.expertise!;
 
@@ -49,7 +50,7 @@ export const BentoExpertise: React.FC<BentoExpertiseProps> = ({ language, expert
         <div className="sticky top-[58px] sm:top-[73px] z-30 bg-[#080808]/95 backdrop-blur-md -mx-6 px-6 lg:-mx-12 lg:px-12 pt-4 pb-0 mb-12 transition-all">
           <div className="max-w-[1600px] mx-auto pb-6">
             <span className="font-mono text-xs uppercase tracking-widest text-neutral-400 block mb-1">
-              02 // METHODOLOGY & CAPABILITIES
+              {getLocalizedText(ui?.expertiseIndex, language, { ua: '02 // METHODOLOGY & CAPABILITIES', en: '02 // METHODOLOGY & CAPABILITIES' })}
             </span>
             <h2 className="text-3xl md:text-5xl font-medium tracking-tight uppercase">
               {t.heading}
@@ -76,7 +77,6 @@ export const BentoExpertise: React.FC<BentoExpertiseProps> = ({ language, expert
               <div className="w-12 h-12 bg-neutral-900 border border-neutral-800 flex items-center justify-center text-emerald-400 shrink-0">
                 <Layout className="w-6 h-6" />
               </div>
-              <span className="font-mono text-xs text-neutral-500">CORE DISCIPLINE</span>
             </div>
 
             <div className="flex-1">
@@ -105,7 +105,6 @@ export const BentoExpertise: React.FC<BentoExpertiseProps> = ({ language, expert
               <div className="w-12 h-12 bg-neutral-900 border border-neutral-800 flex items-center justify-center text-amber-400 shrink-0">
                 <Type className="w-6 h-6" />
               </div>
-              <span className="font-mono text-xs text-neutral-500">SWISS CANON</span>
             </div>
 
             <div className="z-10 flex-1">
@@ -130,7 +129,6 @@ export const BentoExpertise: React.FC<BentoExpertiseProps> = ({ language, expert
               <div className="w-12 h-12 bg-neutral-900 border border-neutral-800 flex items-center justify-center text-cyan-400 shrink-0">
                 <Box className="w-6 h-6" />
               </div>
-              <span className="font-mono text-xs text-neutral-500">SPATIAL R&D</span>
             </div>
 
             <div className="flex-1">
@@ -155,7 +153,6 @@ export const BentoExpertise: React.FC<BentoExpertiseProps> = ({ language, expert
               <div className="w-12 h-12 bg-neutral-900 border border-neutral-800 flex items-center justify-center text-rose-400 shrink-0">
                 <Compass className="w-6 h-6" />
               </div>
-              <span className="font-mono text-xs text-neutral-500">PSYCHOLOGY</span>
             </div>
 
             <div className="flex-1">
@@ -163,18 +160,10 @@ export const BentoExpertise: React.FC<BentoExpertiseProps> = ({ language, expert
                 {t.card4Title}
               </h3>
               {data.card4Desc && (
-                <p className="text-neutral-400 font-light text-xs leading-relaxed mb-3">
+                <p className="text-neutral-400 font-light text-sm leading-relaxed">
                   {removeFigJam(data.card4Desc[language])}
                 </p>
               )}
-              <ul className="space-y-1.5 text-xs font-mono text-neutral-300">
-                {t.heuristics.map((h, i) => (
-                  <li key={i} className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                    <span>{h}</span>
-                  </li>
-                ))}
-              </ul>
             </div>
           </motion.div>
 
@@ -190,7 +179,6 @@ export const BentoExpertise: React.FC<BentoExpertiseProps> = ({ language, expert
               <div className="w-12 h-12 bg-neutral-900 border border-neutral-800 flex items-center justify-center text-blue-400 shrink-0">
                 <Cpu className="w-6 h-6" />
               </div>
-              <span className="font-mono text-xs text-neutral-500">PRODUCTION READY</span>
             </div>
 
             <div className="flex-1">

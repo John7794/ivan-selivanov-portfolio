@@ -82,41 +82,347 @@ export function formatImageUrl(url: any, fallback?: string): string {
   return cleanUrl;
 }
 
+export function cleanLiveLink(val: any): string | undefined {
+  if (!val) return undefined;
+  const str = String(val).trim();
+  if (!str) return undefined;
+  const lower = str.toLowerCase();
+  if (
+    lower === '-' ||
+    lower === '–' ||
+    lower === '—' ||
+    lower === '#' ||
+    lower === 'none' ||
+    lower === 'n/a' ||
+    lower === 'na' ||
+    lower === 'null' ||
+    lower === 'undefined' ||
+    lower === 'false' ||
+    lower === 'no' ||
+    lower === 'ні' ||
+    lower === 'немає' ||
+    lower === 'http://' ||
+    lower === 'https://' ||
+    lower === 'http://...' ||
+    lower === 'https://...'
+  ) {
+    return undefined;
+  }
+  return str.length > 3 ? str : undefined;
+}
+
 function isLocalizedObj(val: any): boolean {
   return typeof val === 'object' && val !== null && !Array.isArray(val) && ('ua' in val || 'en' in val);
 }
 
-function parseFonts(val: any): string[] {
+function parseFontList(val: any): string[] {
   if (Array.isArray(val)) return val.map(String).filter(Boolean);
   if (typeof val === 'string' && val.trim()) {
-    return val.split(',').map(s => s.trim()).filter(Boolean);
+    try {
+      const parsed = JSON.parse(val);
+      if (Array.isArray(parsed)) return parsed.map(String).filter(Boolean);
+    } catch {}
+    return val.split(/[\n,;]+/).map(s => s.trim()).filter(Boolean);
   }
   return [];
 }
 
-function parseColors(val: any): { name: string; hex: string }[] {
+const KNOWN_FONTS = [
+  'PP Neue Montreal', 'Neue Montreal', 'Plus Jakarta Sans', 'Jakarta Sans',
+  'Space Grotesk', 'Space Mono', 'Cabinet Grotesk', 'General Sans',
+  'Clash Display', 'Playfair Display', 'Cormorant Garamond', 'IBM Plex Sans',
+  'IBM Plex Mono', 'JetBrains Mono', 'Fira Code', 'Fira Sans', 'Noto Sans',
+  'Noto Serif', 'DM Sans', 'DM Serif', 'Work Sans', 'Monument Extended',
+  'Bebas Neue', 'Cinzel Decorative', 'Cinzel', 'Inter', 'Roboto', 'Syne',
+  'Montserrat', 'Geist', 'Satoshi', 'Manrope', 'Outfit', 'Unbounded',
+  'Onest', 'Golos Text', 'Golos', 'e-Ukraine', 'Arial', 'Futura',
+  'Circular', 'SF Pro Display', 'SF Pro Text', 'SF Pro', 'Poppins',
+  'Lato', 'Open Sans', 'Raleway', 'Oswald', 'Rubik', 'Ubuntu',
+  'Merriweather', 'Lora', 'Epilogue', 'Sora', 'Urbanist'
+];
+
+function extractFontNamesFromText(text: string): string[] {
+  if (!text) return [];
+  const clean = text.trim();
+
+  // 1. If text is short (<= 35 chars) and doesn't look like a sentence, treat as comma/ampersand separated list
+  if (clean.length <= 35 && !/[.!?]$/.test(clean) && !clean.includes(' з ') && !clean.includes(' with ') && !clean.includes(' для ') && !clean.includes(' for ')) {
+    return clean.split(/[,;&+/]|\band\b|\bта\b/i).map(s => s.trim()).filter(Boolean);
+  }
+
+  // 2. Check for colon or dash prefix: e.g. "Inter: ..." or "PP Neue Montreal — ..."
+  const prefixMatch = clean.match(/^([A-Za-z0-9\s\-]+?)\s*(?::|—|-{1,2})\s*(.+)$/);
+  if (prefixMatch && prefixMatch[1].trim().length <= 35) {
+    const extracted = prefixMatch[1].trim();
+    if (extracted.length > 2) return [extracted];
+  }
+
+  // 3. Check for parentheses containing Latin font family/style: e.g. "(Geometric Sans-Serif)"
+  const parenMatches = clean.match(/\(([^)]+)\)/g);
+  if (parenMatches) {
+    for (const pm of parenMatches) {
+      const inner = pm.replace(/[()]/g, '').trim();
+      // If inner is 1-4 words and contains letters (e.g. Geometric Sans-Serif)
+      if (inner.length >= 3 && inner.length <= 35 && /^[A-Za-z0-9\s\-]+$/.test(inner)) {
+        return [inner];
+      }
+    }
+  }
+
+  // 4. Check for known font names inside the text
+  const foundKnown: string[] = [];
+  for (const kf of KNOWN_FONTS) {
+    const regex = new RegExp(`\\b${kf.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`, 'i');
+    if (regex.test(clean)) {
+      if (!foundKnown.some(f => f.toLowerCase() === kf.toLowerCase())) {
+        foundKnown.push(kf);
+      }
+    }
+  }
+  if (foundKnown.length > 0) return foundKnown;
+
+  // 5. Look for typographic style classifications in Ukrainian or English
+  if (/геометричн\w*\s+гротеск/i.test(clean) || /geometric\s+sans/i.test(clean)) {
+    return ['Geometric Sans-Serif'];
+  }
+  if (/неогротеск/i.test(clean) || /neo-grotesque/i.test(clean)) {
+    return ['Neo-Grotesque'];
+  }
+  if (/гуманістичн\w*\s+гротеск/i.test(clean) || /humanist\s+sans/i.test(clean)) {
+    return ['Humanist Sans'];
+  }
+  if (/моноширинн\w*/i.test(clean) || /monospace/i.test(clean)) {
+    return ['Monospace / Code'];
+  }
+  if (/антикв\w*/i.test(clean) || /serif/i.test(clean)) {
+    return ['Editorial Serif'];
+  }
+  if (/гротеск/i.test(clean) || /sans-serif/i.test(clean)) {
+    return ['Sans-Serif'];
+  }
+
+  // 6. If it's a long sentence, take the first 2-3 words or a clean label
+  const words = clean.split(/\s+/).slice(0, 3).join(' ').replace(/[.,;:!]$/, '');
+  if (words.length > 2 && words.length <= 30) {
+    return [words];
+  }
+
+  return ['Custom Typography'];
+}
+
+export function parseFontsDescription(p: any): { ua: string; en: string } | undefined {
+  if (!p) return undefined;
+
+  const rawUa = String(p.fonts_ua || p.font_ua || p.typography_ua || p.fonts_desc_ua || '').trim();
+  const rawEn = String(p.fonts_en || p.font_en || p.typography_en || p.fonts_desc_en || '').trim();
+
+  // If a string is short (<= 30 chars) and is just a simple font name like "Inter, Roboto", it's not a description
+  const isJustFontName = (text: string) => {
+    if (!text) return true;
+    if (text.length > 40) return false;
+    if (/[.!?]/.test(text) || text.includes(' для ') || text.includes(' for ') || text.includes(' з ') || text.includes(' with ')) {
+      return false;
+    }
+    return true;
+  };
+
+  if (rawUa && !isJustFontName(rawUa)) {
+    return {
+      ua: rawUa,
+      en: rawEn && !isJustFontName(rawEn) ? rawEn : translateToEnglishIfNeeded(rawUa)
+    };
+  }
+
+  if (rawEn && !isJustFontName(rawEn)) {
+    return {
+      ua: rawUa && !isJustFontName(rawUa) ? rawUa : rawEn,
+      en: rawEn
+    };
+  }
+
+  return undefined;
+}
+
+export function parseFonts(p: any): { ua: string[]; en: string[] } | string[] {
+  if (!p) return [];
+
+  // 1. If explicit font column exists (e.g. p.fonts, p.font_family, p.font_families, p.typography)
+  const explicit = p.fonts || p.font_family || p.font_families || p.typography_fonts || p.designSystem?.fonts;
+  if (explicit) {
+    const list = parseFontList(explicit);
+    if (list.length > 0 && list.every(f => f.length <= 40)) {
+      return list;
+    }
+  }
+
+  // 2. Extract from descriptive columns fonts_ua / fonts_en
+  const rawUa = String(p.fonts_ua || p.font_ua || p.typography_ua || '').trim();
+  const rawEn = String(p.fonts_en || p.font_en || p.typography_en || '').trim();
+
+  if (rawEn) {
+    const fromEn = extractFontNamesFromText(rawEn);
+    if (fromEn.length > 0) return fromEn;
+  }
+
+  if (rawUa) {
+    const fromUa = extractFontNamesFromText(rawUa);
+    if (fromUa.length > 0) return fromUa;
+  }
+
+  return [];
+}
+
+function extractCleanHex(str: string): string | null {
+  if (!str) return null;
+  const trimmed = str.trim();
+  // Valid hex with hash: #FFF, #FFFF, #FFFFFF, #FFFFFFFF
+  if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(trimmed)) {
+    return trimmed.toUpperCase();
+  }
+  // Hex without hash: 3, 4, 6, or 8 hex digits
+  if (/^([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(trimmed)) {
+    return `#${trimmed.toUpperCase()}`;
+  }
+  return null;
+}
+
+function parseSwatchesFromSource(val: any): { name: string; hex: string }[] {
+  if (!val) return [];
+
   if (Array.isArray(val)) {
-    return val.map((item, idx) => {
-      if (typeof item === 'string') return { name: `Color ${idx + 1}`, hex: item };
-      if (item && typeof item === 'object') {
-        return { name: String(item.name || `Color ${idx + 1}`), hex: String(item.hex || '#000000') };
+    const list: { name: string; hex: string }[] = [];
+    val.forEach((item, idx) => {
+      if (typeof item === 'string') {
+        const h = extractCleanHex(item);
+        if (h) list.push({ name: `Color ${idx + 1}`, hex: h });
+      } else if (item && typeof item === 'object') {
+        const rawName = typeof item.name === 'object' ? (item.name.ua || item.name.en) : item.name;
+        const h = extractCleanHex(String(item.hex || item.color || ''));
+        if (h) {
+          list.push({ name: String(rawName || `Color ${idx + 1}`), hex: h });
+        }
       }
-      return null;
-    }).filter((x): x is { name: string; hex: string } => Boolean(x));
+    });
+    return list;
   }
+
   if (typeof val === 'string' && val.trim()) {
-    return val.split(',').map((part, idx) => {
-      const trimmed = part.trim();
-      if (!trimmed) return null;
-      if (trimmed.includes(':')) {
-        const [name, hex] = trimmed.split(':').map(s => s.trim());
-        const cleanHex = hex.startsWith('#') ? hex : `#${hex}`;
-        return { name: name || `Color ${idx + 1}`, hex: cleanHex };
+    try {
+      const parsed = JSON.parse(val);
+      if (Array.isArray(parsed)) return parseSwatchesFromSource(parsed);
+    } catch {}
+
+    const parts = val.split(/[\n,;]+/).map(s => s.trim()).filter(Boolean);
+    const results: { name: string; hex: string }[] = [];
+
+    parts.forEach((part, idx) => {
+      if (part.includes(':') || part.includes(' - ')) {
+        const sep = part.includes(':') ? ':' : ' - ';
+        const [name, hex] = part.split(sep).map(s => s.trim());
+        const h = extractCleanHex(hex);
+        if (h) {
+          results.push({ name: name || `Color ${idx + 1}`, hex: h });
+          return;
+        }
       }
-      const cleanHex = trimmed.startsWith('#') ? trimmed : `#${trimmed}`;
-      return { name: `Color ${idx + 1}`, hex: cleanHex };
-    }).filter((x): x is { name: string; hex: string } => Boolean(x));
+      const directHex = extractCleanHex(part);
+      if (directHex) {
+        results.push({ name: `Color ${results.length + 1}`, hex: directHex });
+        return;
+      }
+      // Check space-delimited hex codes inside the part
+      const subTokens = part.split(/\s+/).map(s => s.trim()).filter(Boolean);
+      subTokens.forEach(st => {
+        const subHex = extractCleanHex(st);
+        if (subHex) {
+          results.push({ name: `Color ${results.length + 1}`, hex: subHex });
+        }
+      });
+    });
+
+    if (results.length > 0) return results;
+
+    // Regex match any #hex
+    const regexMatches = val.match(/#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b/g);
+    if (regexMatches && regexMatches.length > 0) {
+      return regexMatches.map((m, idx) => ({ name: `Color ${idx + 1}`, hex: m.toUpperCase() }));
+    }
   }
+
+  return [];
+}
+
+export function parseColorsDescription(p: any): { ua: string; en: string } | undefined {
+  if (!p) return undefined;
+
+  const rawUa = String(p.colors_ua || p.color_ua || p.colors_desc_ua || p.palette_ua || p.palette_desc_ua || '').trim();
+  const rawEn = String(p.colors_en || p.color_en || p.colors_desc_en || p.palette_en || p.palette_desc_en || '').trim();
+
+  // If a string only contains HEX tokens without actual sentences/words, it's not a description
+  const isPureHexList = (text: string) => {
+    if (!text) return true;
+    const stripped = text.replace(/#[0-9a-fA-F]{3,8}/gi, '').replace(/[\s,;:\-–—]/g, '');
+    return stripped.length === 0;
+  };
+
+  if (rawUa && !isPureHexList(rawUa)) {
+    return {
+      ua: rawUa,
+      en: rawEn && !isPureHexList(rawEn) ? rawEn : translateToEnglishIfNeeded(rawUa)
+    };
+  }
+  if (rawEn && !isPureHexList(rawEn)) {
+    return {
+      ua: rawUa && !isPureHexList(rawUa) ? rawUa : rawEn,
+      en: rawEn
+    };
+  }
+  return undefined;
+}
+
+export function parseColors(p: any): { name: string | { ua: string; en: string }; hex: string }[] {
+  if (!p) return [];
+
+  // 1. Primary source: palette column (or colors_hex / palette_hex / colors)
+  const paletteSource = p.palette || p.palette_hex || p.colors_hex || p.colors || p.designSystem?.colors;
+  const swatchesFromPalette = parseSwatchesFromSource(paletteSource);
+
+  // 2. Secondary source: check if colors_ua or colors_en has explicit name:hex or hex list
+  const swatchesFromUa = parseSwatchesFromSource(p.colors_ua);
+  const swatchesFromEn = parseSwatchesFromSource(p.colors_en);
+
+  if (swatchesFromPalette.length > 0) {
+    // If swatchesFromPalette has colors, check if colors_ua/colors_en provides localized names
+    if (swatchesFromUa.length === swatchesFromPalette.length && swatchesFromEn.length === swatchesFromPalette.length) {
+      return swatchesFromPalette.map((item, idx) => ({
+        name: {
+          ua: swatchesFromUa[idx]?.name || item.name,
+          en: swatchesFromEn[idx]?.name || item.name
+        },
+        hex: item.hex
+      }));
+    }
+    return swatchesFromPalette;
+  }
+
+  // If palette was empty, maybe swatches were defined in colors_ua/colors_en?
+  if (swatchesFromUa.length > 0 || swatchesFromEn.length > 0) {
+    const maxLen = Math.max(swatchesFromUa.length, swatchesFromEn.length);
+    const result: { name: { ua: string; en: string }; hex: string }[] = [];
+    for (let i = 0; i < maxLen; i++) {
+      const itemUa = swatchesFromUa[i];
+      const itemEn = swatchesFromEn[i];
+      result.push({
+        name: {
+          ua: itemUa?.name || itemEn?.name || `Колір ${i + 1}`,
+          en: itemEn?.name || itemUa?.name || `Color ${i + 1}`
+        },
+        hex: itemUa?.hex || itemEn?.hex || '#000000'
+      });
+    }
+    return result;
+  }
+
   return [];
 }
 
@@ -202,7 +508,10 @@ function parseProjectImages(p: any): { thumbnailUrl: string; galleryUrls: string
   };
 }
 
-export function parseProjectCategory(p: any): { id: string; label: { ua: string; en: string } } {
+export function parseProjectCategory(
+  p: any, 
+  categoriesMap?: Map<string, { ua: string; en: string }>
+): { id: string; label: { ua: string; en: string } } {
   const raw = p.category || p.category_ua || p.discipline || p.categoryLabel || '';
   const rawEn = p.category_en || p.categoryLabel_en || '';
 
@@ -214,6 +523,21 @@ export function parseProjectCategory(p: any): { id: string; label: { ua: string;
   }
 
   const rawLower = rawStr.toLowerCase();
+
+  // 0. Check custom Categories tab mapping if provided
+  if (categoriesMap && categoriesMap.size > 0) {
+    // Check by exact key/slug or lowercase
+    const matched = categoriesMap.get(rawStr) || categoriesMap.get(rawLower);
+    if (matched) {
+      return {
+        id: rawLower.replace(/[^\w\dа-яіїєґ]+/gi, '-').replace(/^-+|-+$/g, '') || 'cat',
+        label: {
+          ua: matched.ua || rawStr,
+          en: matched.en || matched.ua || rawStr
+        }
+      };
+    }
+  }
 
   // 1. UI/UX patterns
   if (
@@ -312,7 +636,10 @@ export function parseProjectCategory(p: any): { id: string; label: { ua: string;
   };
 }
 
-export function parseProjectStatus(p: any): { id: string; filterLabel: { ua: string; en: string }; badgeLabel: { ua: string; en: string } } {
+export function parseProjectStatus(
+  p: any,
+  statusesMap?: Map<string, { filterLabel: { ua: string; en: string }; badgeLabel: { ua: string; en: string } }>
+): { id: string; filterLabel: { ua: string; en: string }; badgeLabel: { ua: string; en: string } } {
   const raw = p.status || p.status_ua || p.project_status || '';
   const rawEn = p.status_en || '';
 
@@ -325,7 +652,31 @@ export function parseProjectStatus(p: any): { id: string; filterLabel: { ua: str
 
   const rawLower = rawStr.toLowerCase();
 
-  // Concept / R&D
+  // 0. Explicit bilingual status columns on project row
+  if (p.status_ua || p.status_en) {
+    const ua = String(p.status_ua || rawStr || 'Продакшн').trim();
+    const en = String(p.status_en || rawEn || ua).trim();
+    const slug = rawLower.replace(/[^\w\dа-яіїєґ]+/gi, '-').replace(/^-+|-+$/g, '') || 'status';
+    return {
+      id: slug,
+      filterLabel: { ua, en },
+      badgeLabel: { ua, en }
+    };
+  }
+
+  // 1. Look up in custom Statuses tab mapping if provided
+  if (statusesMap && statusesMap.size > 0) {
+    const matched = statusesMap.get(rawStr) || statusesMap.get(rawLower);
+    if (matched) {
+      return {
+        id: rawLower.replace(/[^\w\dа-яіїєґ]+/gi, '-').replace(/^-+|-+$/g, '') || 'status',
+        filterLabel: matched.filterLabel,
+        badgeLabel: matched.badgeLabel
+      };
+    }
+  }
+
+  // 2. Concept / R&D
   if (
     rawLower === 'concept' ||
     rawLower.includes('концепт') ||
@@ -422,35 +773,6 @@ export function mapStatusesFromSheet(raw: any): FilterOption[] {
   return result;
 }
 
-function parseMetrics(val: any): { value: string; label: { ua: string; en: string } }[] {
-  if (Array.isArray(val)) {
-    return val.map((m: any) => ({
-      value: String(m.value || ''),
-      label: isLocalizedObj(m.label) ? m.label : { ua: String(m.label || ''), en: String(m.label || '') }
-    }));
-  }
-  if (typeof val === 'string' && val.trim()) {
-    try {
-      const parsed = JSON.parse(val);
-      if (Array.isArray(parsed)) return parseMetrics(parsed);
-    } catch {}
-    return val.split(/[\n;]+/).map(item => {
-      const parts = item.split(/[:|]/).map(s => s.trim());
-      if (parts.length >= 2) {
-        return {
-          value: parts[0],
-          label: { ua: parts[1], en: parts[1] }
-        };
-      }
-      return {
-        value: item.trim(),
-        label: { ua: '', en: '' }
-      };
-    }).filter(m => Boolean(m.value));
-  }
-  return [];
-}
-
 function parseTools(val: any): string[] {
   if (Array.isArray(val)) return val.map(String).filter(Boolean);
   if (typeof val === 'string' && val.trim()) {
@@ -463,27 +785,59 @@ function parseTools(val: any): string[] {
   return ['Figma', 'TypeScript', 'Design Systems'];
 }
 
-function mapProjectFromSheet(p: any, idx: number): Project {
-  const { id: catId, label: catLabel } = parseProjectCategory(p);
-  const { id: statusId, filterLabel, badgeLabel } = parseProjectStatus(p);
+function mapProjectFromSheet(
+  p: any, 
+  idx: number, 
+  categoriesMap?: Map<string, { ua: string; en: string }>,
+  statusesMap?: Map<string, { filterLabel: { ua: string; en: string }; badgeLabel: { ua: string; en: string } }>
+): Project {
+  const { id: catId, label: catLabel } = parseProjectCategory(p, categoriesMap);
+  const { id: statusId, filterLabel, badgeLabel } = parseProjectStatus(p, statusesMap);
 
-  const parsedFonts = parseFonts(p.fonts || p.designSystem?.fonts);
-  const parsedColors = parseColors(p.colors || p.palette || p.designSystem?.colors);
+  const parsedFonts = parseFonts(p);
+  const parsedFontsDescription = parseFontsDescription(p);
+  const parsedColors = parseColors(p);
+  const parsedColorsDescription = parseColorsDescription(p);
   const parsedGrid = String(p.gridType || p.grid || p.designSystem?.gridType || '').trim();
   const { thumbnailUrl, galleryUrls } = parseProjectImages(p);
+
+  const rawTitleUa = p.title_ua || p.title || p.name_ua || p.name || '';
+  const rawTitleEn = p.title_en || (p.title_ua ? '' : p.title) || p.name_en || p.name || '';
+
+  let titleUa = '';
+  let titleEn = '';
+
+  if (typeof p.title === 'object' && p.title !== null) {
+    titleUa = String(p.title.ua || rawTitleUa || 'Без назви').trim();
+    titleEn = String(p.title.en || rawTitleEn || titleUa).trim();
+  } else {
+    titleUa = String(p.title_ua || p.title || p.name_ua || p.name || 'Без назви').trim();
+    titleEn = String(p.title_en || (p.title_ua ? '' : p.title) || p.name_en || p.name || '').trim();
+    if (!titleEn && titleUa) {
+      titleEn = translateToEnglishIfNeeded(titleUa, undefined, titleUa);
+    }
+  }
+
+  const resolvedTitle = {
+    ua: titleUa,
+    en: titleEn || titleUa
+  };
 
   return {
     id: String(p.id || `p-${idx + 1}`),
     slug: String(p.slug || p.id || `project-${idx + 1}`),
-    title: String(p.title || 'Без назви'),
+    title: resolvedTitle,
+    title_ua: resolvedTitle.ua,
+    title_en: resolvedTitle.en,
     client: p.client ? String(p.client).trim() : undefined,
     category: catId,
     categoryLabel: catLabel,
     status: statusId,
     statusLabel: filterLabel,
+    statusBadgeLabel: badgeLabel,
     role: isLocalizedObj(p.role) ? p.role : {
-      ua: p.role_ua || p.role || 'Lead Designer & Creative Director',
-      en: p.role_en || p.role || 'Lead Designer & Creative Director'
+      ua: String(p.role_ua || p.role || p.Role || p.Role_UA || p.position || p.position_ua || 'Lead Designer & Creative Director').trim(),
+      en: String(p.role_en || (!p.role_ua ? (p.role || p.Role || p.position) : '') || p.role_ua || p.role || 'Lead Designer & Creative Director').trim()
     },
     timeline: String(p.year || p.timeline || '2024'),
     tagline: isLocalizedObj(p.tagline) ? p.tagline : {
@@ -506,16 +860,19 @@ function mapProjectFromSheet(p: any, idx: number): Project {
       ua: String(p.impact_ua || p.businessImpact_ua || '').trim(),
       en: String(p.impact_en || p.businessImpact_en || '').trim()
     },
-    metrics: parseMetrics(p.metrics || p.metricsData),
     toolsUsed: parseTools(p.tools || p.toolsUsed),
     designSystem: {
       fonts: parsedFonts,
+      fontsDescription: parsedFontsDescription,
       colors: parsedColors,
+      colorsDescription: parsedColorsDescription,
       gridType: parsedGrid || undefined
     },
     thumbnailUrl,
     galleryUrls,
-    liveLink: p.liveLink ? String(p.liveLink).trim() : undefined,
+    liveLink: cleanLiveLink(p.liveLink ?? p.live_link ?? p.livelink ?? p.link ?? p.url ?? p.projectUrl ?? p.project_url ?? p.website),
+    figmaUrl: cleanLiveLink(p.figmaUrl ?? p.figma_url ?? p.figma ?? p.figmaLink ?? p.figma_link),
+    figmaEmbedUrl: cleanLiveLink(p.figmaEmbedUrl ?? p.figma_embed ?? p.figma_embed_url ?? p.figmaEmbed ?? p.figma_prototype),
     isFeatured: Boolean(p.featured === true || p.featured === 'true' || p.featured === 1 || p.featured === '1' || p.isFeatured === true),
     sortOrder: Number(p.sortOrder || idx + 1),
     testimonialId: p.testimonialId || undefined
@@ -654,7 +1011,12 @@ export function mapSettingsFromSheet(raw: any): GeneralSettings {
   const title = getLoc('title', DEFAULT_SETTINGS.title);
   const heroTag = getLoc('heroTag', DEFAULT_SETTINGS.heroTag || { ua: 'Готовий до співпраці', en: 'Available for work' });
   const heroTagline = getLoc('heroTagline', getLoc('bioShort', DEFAULT_SETTINGS.bioShort));
-  const location = getLoc('location', DEFAULT_SETTINGS.location);
+  
+  // Resilient location / address resolution with multiple aliases
+  const locRaw = s['location'] || s['address'] || s['локація'] || s['адреса'] || s['city'] || s['місто'];
+  const location = locRaw ? (
+    getLoc('location', getLoc('address', getLoc('локація', getLoc('адреса', { ua: '', en: '' }))))
+  ) : { ua: '', en: '' };
 
   const getSingleStr = (key: string, fallback: string): string => {
     const val = s[key];
@@ -720,6 +1082,63 @@ export function mapSettingsFromSheet(raw: any): GeneralSettings {
   const menuCopyBtn = getLoc('menu_copy_btn', DEFAULT_SETTINGS.menu?.copyBtn || { ua: 'Копія', en: 'Copy' });
   const menuCopiedBtn = getLoc('menu_copied_btn', DEFAULT_SETTINGS.menu?.copiedBtn || { ua: 'Скопійовано!', en: 'Copied!' });
 
+  // UI interface texts (Work section, filters, buttons, headers)
+  const defUi = DEFAULT_SETTINGS.ui!;
+  const heroCta = getLoc('hero_cta_btn', getLoc('hero_cta', getLoc('heroCta', defUi.heroCta!)));
+  const workIndex = getLoc('work_index', defUi.workIndex!);
+  const workTitle = getLoc('work_title', defUi.workTitle!);
+  const layoutCascade = getLoc('layout_cascade', getLoc('layout_masonry', defUi.layoutCascade!));
+  const layoutGrid = getLoc('layout_grid', defUi.layoutGrid!);
+  const filterCategoryLabel = getLoc('filter_category_label', defUi.filterCategoryLabel!);
+  const filterCategoryAll = getLoc('filter_category_all', defUi.filterCategoryAll!);
+  const filterStatusLabel = getLoc('filter_status_label', defUi.filterStatusLabel!);
+  const filterStatusAll = getLoc('filter_status_all', defUi.filterStatusAll!);
+  const expertiseIndex = getLoc('expertise_index', defUi.expertiseIndex!);
+  const quoteText = getLoc('quote_text', defUi.quoteText!);
+  const quoteAuthor = getLoc('quote_author', defUi.quoteAuthor!);
+  const experienceIndex = getLoc('experience_index', defUi.experienceIndex!);
+  const experienceTitle = getLoc('experience_title', defUi.experienceTitle!);
+  const experienceSubtitle = getLoc('experience_subtitle', defUi.experienceSubtitle!);
+  const contactHeading = getLoc('contact_heading', defUi.contactHeading!);
+  const contactCta = getLoc('contact_cta', defUi.contactCta!);
+  const contactEmailLabel = getLoc('contact_email_label', defUi.contactEmailLabel!);
+  const contactSocialLabel = getLoc('contact_social_label', defUi.contactSocialLabel!);
+  const contactLocationLabel = getLoc('contact_location_label', defUi.contactLocationLabel!);
+
+  // Modal & Portfolio view UI strings
+  const modalCaseStudy = getLoc('modal_case_study', defUi.modalCaseStudy || { ua: 'CASE STUDY //', en: 'CASE STUDY //' });
+  const modalPrev = getLoc('modal_prev', defUi.modalPrev || { ua: 'Попередній', en: 'Previous' });
+  const modalNext = getLoc('modal_next', defUi.modalNext || { ua: 'Наступний', en: 'Next' });
+  const modalClose = getLoc('modal_close', defUi.modalClose || { ua: 'Закрити', en: 'Close' });
+  const modalLive = getLoc('modal_live', defUi.modalLive || { ua: 'Live', en: 'Live' });
+  const modalRole = getLoc('modal_role', defUi.modalRole || { ua: 'Роль', en: 'Role' });
+  const modalTimeline = getLoc('modal_timeline', defUi.modalTimeline || { ua: 'Період', en: 'Timeline' });
+  const modalCategory = getLoc('modal_category', defUi.modalCategory || { ua: 'Категорія', en: 'Category' });
+  const modalDeliverables = getLoc('modal_deliverables', defUi.modalDeliverables || { ua: 'Результати', en: 'Deliverables' });
+  const modalInteractiveExperience = getLoc('modal_interactive_experience', getLoc('modal_interactive_title', defUi.modalInteractiveExperience || { ua: 'INTERACTIVE VISUAL EXPERIENCE', en: 'INTERACTIVE VISUAL EXPERIENCE' }));
+  const modalMaxSpace = getLoc('modal_max_space', defUi.modalMaxSpace || { ua: 'Максимум місця', en: 'Max space' });
+  const modalFitFrame = getLoc('modal_fit_frame', defUi.modalFitFrame || { ua: 'Вписати в екран', en: 'Fit frame' });
+  const modalFullscreen = getLoc('modal_fullscreen', defUi.modalFullscreen || { ua: 'На весь екран', en: 'Fullscreen' });
+  const modalOverview = getLoc('modal_overview', defUi.modalOverview || { ua: 'Огляд проєкту', en: 'Project Overview' });
+  const modalChallenge = getLoc('modal_challenge', defUi.modalChallenge || { ua: 'Виклик & Проблема', en: 'The Challenge' });
+  const modalSolution = getLoc('modal_solution', defUi.modalSolution || { ua: 'Архітектурне Рішення', en: 'The Solution' });
+  const modalImpact = getLoc('modal_impact', defUi.modalImpact || { ua: 'Результати & Бізнес-Метрики', en: 'Business Impact & Metrics' });
+  const modalDesignSystem = getLoc('modal_design_system', defUi.modalDesignSystem || { ua: 'Дизайн-Система & Токени', en: 'Design Tokens & Typography' });
+  const modalFonts = getLoc('modal_fonts', defUi.modalFonts || { ua: 'Шрифти', en: 'Typography' });
+  const modalColors = getLoc('modal_colors', defUi.modalColors || { ua: 'Колірна палітра', en: 'Color Palette' });
+  const modalGrid = getLoc('modal_grid', defUi.modalGrid || { ua: 'Тип сітки', en: 'Grid Architecture' });
+  const modalTools = getLoc('modal_tools', defUi.modalTools || { ua: 'Інструменти', en: 'Tooling' });
+  const modalClientReview = getLoc('modal_client_review', defUi.modalClientReview || { ua: 'Відгук замовника', en: 'Client Endorsement' });
+  const modalVisitLive = getLoc('modal_visit_live', defUi.modalVisitLive || { ua: 'Переглянути Live Проєкт', en: 'Explore Live Interface' });
+  const modalCopied = getLoc('modal_copied', defUi.modalCopied || { ua: 'Скопійовано', en: 'Copied' });
+  const modalArtifacts = getLoc('modal_artifacts', defUi.modalArtifacts || { ua: 'Екрани та Артефакти', en: 'Screens & Artifacts' });
+
+  // Card & Badge UI strings
+  const badgeFeatured = getLoc('badge_featured', defUi.badgeFeatured || { ua: 'Флагман', en: 'Featured' });
+  const badgeConcept = getLoc('badge_concept', defUi.badgeConcept || { ua: 'Концепт', en: 'Concept' });
+  const badgeProduction = getLoc('badge_production', getLoc('badge_realized', defUi.badgeProduction || { ua: 'Продакшн', en: 'Production' }));
+  const cardViewCase = getLoc('card_view_case', getLoc('btn_view_case', defUi.cardViewCase || { ua: 'Відкрити кейс', en: 'View Case' }));
+
   return {
     name,
     title,
@@ -767,6 +1186,58 @@ export function mapSettingsFromSheet(raw: any): GeneralSettings {
       contactsTitle: menuContactsTitle,
       copyBtn: menuCopyBtn,
       copiedBtn: menuCopiedBtn
+    },
+    ui: {
+      heroCta,
+      workIndex,
+      workTitle,
+      layoutCascade,
+      layoutGrid,
+      filterCategoryLabel,
+      filterCategoryAll,
+      filterStatusLabel,
+      filterStatusAll,
+      expertiseIndex,
+      quoteText,
+      quoteAuthor,
+      experienceIndex,
+      experienceTitle,
+      experienceSubtitle,
+      contactHeading,
+      contactCta,
+      contactEmailLabel,
+      contactSocialLabel,
+      contactLocationLabel,
+      modalCaseStudy,
+      modalPrev,
+      modalNext,
+      modalClose,
+      modalLive,
+      modalRole,
+      modalTimeline,
+      modalCategory,
+      modalDeliverables,
+      modalInteractiveExperience,
+      modalMaxSpace,
+      modalFitFrame,
+      modalFullscreen,
+      modalOverview,
+      modalChallenge,
+      modalSolution,
+      modalImpact,
+      modalDesignSystem,
+      modalFonts,
+      modalColors,
+      modalGrid,
+      modalTools,
+      modalClientReview,
+      modalVisitLive,
+      modalCopied,
+      modalArtifacts,
+      badgeFeatured,
+      badgeConcept,
+      badgeProduction,
+      cardViewCase
     }
   };
 }
@@ -886,7 +1357,7 @@ export function mapContactsFromSheet(raw: any, fallbackSettings?: GeneralSetting
   const behanceFallback = fallbackSettings?.behance || d.behance || '';
   const githubFallback = fallbackSettings?.github || d.github || '';
 
-  const addressVal = getLoc('address', getLoc('location', fallbackSettings?.location || d.address || { ua: 'Львів, Україна', en: 'Lviv, Ukraine' }));
+  const addressVal = getLoc('address', getLoc('location', getLoc('локація', getLoc('адреса', getLoc('місто', fallbackSettings?.location || d.address || { ua: 'Львів, Україна', en: 'Lviv, Ukraine' })))));
 
   return {
     email: getStr('email', emailFallback),
@@ -1135,8 +1606,48 @@ export async function syncWithGoogleSheets(endpointUrl: string = DEFAULT_SHEETS_
 
   const json = await response.json();
 
+  const categoriesMap = new Map<string, { ua: string; en: string }>();
+  if (json.categories && Array.isArray(json.categories)) {
+    for (const c of json.categories) {
+      const id = String(c.id || c.slug || c.key || '').trim();
+      const ua = String(c.ua || c.UA || c.title_ua || c.name_ua || c.name || '').trim();
+      const en = String(c.en || c.EN || c.title_en || c.name_en || ua).trim();
+      if (id && ua) {
+        categoriesMap.set(id, { ua, en });
+        categoriesMap.set(id.toLowerCase(), { ua, en });
+      }
+      if (ua) {
+        categoriesMap.set(ua, { ua, en });
+        categoriesMap.set(ua.toLowerCase(), { ua, en });
+      }
+    }
+  }
+
+  const statusesMap = new Map<string, { filterLabel: { ua: string; en: string }; badgeLabel: { ua: string; en: string } }>();
+  if (json.statuses && Array.isArray(json.statuses)) {
+    for (const s of json.statuses) {
+      const id = String(s.id || s.slug || s.key || '').trim();
+      const ua = String(s.ua || s.name_ua || s.title_ua || s.name || s.label || '').trim();
+      const en = String(s.en || s.name_en || s.title_en || s.name || ua).trim();
+      const badgeUa = String(s.badge_ua || s.badge || ua).trim();
+      const badgeEn = String(s.badge_en || s.badge || en).trim();
+      const entry = {
+        filterLabel: { ua, en },
+        badgeLabel: { ua: badgeUa, en: badgeEn }
+      };
+      if (id && ua) {
+        statusesMap.set(id, entry);
+        statusesMap.set(id.toLowerCase(), entry);
+      }
+      if (ua) {
+        statusesMap.set(ua, entry);
+        statusesMap.set(ua.toLowerCase(), entry);
+      }
+    }
+  }
+
   const parsedProjects = json.projects && Array.isArray(json.projects) && json.projects.length > 0
-    ? json.projects.map(mapProjectFromSheet)
+    ? json.projects.map((p: any, idx: number) => mapProjectFromSheet(p, idx, categoriesMap, statusesMap))
     : DEFAULT_PROJECTS;
 
   const parsedExperience = json.experience && Array.isArray(json.experience) && json.experience.length > 0
@@ -1206,7 +1717,7 @@ export function getGoogleAppsScriptTemplate(): string {
   return `/**
  * Google Apps Script for Ivan Selivanov Portfolio Sync
  * Tabs supported:
- * 1. "Projects" (columns: id, title, year, client, category, status, featured, thumbnailUrl, heroImage, liveLink, tagline_ua, tagline_en, overview_ua, overview_en, metrics, tools, palette, challenge_ua, challenge_en, solution_ua, solution_en, impact_ua, impact_en, fonts, colors)
+ * 1. "Projects" (columns: id, title_ua, title_en, year, client, role_ua, role_en, category, status, featured, thumbnailUrl, heroImage, liveLink, tagline_ua, tagline_en, overview_ua, overview_en, tools, palette, challenge_ua, challenge_en, solution_ua, solution_en, impact_ua, impact_en, fonts_ua, fonts_en, colors_ua, colors_en)
  * 2. "Categories" (optional custom filter categories, columns: id, ua, en)
  * 3. "Statuses" (optional custom filter statuses, columns: id, ua, en)
  * 4. "General_Data" (columns: key, ua, en)
@@ -1422,7 +1933,59 @@ export function getGeneralSheetTsvTemplate(): string {
     ['menu_item4_desc', 'Зв’язок для нових викликів', 'Direct collaboration inquiries'],
     ['menu_contacts_title', 'Прямі контакти:', 'Direct Channels:'],
     ['menu_copy_btn', 'Копія', 'Copy'],
-    ['menu_copied_btn', 'Скопійовано!', 'Copied!']
+    ['menu_copied_btn', 'Скопійовано!', 'Copied!'],
+    ['hero_cta_btn', 'Дослідити кейси', 'Explore Portfolio'],
+    ['work_index', '01 // INDEXED CASE STUDIES', '01 // INDEXED CASE STUDIES'],
+    ['work_title', 'Вибрані Роботи', 'Selected Works'],
+    ['layout_cascade', 'Каскад', 'Masonry'],
+    ['layout_grid', 'Сітка', 'Grid'],
+    ['filter_category_label', 'Напрямок:', 'Discipline:'],
+    ['filter_category_all', 'Всі напрямки', 'All Disciplines'],
+    ['filter_status_label', 'Статус:', 'Status:'],
+    ['filter_status_all', 'Всі статуси', 'All'],
+    ['expertise_index', '02 // METHODOLOGY & CAPABILITIES', '02 // METHODOLOGY & CAPABILITIES'],
+    ['quote_text', 'Good design is as little design as possible. It concentrates on the essential aspects, and the products are not burdened with non-essentials.', 'Good design is as little design as possible. It concentrates on the essential aspects, and the products are not burdened with non-essentials.'],
+    ['quote_author', '— Dieter Rams (Ten Principles for Good Design)', '— Dieter Rams (Ten Principles for Good Design)'],
+    ['experience_index', '03 // TRACK RECORD', '03 // TRACK RECORD'],
+    ['experience_title', 'Кар’єрний Шлях & Досвід', 'Career Track & Background'],
+    ['experience_subtitle', 'Хронологія комерційних проєктів, артдирекції та фундаментальної академічної школи', 'Timeline of design leadership, commercial execution, and academic honors'],
+    ['contact_heading', 'Маєте амбітний проєкт?', 'Have an ambitious project?'],
+    ['contact_cta', 'Обговорити', "Let's Talk"],
+    ['contact_email_label', 'Прямий контакт', 'Direct Inquiries'],
+    ['contact_social_label', 'Мережі', 'Networks'],
+    ['contact_location_label', 'Локальний час', 'Local Time'],
+    // Modal & Case study viewer UI strings
+    ['modal_case_study', 'CASE STUDY //', 'CASE STUDY //'],
+    ['modal_prev', 'Попередній', 'Previous'],
+    ['modal_next', 'Наступний', 'Next'],
+    ['modal_close', 'Закрити', 'Close'],
+    ['modal_live', 'Live', 'Live'],
+    ['modal_role', 'Роль', 'Role'],
+    ['modal_timeline', 'Період', 'Timeline'],
+    ['modal_category', 'Категорія', 'Category'],
+    ['modal_deliverables', 'Результати', 'Deliverables'],
+    ['modal_interactive_title', 'INTERACTIVE VISUAL EXPERIENCE', 'INTERACTIVE VISUAL EXPERIENCE'],
+    ['modal_max_space', 'Максимум місця', 'Max space'],
+    ['modal_fit_frame', 'Вписати в екран', 'Fit frame'],
+    ['modal_fullscreen', 'На весь екран', 'Fullscreen'],
+    ['modal_overview', 'Огляд проєкту', 'Project Overview'],
+    ['modal_challenge', 'Виклик & Проблема', 'The Challenge'],
+    ['modal_solution', 'Архітектурне Рішення', 'The Solution'],
+    ['modal_impact', 'Результати & Бізнес-Метрики', 'Business Impact & Metrics'],
+    ['modal_design_system', 'Дизайн-Система & Токени', 'Design Tokens & Typography'],
+    ['modal_fonts', 'Шрифти', 'Typography'],
+    ['modal_colors', 'Колірна палітра', 'Color Palette'],
+    ['modal_grid', 'Тип сітки', 'Grid Architecture'],
+    ['modal_tools', 'Інструменти', 'Tooling'],
+    ['modal_client_review', 'Відгук замовника', 'Client Endorsement'],
+    ['modal_visit_live', 'Переглянути Live Проєкт', 'Explore Live Interface'],
+    ['modal_copied', 'Скопійовано', 'Copied'],
+    ['modal_artifacts', 'Екрани та Артефакти', 'Screens & Artifacts'],
+    // Card & Badge UI
+    ['badge_featured', 'Флагман', 'Featured'],
+    ['badge_concept', 'Концепт', 'Concept'],
+    ['badge_production', 'Продакшн', 'Production'],
+    ['card_view_case', 'Відкрити кейс', 'View Case']
   ];
 
   return rows.map(r => r.join('\t')).join('\n');
@@ -1552,4 +2115,135 @@ export function getLegalSheetTsvTemplate(): string {
 
   const escapeTsv = (str: string) => str.replace(/\t/g, ' ').replace(/\n/g, ' ');
   return ['key\tua\ten', ...rows.map(r => `${r[0]}\t${escapeTsv(r[1])}\t${escapeTsv(r[2])}`)].join('\n');
+}
+
+/**
+ * Generates copy-pasteable TSV data for the "Projects" tab in Google Sheets
+ */
+export function generateProjectsTSV(projects: any[]): string {
+  const headers = [
+    'id',
+    'title_ua',
+    'title_en',
+    'year',
+    'client',
+    'role_ua',
+    'role_en',
+    'category',
+    'status',
+    'featured',
+    'thumbnailUrl',
+    'heroImage',
+    'liveLink',
+    'figmaUrl',
+    'figmaEmbedUrl',
+    'tagline_ua',
+    'tagline_en',
+    'overview_ua',
+    'overview_en',
+    'tools',
+    'palette',
+    'challenge_ua',
+    'challenge_en',
+    'solution_ua',
+    'solution_en',
+    'impact_ua',
+    'impact_en',
+    'fonts_ua',
+    'fonts_en',
+    'colors_ua',
+    'colors_en'
+  ];
+
+  const escapeCell = (val: any) => {
+    if (val === undefined || val === null) return '';
+    return String(val).replace(/\t/g, ' ').replace(/\n/g, ' ').trim();
+  };
+
+  const rows = projects.map(p => {
+    const roleUa = typeof p.role === 'object' && p.role !== null ? p.role.ua : String(p.role || p.role_ua || '');
+    const roleEn = typeof p.role === 'object' && p.role !== null ? p.role.en : String(p.role || p.role_en || '');
+    const titleUa = typeof p.title === 'object' && p.title !== null ? p.title.ua : String(p.title_ua || p.title || '');
+    const titleEn = typeof p.title === 'object' && p.title !== null ? p.title.en : String(p.title_en || p.title || '');
+    const taglineUa = typeof p.tagline === 'object' && p.tagline !== null ? p.tagline.ua : String(p.tagline_ua || p.tagline || '');
+    const taglineEn = typeof p.tagline === 'object' && p.tagline !== null ? p.tagline.en : String(p.tagline_en || p.tagline || '');
+    const descUa = typeof p.description === 'object' && p.description !== null ? p.description.ua : String(p.overview_ua || p.description_ua || p.description || '');
+    const descEn = typeof p.description === 'object' && p.description !== null ? p.description.en : String(p.overview_en || p.description_en || p.description || '');
+    const challengeUa = typeof p.problemStatement === 'object' && p.problemStatement !== null ? p.problemStatement.ua : String(p.challenge_ua || p.problemStatement || '');
+    const challengeEn = typeof p.problemStatement === 'object' && p.problemStatement !== null ? p.problemStatement.en : String(p.challenge_en || p.problemStatement || '');
+    const solutionUa = typeof p.solution === 'object' && p.solution !== null ? p.solution.ua : String(p.solution_ua || p.solution || '');
+    const solutionEn = typeof p.solution === 'object' && p.solution !== null ? p.solution.en : String(p.solution_en || p.solution || '');
+    const impactUa = typeof p.businessImpact === 'object' && p.businessImpact !== null ? p.businessImpact.ua : String(p.impact_ua || p.businessImpact || '');
+    const impactEn = typeof p.businessImpact === 'object' && p.businessImpact !== null ? p.businessImpact.en : String(p.impact_en || p.businessImpact || '');
+    const toolsStr = Array.isArray(p.toolsUsed) ? p.toolsUsed.join(', ') : (Array.isArray(p.tools) ? p.tools.join(', ') : String(p.tools || ''));
+    
+    // Fonts resolution
+    const fontsRaw = p.designSystem?.fonts;
+    let fontsUa = '';
+    let fontsEn = '';
+    if (Array.isArray(fontsRaw)) {
+      fontsUa = fontsRaw.join(', ');
+      fontsEn = fontsRaw.join(', ');
+    } else if (fontsRaw && typeof fontsRaw === 'object') {
+      fontsUa = Array.isArray(fontsRaw.ua) ? fontsRaw.ua.join(', ') : String(fontsRaw.ua || '');
+      fontsEn = Array.isArray(fontsRaw.en) ? fontsRaw.en.join(', ') : String(fontsRaw.en || fontsUa);
+    } else {
+      fontsUa = String(p.fonts_ua || p.fonts || '');
+      fontsEn = String(p.fonts_en || p.fonts || fontsUa);
+    }
+
+    // Colors resolution
+    const colorsRaw = p.designSystem?.colors;
+    let colorsUa = '';
+    let colorsEn = '';
+    if (Array.isArray(colorsRaw)) {
+      colorsUa = colorsRaw.map((c: any) => {
+        const name = typeof c.name === 'object' && c.name !== null ? (c.name.ua || c.name.en) : c.name;
+        return `${name}: ${c.hex}`;
+      }).join(', ');
+      colorsEn = colorsRaw.map((c: any) => {
+        const name = typeof c.name === 'object' && c.name !== null ? (c.name.en || c.name.ua) : c.name;
+        return `${name}: ${c.hex}`;
+      }).join(', ');
+    } else {
+      colorsUa = String(p.colors_ua || p.palette_ua || p.colors || p.palette || '');
+      colorsEn = String(p.colors_en || p.palette_en || p.colors || p.palette || colorsUa);
+    }
+
+    return [
+      escapeCell(p.id),
+      escapeCell(titleUa),
+      escapeCell(titleEn),
+      escapeCell(p.timeline || p.year),
+      escapeCell(p.client || ''),
+      escapeCell(roleUa),
+      escapeCell(roleEn),
+      escapeCell(p.category),
+      escapeCell(p.status),
+      escapeCell(p.isFeatured || p.featured ? 'TRUE' : 'FALSE'),
+      escapeCell(p.thumbnailUrl || ''),
+      escapeCell((p.galleryUrls && p.galleryUrls[0]) || p.heroImage || ''),
+      escapeCell(p.liveLink || ''),
+      escapeCell(p.figmaUrl || ''),
+      escapeCell(p.figmaEmbedUrl || ''),
+      escapeCell(taglineUa),
+      escapeCell(taglineEn),
+      escapeCell(descUa),
+      escapeCell(descEn),
+      escapeCell(toolsStr),
+      escapeCell(colorsUa),
+      escapeCell(challengeUa),
+      escapeCell(challengeEn),
+      escapeCell(solutionUa),
+      escapeCell(solutionEn),
+      escapeCell(impactUa),
+      escapeCell(impactEn),
+      escapeCell(fontsUa),
+      escapeCell(fontsEn),
+      escapeCell(colorsUa),
+      escapeCell(colorsEn)
+    ].join('\t');
+  });
+
+  return [headers.join('\t'), ...rows].join('\n');
 }

@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ArrowUpRight, Check, Copy, Laptop, Smartphone, ExternalLink, ChevronLeft, ChevronRight, Quote, Maximize2, Minimize2, Expand, Images, ZoomIn, ZoomOut } from 'lucide-react';
+import { X, ArrowUpRight, Check, Copy, Laptop, Smartphone, ExternalLink, ChevronLeft, ChevronRight, Quote, Maximize2, Minimize2, Expand, Images, ZoomIn, ZoomOut, Figma } from 'lucide-react';
 import { Project, Language, Testimonial } from '../types';
-import { Interactive3DViewer } from './Interactive3DViewer';
-import { BookSpreadViewer } from './BookSpreadViewer';
 import { formatImageUrl } from '../services/googleSheets';
 import { getLocalizedText } from '../utils/i18n';
+import { getFigmaEmbedSrc, getFigmaDirectUrl, isFigmaUrl } from '../utils/figma';
 
 interface CaseStudyModalProps {
   project: Project | null;
   allProjects: Project[];
   testimonial?: Testimonial;
   language: Language;
+  ui?: Record<string, any>;
   onClose: () => void;
   onSelectProject: (p: Project) => void;
 }
@@ -21,6 +21,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
   allProjects,
   testimonial,
   language,
+  ui,
   onClose,
   onSelectProject
 }) => {
@@ -30,10 +31,14 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [fullscreenZoom, setFullscreenZoom] = useState(false);
+  const [activeTab, setActiveTab] = useState<'screens' | 'figma'>('screens');
+
+  const modalBodyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setActiveImageIndex(0);
     setFullscreenZoom(false);
+    setActiveTab('screens');
   }, [project?.id]);
 
   const allImages = React.useMemo(() => {
@@ -67,6 +72,52 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
   const currentIndex = project ? allProjects.findIndex(p => p.id === project.id) : 0;
   const prevProject = allProjects.length > 0 ? allProjects[(currentIndex - 1 + allProjects.length) % allProjects.length] : null;
   const nextProject = allProjects.length > 0 ? allProjects[(currentIndex + 1) % allProjects.length] : null;
+
+  const resolvedProjectTitle = getLocalizedText(project?.title, language, { ua: 'Без назви', en: 'Untitled' });
+  const prevProjectTitle = prevProject ? getLocalizedText(prevProject.title, language, { ua: 'Попередній', en: 'Previous' }) : '';
+  const nextProjectTitle = nextProject ? getLocalizedText(nextProject.title, language, { ua: 'Наступний', en: 'Next' }) : '';
+
+  const isValidLiveLink = (link?: string | null): boolean => {
+    if (!link) return false;
+    const trimmed = String(link).trim();
+    if (!trimmed || trimmed === '-' || trimmed === '–' || trimmed === '—' || trimmed === '#') return false;
+    const lower = trimmed.toLowerCase();
+    if (
+      lower === 'none' ||
+      lower === 'n/a' ||
+      lower === 'na' ||
+      lower === 'null' ||
+      lower === 'undefined' ||
+      lower === 'false' ||
+      lower === 'no' ||
+      lower === 'ні' ||
+      lower === 'немає' ||
+      lower === 'http://' ||
+      lower === 'https://' ||
+      lower === 'http://...' ||
+      lower === 'https://...'
+    ) {
+      return false;
+    }
+    return trimmed.length > 3;
+  };
+
+  const formatLiveUrl = (link?: string | null): string => {
+    if (!link) return '#';
+    const trimmed = String(link).trim();
+    if (/^https?:\/\//i.test(trimmed)) {
+      return trimmed;
+    }
+    return `https://${trimmed}`;
+  };
+
+  const hasLiveLink = isValidLiveLink(project?.liveLink);
+  const liveUrl = formatLiveUrl(project?.liveLink);
+
+  const figmaEmbedSrc = project ? getFigmaEmbedSrc(project.figmaEmbedUrl || (project.liveLink && isFigmaUrl(project.liveLink) ? project.liveLink : project.figmaUrl)) : null;
+  const figmaDirectUrl = project ? getFigmaDirectUrl(project) : null;
+  const hasFigmaEmbed = Boolean(figmaEmbedSrc);
+  const hasFigmaDirect = Boolean(figmaDirectUrl);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -103,23 +154,32 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
   };
 
   const t = {
-    overview: language === 'ua' ? 'Огляд проєкту' : 'Project Overview',
-    challenge: language === 'ua' ? 'Виклик & Проблема' : 'The Challenge',
-    solution: language === 'ua' ? 'Архітектурне Рішення' : 'The Solution',
-    impact: language === 'ua' ? 'Результати & Бізнес-Метрики' : 'Business Impact & Metrics',
-    designSystem: language === 'ua' ? 'Дизайн-Система & Токени' : 'Design Tokens & Typography',
-    fonts: language === 'ua' ? 'Шрифти' : 'Typography',
-    colors: language === 'ua' ? 'Колірна палітра' : 'Color Palette',
-    grid: language === 'ua' ? 'Тип сітки' : 'Grid Architecture',
-    tools: language === 'ua' ? 'Інструменти' : 'Tooling',
-    clientReview: language === 'ua' ? 'Відгук замовника' : 'Client Endorsement',
-    visitLive: language === 'ua' ? 'Переглянути Live Проєкт' : 'Explore Live Interface',
-    copied: language === 'ua' ? 'Скопійовано' : 'Copied',
-    prev: language === 'ua' ? 'Попередній' : 'Previous',
-    next: language === 'ua' ? 'Наступний' : 'Next',
-    maxSpace: language === 'ua' ? 'Максимум місця' : 'Max width',
-    fitFrame: language === 'ua' ? 'Вмістити' : 'Fit to frame',
-    fullscreen: language === 'ua' ? 'На весь екран' : 'Fullscreen'
+    caseStudy: getLocalizedText(ui?.modalCaseStudy, language, { ua: 'CASE STUDY //', en: 'CASE STUDY //' }),
+    prev: getLocalizedText(ui?.modalPrev, language, { ua: 'Попередній', en: 'Previous' }),
+    next: getLocalizedText(ui?.modalNext, language, { ua: 'Наступний', en: 'Next' }),
+    close: getLocalizedText(ui?.modalClose, language, { ua: 'Закрити', en: 'Close' }),
+    live: getLocalizedText(ui?.modalLive, language, { ua: 'Live', en: 'Live' }),
+    role: getLocalizedText(ui?.modalRole, language, { ua: 'Роль', en: 'Role' }),
+    timeline: getLocalizedText(ui?.modalTimeline, language, { ua: 'Період', en: 'Timeline' }),
+    category: getLocalizedText(ui?.modalCategory, language, { ua: 'Категорія', en: 'Category' }),
+    deliverables: getLocalizedText(ui?.modalDeliverables, language, { ua: 'Результати', en: 'Deliverables' }),
+    interactiveExperience: getLocalizedText(ui?.modalInteractiveExperience, language, { ua: 'INTERACTIVE VISUAL EXPERIENCE', en: 'INTERACTIVE VISUAL EXPERIENCE' }),
+    maxSpace: getLocalizedText(ui?.modalMaxSpace, language, { ua: 'Повна довжина', en: 'Full Length' }),
+    fitFrame: getLocalizedText(ui?.modalFitFrame, language, { ua: 'Вписати в екран', en: 'Fit frame' }),
+    fullscreen: getLocalizedText(ui?.modalFullscreen, language, { ua: 'На весь екран', en: 'Fullscreen' }),
+    overview: getLocalizedText(ui?.modalOverview, language, { ua: 'Огляд проєкту', en: 'Project Overview' }),
+    challenge: getLocalizedText(ui?.modalChallenge, language, { ua: 'Виклик & Проблема', en: 'The Challenge' }),
+    solution: getLocalizedText(ui?.modalSolution, language, { ua: 'Архітектурне Рішення', en: 'The Solution' }),
+    impact: getLocalizedText(ui?.modalImpact, language, { ua: 'Результати та вплив', en: 'Results & Impact' }),
+    designSystem: getLocalizedText(ui?.modalDesignSystem, language, { ua: 'Дизайн-Система & Токени', en: 'Design Tokens & Typography' }),
+    fonts: getLocalizedText(ui?.modalFonts, language, { ua: 'Шрифти', en: 'Typography' }),
+    colors: getLocalizedText(ui?.modalColors, language, { ua: 'Колірна палітра', en: 'Color Palette' }),
+    grid: getLocalizedText(ui?.modalGrid, language, { ua: 'Тип сітки', en: 'Grid Architecture' }),
+    tools: getLocalizedText(ui?.modalTools, language, { ua: 'Інструменти', en: 'Tooling' }),
+    clientReview: getLocalizedText(ui?.modalClientReview, language, { ua: 'Відгук замовника', en: 'Client Endorsement' }),
+    visitLive: getLocalizedText(ui?.modalVisitLive, language, { ua: 'Переглянути Live Проєкт', en: 'Explore Live Interface' }),
+    copied: getLocalizedText(ui?.modalCopied, language, { ua: 'Скопійовано', en: 'Copied' }),
+    artifacts: getLocalizedText(ui?.modalArtifacts, language, { ua: 'Екрани та Артефакти', en: 'Screens & Artifacts' })
   };
 
   return (
@@ -149,7 +209,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                   }`}></span>
                 </span>
                 <span className="font-mono text-xs uppercase tracking-widest text-neutral-300 font-medium truncate max-w-[130px] sm:max-w-[240px] md:max-w-none">
-                  CASE STUDY // {project.slug.toUpperCase()}
+                  {t.caseStudy} {project.slug.toUpperCase()}
                 </span>
               </div>
 
@@ -169,15 +229,29 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
             </div>
 
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-              {project.liveLink && (
+              {hasFigmaDirect && (
                 <a
-                  href={project.liveLink}
+                  href={figmaDirectUrl!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#1e1e1e] hover:bg-[#282828] text-neutral-200 hover:text-white border border-[#a259ff]/40 hover:border-[#a259ff] font-mono text-xs transition-colors shadow-sm"
+                  title={language === 'ua' ? 'Перейти в макет Figma' : 'Open in Figma'}
+                >
+                  <Figma className="w-3.5 h-3.5 text-[#0acf83]" />
+                  <span className="hidden sm:inline">Figma</span>
+                  <ExternalLink className="w-3 h-3 text-[#a259ff]" />
+                </a>
+              )}
+
+              {hasLiveLink && (
+                <a
+                  href={liveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-800 hover:border-neutral-700 font-mono text-xs transition-colors"
                   title={language === 'ua' ? 'Відкрити live проєкт' : 'Open live project'}
                 >
-                  <span>Live</span>
+                  <span>{t.live}</span>
                   <ExternalLink className="w-3 h-3 text-cyan-400" />
                 </a>
               )}
@@ -210,7 +284,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                 onClick={onClose}
                 className="group flex items-center gap-1.5 pl-2.5 pr-2 py-1 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-600 text-neutral-400 hover:text-white transition-all cursor-pointer rounded-sm"
                 aria-label="Close modal"
-                title={language === 'ua' ? 'Закрити (ESC)' : 'Close (ESC)'}
+                title={`${t.close} (ESC)`}
               >
                 <span className="hidden md:inline font-mono text-[10px] text-neutral-500 group-hover:text-neutral-300">ESC</span>
                 <X className="w-4 h-4" />
@@ -219,35 +293,46 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
           </div>
 
           {/* Scrollable Body */}
-          <div className="overflow-y-auto custom-scrollbar px-6 py-8 md:px-12 md:py-12 space-y-16">
+          <div ref={modalBodyRef} className="overflow-y-auto custom-scrollbar px-6 py-8 md:px-12 md:py-12 space-y-12">
             {/* Header / Hero */}
-            <div className="space-y-6 border-b border-neutral-800 pb-12">
+            <div className="space-y-6 border-b border-neutral-800 pb-10">
               <p className="font-mono text-xs uppercase tracking-widest text-neutral-400">
                 {getLocalizedText(project.categoryLabel, language, { ua: 'UI/UX Продукт', en: 'UI/UX Product' })} — {project.timeline}
               </p>
               <h1 className="text-3xl sm:text-5xl md:text-6xl font-medium tracking-tight uppercase leading-[0.95]">
-                {project.title}
+                {getLocalizedText(project.title, language, { ua: 'Без назви', en: 'Untitled' })}
               </h1>
               <p className="text-xl md:text-2xl text-neutral-300 max-w-3xl font-light leading-snug">
                 {getLocalizedText(project.tagline, language, { ua: '', en: '' })}
               </p>
 
+              {(() => {
+                const descText = getLocalizedText(project.description, language, { ua: '', en: '' }).trim();
+                const tagText = getLocalizedText(project.tagline, language, { ua: '', en: '' }).trim();
+                if (!descText || descText === tagText) return null;
+                return (
+                  <p className="text-sm md:text-base text-neutral-400 max-w-3xl font-light leading-relaxed whitespace-pre-line pt-1">
+                    {descText}
+                  </p>
+                );
+              })()}
+
               {/* Meta Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-6 font-mono text-xs border-t border-neutral-800/80">
                 <div>
-                  <span className="text-neutral-500 uppercase tracking-wider block mb-1">Role</span>
+                  <span className="text-neutral-500 uppercase tracking-wider block mb-1">{t.role}</span>
                   <span className="text-neutral-200">{getLocalizedText(project.role, language, { ua: 'Lead Designer', en: 'Lead Designer' })}</span>
                 </div>
                 <div>
-                  <span className="text-neutral-500 uppercase tracking-wider block mb-1">Timeline</span>
+                  <span className="text-neutral-500 uppercase tracking-wider block mb-1">{t.timeline}</span>
                   <span className="text-neutral-200">{project.timeline}</span>
                 </div>
                 <div>
-                  <span className="text-neutral-500 uppercase tracking-wider block mb-1">Category</span>
-                  <span className="text-neutral-200">{project.categoryLabel[language]}</span>
+                  <span className="text-neutral-500 uppercase tracking-wider block mb-1">{t.category}</span>
+                  <span className="text-neutral-200">{getLocalizedText(project.categoryLabel, language, { ua: 'UI/UX Продукт', en: 'UI/UX Product' })}</span>
                 </div>
                 <div>
-                  <span className="text-neutral-500 uppercase tracking-wider block mb-1">Deliverables</span>
+                  <span className="text-neutral-500 uppercase tracking-wider block mb-1">{t.deliverables}</span>
                   <span className="text-neutral-200">{project.toolsUsed.slice(0, 3).join(', ')}</span>
                 </div>
               </div>
@@ -257,15 +342,48 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
             <div id="project-interactive-viewer" className="space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-xs uppercase tracking-widest text-neutral-400">
                 <div className="flex items-center gap-2">
-                  <span>INTERACTIVE VISUAL EXPERIENCE</span>
-                  <span className="text-[10px] text-neutral-500 hidden sm:inline">
-                    [{fitMode === 'fill' ? t.maxSpace : t.fitFrame}]
-                  </span>
+                  <span>{t.interactiveExperience}</span>
+                  {activeTab === 'screens' && (
+                    <span className="text-[10px] text-neutral-500 hidden sm:inline">
+                      [{fitMode === 'fill' ? t.maxSpace : t.fitFrame}]
+                    </span>
+                  )}
+                  {activeTab === 'figma' && (
+                    <span className="text-[10px] text-[#0acf83] font-medium hidden sm:inline">
+                      [LIVE FIGMA PROTOTYPE]
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {/* Multi-screen Switcher */}
-                  {allImages.length > 1 && (
+                  {/* Mode switcher: Static Screens vs Live Figma Embed */}
+                  {hasFigmaEmbed && (
+                    <div className="flex items-center bg-neutral-900 border border-neutral-800 p-0.5">
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('screens')}
+                        className={`px-2.5 py-1 flex items-center gap-1.5 cursor-pointer text-xs transition-colors ${
+                          activeTab === 'screens' ? 'bg-neutral-800 text-white font-medium' : 'text-neutral-400 hover:text-neutral-200'
+                        }`}
+                      >
+                        <Images className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>{language === 'ua' ? 'Макети' : 'Screens'}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('figma')}
+                        className={`px-2.5 py-1 flex items-center gap-1.5 cursor-pointer text-xs transition-colors ${
+                          activeTab === 'figma' ? 'bg-[#1e1e1e] text-[#0acf83] font-medium border border-[#0acf83]/40' : 'text-neutral-400 hover:text-white'
+                        }`}
+                      >
+                        <Figma className="w-3.5 h-3.5 text-[#a259ff]" />
+                        <span>{language === 'ua' ? 'Інтерактивна Figma' : 'Interactive Figma'}</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Multi-screen Switcher (only in screens tab) */}
+                  {activeTab === 'screens' && allImages.length > 1 && (
                     <div className="flex items-center bg-neutral-900 border border-neutral-800 p-0.5">
                       <button
                         onClick={handlePrevImage}
@@ -287,103 +405,148 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                     </div>
                   )}
 
-                  {project.category === 'ui-ux' && (
-                    <>
-                      {/* Device switch */}
-                      <div className="flex items-center bg-neutral-900 border border-neutral-800 p-0.5">
-                        <button
-                          onClick={() => setDeviceView('desktop')}
-                          className={`px-2.5 py-1 flex items-center gap-1.5 cursor-pointer text-xs transition-colors ${
-                            deviceView === 'desktop' ? 'bg-neutral-800 text-white' : 'text-neutral-500 hover:text-neutral-300'
-                          }`}
-                        >
-                          <Laptop className="w-3.5 h-3.5" />
-                          <span>Desktop</span>
-                        </button>
-                        <button
-                          onClick={() => setDeviceView('mobile')}
-                          className={`px-2.5 py-1 flex items-center gap-1.5 cursor-pointer text-xs transition-colors ${
-                            deviceView === 'mobile' ? 'bg-neutral-800 text-white' : 'text-neutral-500 hover:text-neutral-300'
-                          }`}
-                        >
-                          <Smartphone className="w-3.5 h-3.5" />
-                          <span>Mobile</span>
-                        </button>
-                      </div>
+                  {activeTab === 'screens' && project.category === 'ui-ux' && (
+                    <div className="flex items-center bg-neutral-900 border border-neutral-800 p-0.5">
+                      <button
+                        onClick={() => setDeviceView('desktop')}
+                        className={`px-2.5 py-1 flex items-center gap-1.5 cursor-pointer text-xs transition-colors ${
+                          deviceView === 'desktop' ? 'bg-neutral-800 text-white' : 'text-neutral-500 hover:text-neutral-300'
+                        }`}
+                      >
+                        <Laptop className="w-3.5 h-3.5" />
+                        <span>Desktop</span>
+                      </button>
+                      <button
+                        onClick={() => setDeviceView('mobile')}
+                        className={`px-2.5 py-1 flex items-center gap-1.5 cursor-pointer text-xs transition-colors ${
+                          deviceView === 'mobile' ? 'bg-neutral-800 text-white' : 'text-neutral-500 hover:text-neutral-300'
+                        }`}
+                      >
+                        <Smartphone className="w-3.5 h-3.5" />
+                        <span>Mobile</span>
+                      </button>
+                    </div>
+                  )}
 
-                      {/* Display Mode: Maximum Space vs Fit */}
-                      <div className="flex items-center bg-neutral-900 border border-neutral-800 p-0.5">
-                        <button
-                          onClick={() => setFitMode('fill')}
-                          title={t.maxSpace}
-                          className={`px-2.5 py-1 flex items-center gap-1.5 cursor-pointer text-xs transition-colors ${
-                            fitMode === 'fill' ? 'bg-neutral-800 text-white' : 'text-neutral-500 hover:text-neutral-300'
-                          }`}
-                        >
-                          <Maximize2 className="w-3.5 h-3.5" />
-                          <span className="hidden sm:inline">{t.maxSpace}</span>
-                        </button>
-                        <button
-                          onClick={() => setFitMode('fit')}
-                          title={t.fitFrame}
-                          className={`px-2.5 py-1 flex items-center gap-1.5 cursor-pointer text-xs transition-colors ${
-                            fitMode === 'fit' ? 'bg-neutral-800 text-white' : 'text-neutral-500 hover:text-neutral-300'
-                          }`}
-                        >
-                          <Minimize2 className="w-3.5 h-3.5" />
-                          <span className="hidden sm:inline">{t.fitFrame}</span>
-                        </button>
-                      </div>
-                    </>
+                  {/* Display Mode: Maximum Space vs Fit (available in screens mode) */}
+                  {activeTab === 'screens' && (
+                    <div className="flex items-center bg-neutral-900 border border-neutral-800 p-0.5">
+                      <button
+                        onClick={() => setFitMode('fill')}
+                        title={t.maxSpace}
+                        className={`px-2.5 py-1 flex items-center gap-1.5 cursor-pointer text-xs transition-colors ${
+                          fitMode === 'fill' ? 'bg-neutral-800 text-white' : 'text-neutral-500 hover:text-neutral-300'
+                        }`}
+                      >
+                        <Maximize2 className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">{t.maxSpace}</span>
+                      </button>
+                      <button
+                        onClick={() => setFitMode('fit')}
+                        title={t.fitFrame}
+                        className={`px-2.5 py-1 flex items-center gap-1.5 cursor-pointer text-xs transition-colors ${
+                          fitMode === 'fit' ? 'bg-neutral-800 text-white' : 'text-neutral-500 hover:text-neutral-300'
+                        }`}
+                      >
+                        <Minimize2 className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">{t.fitFrame}</span>
+                      </button>
+                    </div>
                   )}
 
                   {/* Fullscreen Lightbox Button */}
-                  <button
-                    onClick={() => setIsFullscreen(true)}
-                    className="px-2.5 py-1 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 hover:text-white text-neutral-400 flex items-center gap-1.5 cursor-pointer text-xs transition-colors"
-                    title={t.fullscreen}
-                  >
-                    <Expand className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">{t.fullscreen}</span>
-                  </button>
+                  {activeTab === 'screens' && (
+                    <button
+                      onClick={() => setIsFullscreen(true)}
+                      className="px-2.5 py-1 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 hover:text-white text-neutral-400 flex items-center gap-1.5 cursor-pointer text-xs transition-colors"
+                      title={t.fullscreen}
+                    >
+                      <Expand className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">{t.fullscreen}</span>
+                    </button>
+                  )}
                 </div>
               </div>
 
-              {/* Format-Specific Render */}
-              {project.category === '3d-render' ? (
-                <Interactive3DViewer
-                  imageUrl={currentImage}
-                  title={project.title}
-                />
-              ) : project.category === 'book-design' ? (
-                <BookSpreadViewer
-                  imageUrl={currentImage}
-                />
+              {/* View Container: Either Interactive Figma Embed or Visual Media Device */}
+              {activeTab === 'figma' && hasFigmaEmbed ? (
+                /* Interactive Figma Embed Canvas */
+                <div className="bg-neutral-950 border border-neutral-800 p-2 sm:p-3 flex flex-col justify-center items-center shadow-2xl rounded-sm space-y-3">
+                  <div className="w-full bg-neutral-900 border border-neutral-800 px-4 py-2.5 flex items-center justify-between gap-3 font-mono text-xs">
+                    <div className="flex items-center gap-2 text-neutral-300">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#0acf83] animate-pulse" />
+                      <span className="font-medium text-white">{language === 'ua' ? 'ІНТЕРАКТИВНИЙ ПРОТОТИП FIGMA' : 'INTERACTIVE FIGMA PROTOTYPE'}</span>
+                      <span className="text-neutral-600">//</span>
+                      <span className="text-neutral-400 hidden sm:inline">{language === 'ua' ? 'Клікабельний прототип у реальному часі' : 'Live clickable prototype'}</span>
+                    </div>
+
+                    <span className="text-neutral-500 text-[11px] hidden sm:inline font-mono">
+                      {language === 'ua' ? 'Масштаб 100% / Auto' : '100% / Auto Scale'}
+                    </span>
+                  </div>
+
+                  <div className="w-full aspect-[16/10] min-h-[480px] sm:min-h-[600px] bg-neutral-950 border border-neutral-800 rounded-sm overflow-hidden shadow-inner relative">
+                    <iframe
+                      src={figmaEmbedSrc!}
+                      title={`${resolvedProjectTitle} Figma Prototype`}
+                      className="w-full h-full border-0 absolute inset-0"
+                      allowFullScreen
+                    />
+                  </div>
+
+                  <div className="w-full px-1 text-[11px] font-mono text-neutral-500">
+                    {language === 'ua' 
+                      ? 'Порада: ви можете клікати по елементах всередині фрейму або масштабувати макет коліщатком миші.' 
+                      : 'Tip: interact with prototype hot-spots directly inside the frame or zoom with mouse scroll.'}
+                  </div>
+                </div>
               ) : (
+                /* Standard High-Fidelity Artwork / Device View */
+                <>
+                  {project.category === 'ui-ux' ? (
                 /* UI/UX Simulated Interactive Device Frame */
-                <div className="bg-neutral-950 border border-neutral-800 p-1 sm:p-2 md:p-3 flex justify-center items-center shadow-inner">
+                <div className="bg-neutral-950 border border-neutral-800 p-1 sm:p-2 md:p-3 flex justify-center items-center shadow-inner rounded-sm">
                   <div
-                    className={`transition-all duration-500 overflow-hidden border border-neutral-700 shadow-2xl bg-neutral-900 ${
+                    className={`transition-all duration-300 overflow-hidden border border-neutral-700 shadow-2xl bg-neutral-900 ${
                       deviceView === 'desktop'
-                        ? 'w-full rounded-t-lg'
+                        ? 'w-full rounded-lg'
                         : 'w-full max-w-[360px] aspect-[9/19] rounded-3xl p-2 border-4 border-neutral-700'
                     }`}
                   >
                     {/* Simulated browser/device chrome */}
                     {deviceView === 'desktop' ? (
-                      <div className="h-8 bg-neutral-900 border-b border-neutral-800 flex items-center justify-between px-4 gap-2">
+                      <div className="h-8 bg-neutral-900 border-b border-neutral-800 flex items-center justify-between px-4 gap-2 select-none">
                         <div className="flex items-center gap-1.5">
                           <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
                           <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
                           <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
                           <span className="text-[10px] font-mono text-neutral-400 ml-2 hidden md:inline truncate max-w-[200px]">
-                            {project.title}
+                            {resolvedProjectTitle}
                           </span>
                         </div>
                         <div className="bg-neutral-950 px-4 py-0.5 rounded text-[10px] font-mono text-neutral-400 border border-neutral-800/80 max-w-sm truncate text-center">
                           https://{project.slug}.internal/terminal
                         </div>
                         <div className="flex items-center gap-2">
+                          {allImages.length > 1 && (
+                            <div className="flex items-center gap-1 font-mono text-[10px] text-neutral-400 bg-neutral-950 px-2 py-0.5 rounded border border-neutral-800">
+                              <button
+                                onClick={handlePrevImage}
+                                className="p-0.5 hover:text-white transition-colors cursor-pointer"
+                                title={t.prev}
+                              >
+                                <ChevronLeft className="w-3 h-3" />
+                              </button>
+                              <span>{activeImageIndex + 1}/{allImages.length}</span>
+                              <button
+                                onClick={handleNextImage}
+                                className="p-0.5 hover:text-white transition-colors cursor-pointer"
+                                title={t.next}
+                              >
+                                <ChevronRight className="w-3 h-3" />
+                              </button>
+                            </div>
+                          )}
                           <button
                             onClick={() => setIsFullscreen(true)}
                             title={t.fullscreen}
@@ -394,19 +557,21 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                         </div>
                       </div>
                     ) : (
-                      <div className="h-4 flex justify-center items-center">
+                      <div className="h-4 flex justify-center items-center select-none">
                         <div className="w-16 h-2 bg-neutral-700 rounded-full" />
                       </div>
                     )}
 
-                    {/* Viewport Frame with Smart Sizing */}
+                    {/* Viewport Frame with Single Continuous Scroll (No nested double scroll) */}
                     <div
                       className={`relative group/viewer w-full bg-neutral-950 transition-all ${
                         deviceView === 'desktop'
                           ? fitMode === 'fill'
-                            ? 'h-[550px] sm:h-[680px] md:h-[800px] overflow-y-auto overscroll-contain custom-scrollbar'
-                            : 'aspect-[16/10] max-h-[75vh] flex items-center justify-center p-2'
-                          : 'h-full overflow-y-auto rounded-2xl overscroll-contain custom-scrollbar'
+                            ? 'w-full h-auto'
+                            : 'w-full h-auto max-h-[80vh] flex items-center justify-center p-2 sm:p-4 overflow-hidden'
+                          : fitMode === 'fill'
+                          ? 'w-full h-auto'
+                          : 'max-h-[80vh] flex items-center justify-center p-2 overflow-hidden'
                       }`}
                     >
                       {/* Interactive Next/Prev arrows on hover inside viewer */}
@@ -416,7 +581,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                             type="button"
                             onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
                             title={language === 'ua' ? 'Попередній макет' : 'Previous screen'}
-                            className="absolute left-3 top-1/2 -translate-y-1/2 z-30 p-2 bg-black/80 hover:bg-black text-white border border-neutral-700 backdrop-blur-md opacity-0 group-hover/viewer:opacity-100 transition-opacity cursor-pointer shadow-lg rounded-sm"
+                            className="sticky top-1/2 -translate-y-1/2 float-left ml-3 z-30 p-2 bg-black/80 hover:bg-black text-white border border-neutral-700 backdrop-blur-md opacity-0 group-hover/viewer:opacity-100 transition-opacity cursor-pointer shadow-lg rounded-full"
                           >
                             <ChevronLeft className="w-5 h-5" />
                           </button>
@@ -424,7 +589,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                             type="button"
                             onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
                             title={language === 'ua' ? 'Наступний макет' : 'Next screen'}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 z-30 p-2 bg-black/80 hover:bg-black text-white border border-neutral-700 backdrop-blur-md opacity-0 group-hover/viewer:opacity-100 transition-opacity cursor-pointer shadow-lg rounded-sm"
+                            className="sticky top-1/2 -translate-y-1/2 float-right mr-3 z-30 p-2 bg-black/80 hover:bg-black text-white border border-neutral-700 backdrop-blur-md opacity-0 group-hover/viewer:opacity-100 transition-opacity cursor-pointer shadow-lg rounded-full"
                           >
                             <ChevronRight className="w-5 h-5" />
                           </button>
@@ -433,7 +598,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
 
                       <img
                         src={currentImage}
-                        alt={`${project.title} - screen ${activeImageIndex + 1}`}
+                        alt={`${resolvedProjectTitle} - screen ${activeImageIndex + 1}`}
                         loading="eager"
                         decoding="async"
                         style={{
@@ -444,8 +609,109 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                           deviceView === 'desktop'
                             ? fitMode === 'fill'
                               ? 'w-full h-auto block'
-                              : 'w-full h-full object-contain'
-                            : 'w-full h-auto block rounded-xl'
+                              : 'max-h-[76vh] w-auto max-w-full h-auto object-contain block mx-auto'
+                            : fitMode === 'fill'
+                            ? 'w-full h-auto block rounded-2xl'
+                            : 'max-h-[76vh] w-auto max-w-full h-auto object-contain block mx-auto rounded-2xl'
+                        }`}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* Clean High-Fidelity Artwork Showcase (3D Renders, Editorial Books, Graphic Art, Branding) */
+                <div className="bg-neutral-950 border border-neutral-800 p-1 sm:p-2 md:p-3 flex justify-center items-center shadow-inner rounded-sm">
+                  <div className="w-full transition-all duration-300 overflow-hidden border border-neutral-800 shadow-2xl bg-neutral-900 rounded-sm">
+                    {/* Sleek minimal showcase bar */}
+                    <div className="h-8 bg-neutral-900 border-b border-neutral-800 flex items-center justify-between px-4 gap-2 select-none font-mono text-[11px]">
+                      <div className="flex items-center gap-2 truncate text-neutral-300">
+                        <span className="w-2 h-2 rounded-full bg-cyan-400 shrink-0" />
+                        <span className="uppercase tracking-wider font-medium truncate max-w-[200px] sm:max-w-none">
+                          {resolvedProjectTitle}
+                        </span>
+                        <span className="text-neutral-600 hidden sm:inline">//</span>
+                        <span className="text-neutral-500 uppercase tracking-widest text-[10px] hidden sm:inline">
+                          {getLocalizedText(project.categoryLabel, language, { ua: 'Візуальний макет', en: 'Visual Asset' })}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        {allImages.length > 1 && (
+                          <div className="flex items-center gap-1 font-mono text-[10px] text-neutral-400 bg-neutral-950 px-2 py-0.5 rounded border border-neutral-800">
+                            <button
+                              onClick={handlePrevImage}
+                              className="p-0.5 hover:text-white transition-colors cursor-pointer"
+                              title={t.prev}
+                            >
+                              <ChevronLeft className="w-3 h-3" />
+                            </button>
+                            <span className="text-cyan-300 font-medium">
+                              {activeImageIndex + 1}/{allImages.length}
+                            </span>
+                            <button
+                              onClick={handleNextImage}
+                              className="p-0.5 hover:text-white transition-colors cursor-pointer"
+                              title={t.next}
+                            >
+                              <ChevronRight className="w-3 h-3" />
+                            </button>
+                          </div>
+                        )}
+                        <button
+                          onClick={() => setIsFullscreen(true)}
+                          title={t.fullscreen}
+                          className="text-neutral-400 hover:text-white transition-colors cursor-pointer p-1"
+                        >
+                          <Expand className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Viewport Frame with Clean Undistorted Image */}
+                    <div
+                      className={`relative group/viewer w-full bg-neutral-950 transition-all flex items-center justify-center ${
+                        fitMode === 'fill'
+                          ? 'w-full h-auto min-h-[300px]'
+                          : 'max-h-[82vh] p-2 sm:p-4 overflow-hidden'
+                      }`}
+                    >
+                      {/* Interactive Next/Prev arrows on hover */}
+                      {allImages.length > 1 && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
+                            title={language === 'ua' ? 'Попередній макет' : 'Previous image'}
+                            className="sticky top-1/2 -translate-y-1/2 float-left ml-3 z-30 p-2 sm:p-2.5 bg-black/80 hover:bg-black text-white border border-neutral-700 backdrop-blur-md opacity-0 group-hover/viewer:opacity-100 transition-opacity cursor-pointer shadow-xl rounded-full"
+                          >
+                            <ChevronLeft className="w-5 h-5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
+                            title={language === 'ua' ? 'Наступний макет' : 'Next image'}
+                            className="sticky top-1/2 -translate-y-1/2 float-right mr-3 z-30 p-2 sm:p-2.5 bg-black/80 hover:bg-black text-white border border-neutral-700 backdrop-blur-md opacity-0 group-hover/viewer:opacity-100 transition-opacity cursor-pointer shadow-xl rounded-full"
+                          >
+                            <ChevronRight className="w-5 h-5" />
+                          </button>
+                        </>
+                      )}
+
+                      <img
+                        src={currentImage}
+                        alt={`${resolvedProjectTitle} - screen ${activeImageIndex + 1}`}
+                        loading="eager"
+                        decoding="async"
+                        style={{
+                          transform: 'translateZ(0)',
+                          backfaceVisibility: 'hidden'
+                        }}
+                        onClick={() => setIsFullscreen(true)}
+                        title={language === 'ua' ? 'Натисніть для перегляду на весь екран' : 'Click to view fullscreen'}
+                        className={`transition-all duration-300 block mx-auto cursor-zoom-in select-none ${
+                          fitMode === 'fill'
+                            ? 'w-full h-auto max-w-full'
+                            : 'max-h-[76vh] w-auto max-w-full h-auto object-contain'
                         }`}
                       />
                     </div>
@@ -485,6 +751,8 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                   </div>
                 </div>
               )}
+                </>
+              )}
             </div>
 
             {/* Strategic Product Pillars: Challenge -> Solution -> Impact */}
@@ -504,8 +772,9 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                   {/* Pillar 1: Challenge */}
                   {challengeText && (
                     <div className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <span className="font-mono text-xs text-red-400 border border-red-500/40 px-2 py-0.5">01 // CHALLENGE</span>
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-red-400 shrink-0 shadow-[0_0_8px_rgba(248,113,113,0.5)]" />
+                        <span className="font-mono text-[11px] text-neutral-500">01</span>
                       </div>
                       <h3 className="text-xl font-medium uppercase tracking-tight">{t.challenge}</h3>
                       <p className="text-neutral-400 font-light leading-relaxed text-sm md:text-base whitespace-pre-line">
@@ -517,8 +786,9 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                   {/* Pillar 2: Solution */}
                   {solutionText && (
                     <div className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <span className="font-mono text-xs text-cyan-400 border border-cyan-500/40 px-2 py-0.5">02 // SOLUTION</span>
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-cyan-400 shrink-0 shadow-[0_0_8px_rgba(34,211,238,0.5)]" />
+                        <span className="font-mono text-[11px] text-neutral-500">02</span>
                       </div>
                       <h3 className="text-xl font-medium uppercase tracking-tight">{t.solution}</h3>
                       <p className="text-neutral-400 font-light leading-relaxed text-sm md:text-base whitespace-pre-line">
@@ -530,8 +800,9 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                   {/* Pillar 3: Impact */}
                   {impactText && (
                     <div className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <span className="font-mono text-xs text-emerald-400 border border-emerald-500/40 px-2 py-0.5">03 // IMPACT</span>
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
+                        <span className="font-mono text-[11px] text-neutral-500">03</span>
                       </div>
                       <h3 className="text-xl font-medium uppercase tracking-tight">{t.impact}</h3>
                       <p className="text-neutral-400 font-light leading-relaxed text-sm md:text-base whitespace-pre-line">
@@ -542,22 +813,6 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                 </div>
               );
             })()}
-
-            {/* Metrics Callout Strip */}
-            {project.metrics && project.metrics.length > 0 && (
-              <div className="bg-[#121212] border border-neutral-800 p-6 md:p-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
-                {project.metrics.map((m, idx) => (
-                  <div key={idx} className="border-l-2 border-neutral-700 pl-4">
-                    <div className="text-3xl md:text-5xl font-semibold tracking-tighter text-white">
-                      {m.value}
-                    </div>
-                    <div className="text-xs font-mono uppercase tracking-widest text-neutral-400 mt-1">
-                      {m.label[language]}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
 
             {/* Deep Dive Gallery: All Project Screens */}
             {allImages.length > 1 && (
@@ -597,7 +852,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                       <div className="aspect-[16/10] bg-neutral-900 overflow-hidden relative">
                         <img
                           src={imgUrl}
-                          alt={`${project.title} - screen ${idx + 1}`}
+                          alt={`${resolvedProjectTitle} - screen ${idx + 1}`}
                           className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
                         />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
@@ -638,12 +893,25 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
 
             {/* Design Tokens & Typography Specimen */}
             {(() => {
-              const fontList = project.designSystem?.fonts || [];
+              const rawFonts = project.designSystem?.fonts;
+              const fontList: string[] = Array.isArray(rawFonts)
+                ? rawFonts
+                : (rawFonts && typeof rawFonts === 'object' ? (rawFonts[language] || rawFonts.ua || rawFonts.en || []) : []);
+
+              const fontsDescription = project.designSystem?.fontsDescription;
               const colorList = project.designSystem?.colors || [];
+              const colorsDescription = project.designSystem?.colorsDescription;
               const gridName = project.designSystem?.gridType || '';
-              const hasDesignSystem = fontList.length > 0 || colorList.length > 0 || Boolean(gridName);
+              const hasDesignSystem = fontList.length > 0 || colorList.length > 0 || Boolean(fontsDescription) || Boolean(colorsDescription) || Boolean(gridName);
 
               if (!hasDesignSystem) return null;
+
+              const getColorName = (name: string | { ua: string; en: string }) => {
+                if (typeof name === 'object' && name !== null) {
+                  return name[language] || name.ua || name.en || '';
+                }
+                return String(name || '');
+              };
 
               return (
                 <div className="border-t border-neutral-800 pt-12 space-y-8">
@@ -657,14 +925,23 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* Font Hierarchy Specimen */}
-                    {fontList.length > 0 && (
-                      <div className={`bg-neutral-900/60 border border-neutral-800 p-6 space-y-4 ${colorList.length === 0 ? 'md:col-span-2' : ''}`}>
-                        <span className="text-xs font-mono uppercase tracking-widest text-neutral-400 block mb-2">
-                          {t.fonts}
-                        </span>
+                    {/* Font Hierarchy Specimen & Typography Description */}
+                    {(fontList.length > 0 || fontsDescription) && (
+                      <div className={`bg-neutral-900/60 border border-neutral-800 p-6 space-y-4 ${colorList.length === 0 && !colorsDescription ? 'md:col-span-2' : ''}`}>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-mono uppercase tracking-widest text-neutral-400 block mb-2">
+                            {t.fonts}
+                          </span>
+                        </div>
+
+                        {fontsDescription && (
+                          <p className="text-xs sm:text-sm text-neutral-300 font-light leading-relaxed border-b border-neutral-800/80 pb-3">
+                            {getLocalizedText(fontsDescription, language, { ua: '', en: '' })}
+                          </p>
+                        )}
+
                         {fontList.map((f, i) => (
-                          <div key={i} className="border-b border-neutral-800/80 pb-3">
+                          <div key={i} className="border-b border-neutral-800/80 last:border-0 pb-3 last:pb-0">
                             <div className="text-2xl font-semibold tracking-tight">{f}</div>
                             <div className="text-xs font-mono text-neutral-500 mt-1">
                               ABCDEFGHIJKLMOPQRSTUVWXYZ 0123456789
@@ -674,35 +951,46 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                       </div>
                     )}
 
-                    {/* Color Token Swatches */}
-                    {colorList.length > 0 && (
+                    {/* Color Token Swatches & Palette Description */}
+                    {(colorList.length > 0 || colorsDescription) && (
                       <div className={`bg-neutral-900/60 border border-neutral-800 p-6 space-y-4 ${fontList.length === 0 ? 'md:col-span-2' : ''}`}>
-                        <span className="text-xs font-mono uppercase tracking-widest text-neutral-400 block mb-2">
-                          {t.colors} (Click to copy hex)
-                        </span>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                          {colorList.map((c, i) => (
-                            <button
-                              key={i}
-                              onClick={() => handleCopyHex(c.hex)}
-                              className="group flex flex-col p-2.5 bg-neutral-950 border border-neutral-800 hover:border-neutral-600 text-left transition-all cursor-pointer"
-                            >
-                              <div
-                                className="w-full aspect-[2/1] rounded-xs mb-2 border border-white/10"
-                                style={{ backgroundColor: c.hex }}
-                              />
-                              <span className="text-[11px] font-medium text-neutral-300 truncate">{c.name}</span>
-                              <div className="flex items-center justify-between text-[10px] font-mono text-neutral-500 mt-0.5">
-                                <span>{c.hex}</span>
-                                {copiedHex === c.hex ? (
-                                  <Check className="w-3 h-3 text-emerald-400" />
-                                ) : (
-                                  <Copy className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                )}
-                              </div>
-                            </button>
-                          ))}
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-mono uppercase tracking-widest text-neutral-400 block mb-2">
+                            {t.colors} {colorList.length > 0 && <span className="text-neutral-500 font-normal lowercase">(click to copy hex)</span>}
+                          </span>
                         </div>
+
+                        {colorsDescription && (
+                          <p className="text-xs sm:text-sm text-neutral-300 font-light leading-relaxed border-b border-neutral-800/80 pb-3">
+                            {getLocalizedText(colorsDescription, language, { ua: '', en: '' })}
+                          </p>
+                        )}
+
+                        {colorList.length > 0 && (
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            {colorList.map((c, i) => (
+                              <button
+                                key={i}
+                                onClick={() => handleCopyHex(c.hex)}
+                                className="group flex flex-col p-2.5 bg-neutral-950 border border-neutral-800 hover:border-neutral-600 text-left transition-all cursor-pointer"
+                              >
+                                <div
+                                  className="w-full aspect-[2/1] rounded-xs mb-2 border border-white/10"
+                                  style={{ backgroundColor: c.hex }}
+                                />
+                                <span className="text-[11px] font-medium text-neutral-300 truncate">{getColorName(c.name)}</span>
+                                <div className="flex items-center justify-between text-[10px] font-mono text-neutral-500 mt-0.5">
+                                  <span>{c.hex}</span>
+                                  {copiedHex === c.hex ? (
+                                    <Check className="w-3 h-3 text-emerald-400" />
+                                  ) : (
+                                    <Copy className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                  )}
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -733,31 +1021,46 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
 
             {/* Footer actions inside modal */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-neutral-800 pt-8">
-              {project.liveLink && (
-                <a
-                  href={project.liveLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-6 py-3 bg-[#f4f4f0] text-[#0a0a0a] font-medium text-sm uppercase tracking-wider hover:bg-white transition-colors cursor-pointer"
-                >
-                  <span>{t.visitLive}</span>
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-              )}
+              <div className="flex flex-wrap items-center gap-3">
+                {hasFigmaDirect && (
+                  <a
+                    href={figmaDirectUrl!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-6 py-3 bg-[#1e1e1e] hover:bg-[#282828] text-white font-medium text-sm uppercase tracking-wider border border-[#a259ff]/70 hover:border-[#a259ff] transition-all cursor-pointer shadow-lg"
+                  >
+                    <Figma className="w-4 h-4 text-[#0acf83]" />
+                    <span>{language === 'ua' ? 'Перейти в макет Figma' : 'Open in Figma'}</span>
+                    <ExternalLink className="w-4 h-4 text-[#a259ff]" />
+                  </a>
+                )}
+
+                {hasLiveLink && (
+                  <a
+                    href={liveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-6 py-3 bg-[#f4f4f0] text-[#0a0a0a] font-medium text-sm uppercase tracking-wider hover:bg-white transition-colors cursor-pointer"
+                  >
+                    <span>{t.visitLive}</span>
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
 
               <div className="flex items-center gap-4 font-mono text-xs text-neutral-400 ml-auto">
                 <button
                   onClick={() => onSelectProject(prevProject)}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
-                  ← {prevProject.title}
+                  ← {prevProjectTitle}
                 </button>
                 <span>/</span>
                 <button
                   onClick={() => onSelectProject(nextProject)}
                   className="hover:text-white transition-colors cursor-pointer"
                 >
-                  {nextProject.title} →
+                  {nextProjectTitle} →
                 </button>
               </div>
             </div>
@@ -780,7 +1083,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="font-mono text-xs uppercase tracking-widest text-neutral-400 flex items-center gap-2">
-              <span className="text-white font-medium truncate max-w-[200px] sm:max-w-none">{project.title}</span>
+              <span className="text-white font-medium truncate max-w-[200px] sm:max-w-none">{resolvedProjectTitle}</span>
               <span className="text-neutral-600">//</span>
               <span className="text-neutral-400">{t.fullscreen}</span>
               {allImages.length > 1 && (
@@ -873,7 +1176,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
             <img
               key={currentImage}
               src={currentImage}
-              alt={`${project.title} - screen ${activeImageIndex + 1}`}
+              alt={`${getLocalizedText(project.title, language, { ua: 'Проєкт', en: 'Project' })} - screen ${activeImageIndex + 1}`}
               loading="eager"
               decoding="async"
               style={{

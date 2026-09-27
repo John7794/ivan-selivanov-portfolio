@@ -126,7 +126,7 @@ export function translateToEnglishIfNeeded(uaText: string, enCandidate?: string,
 export function getLocalizedText(
   localized: { ua?: string; en?: string } | string | undefined | null,
   language: Language,
-  fallback: { ua: string; en: string }
+  fallback: { ua: string; en: string } = { ua: '', en: '' }
 ): string {
   if (!localized) {
     return fallback[language];

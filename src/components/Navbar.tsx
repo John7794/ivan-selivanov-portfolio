@@ -144,9 +144,8 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const activeAddress = getLocalizedText(
     contacts?.address || contacts?.location || settings?.location,
-    language,
-    { ua: 'Львів, Україна (Доступний по всьому світу)', en: 'Lviv, Ukraine (Available Worldwide)' }
-  );
+    language
+  ).trim();
 
   const displayName = getLocalizedText(
     { ua: name || settings?.name?.ua, en: settings?.name?.en || name },
@@ -156,7 +155,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full p-4 sm:p-6 flex justify-between items-center z-40 bg-[#0a0a0a]/85 backdrop-blur-md border-b border-neutral-900/90 transition-all">
+      <header className="fixed top-0 left-0 w-full p-4 sm:p-6 flex justify-between items-center z-50 bg-[#0a0a0a]/85 backdrop-blur-md border-b border-neutral-900/90 transition-all">
         {/* Brand Monogram "IS" */}
         <a
           href="#"
@@ -165,9 +164,6 @@ export const Navbar: React.FC<NavbarProps> = ({
         >
           <span className="relative font-mono tracking-widest group-hover:tracking-[0.25em] transition-all duration-300">
             IS
-          </span>
-          <span className="hidden sm:inline-block font-mono text-[10px] uppercase tracking-widest text-neutral-400 font-normal border-l border-neutral-800 pl-3">
-            {displayName.toUpperCase()}
           </span>
         </a>
 
@@ -263,7 +259,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Enhanced Popup Menu Overlay */}
       <AnimatePresence>
         {isMenuOpen && (
-          <div className="fixed inset-0 z-50 flex flex-col">
+          <div className="fixed inset-0 z-[60] flex flex-col">
             {/* Dark Backdrop with High-Fidelity Blur */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -370,7 +366,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                           {item.num}
                         </span>
                         <div>
-                          <h2 className="text-2xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight group-hover:text-white text-neutral-200 transition-colors">
+                          <h2 className="text-2xl sm:text-4xl md:text-5xl font-medium uppercase tracking-tight text-[#f4f4f0] group-hover:text-white transition-colors">
                             {language === 'ua' ? item.titleUa : item.titleEn}
                           </h2>
                           <p className="font-mono text-xs text-neutral-500 group-hover:text-neutral-400 transition-colors mt-1">

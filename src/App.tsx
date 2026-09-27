@@ -29,7 +29,7 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<ProjectCategory>('all');
   const [selectedStatus, setSelectedStatus] = useState<ProjectStatus>('all');
   const [activeProject, setActiveProject] = useState<Project | null>(null);
-  const [layoutMode, setLayoutMode] = useState<'bento-masonry' | 'bento-grid'>('bento-masonry');
+  const [layoutMode, setLayoutMode] = useState<'bento-masonry' | 'bento-grid'>('bento-grid');
   const [legalDoc, setLegalDoc] = useState<LegalDocType | null>(null);
   const [isSheetsModalOpen, setIsSheetsModalOpen] = useState(false);
   const [isCookieBannerOpen, setIsCookieBannerOpen] = useState(false);
@@ -123,8 +123,10 @@ export default function App() {
 
   // Dynamic Categories derived directly from Google Sheets Projects & custom tabs
   const categoryLabels = useMemo(() => {
+    const allCatUa = data.settings.ui?.filterCategoryAll?.ua || 'Всі напрямки';
+    const allCatEn = data.settings.ui?.filterCategoryAll?.en || 'All Disciplines';
     const list: FilterOption[] = [
-      { id: 'all', ua: 'Всі напрямки', en: 'All Disciplines' }
+      { id: 'all', ua: allCatUa, en: allCatEn }
     ];
 
     // 1. If explicit categories sheet was provided
@@ -161,12 +163,14 @@ export default function App() {
     }
 
     return list;
-  }, [data.projects, data.categories]);
+  }, [data.projects, data.categories, data.settings.ui]);
 
   // Dynamic Statuses derived directly from Google Sheets Projects & custom tabs
   const statusLabels = useMemo(() => {
+    const allStatUa = data.settings.ui?.filterStatusAll?.ua || 'Всі статуси';
+    const allStatEn = data.settings.ui?.filterStatusAll?.en || 'All';
     const list: FilterOption[] = [
-      { id: 'all', ua: 'Всі статуси', en: 'All' }
+      { id: 'all', ua: allStatUa, en: allStatEn }
     ];
 
     // 1. If explicit statuses sheet was provided
@@ -203,7 +207,7 @@ export default function App() {
     }
 
     return list;
-  }, [data.projects, data.statuses]);
+  }, [data.projects, data.statuses, data.settings.ui]);
 
   // Auto-reset filter if active selection is no longer present
   useEffect(() => {
@@ -259,6 +263,17 @@ export default function App() {
       return matchesCategory && matchesStatus;
     });
   }, [data.projects, selectedCategory, selectedStatus]);
+
+  const featuredIndices = useMemo(() => {
+    const map = new Map<string, number>();
+    let count = 0;
+    filteredProjects.forEach(p => {
+      if (p.isFeatured) {
+        map.set(p.id, count++);
+      }
+    });
+    return map;
+  }, [filteredProjects]);
 
   const activeTestimonial = activeProject?.testimonialId
     ? data.testimonials.find(t => t.id === activeProject.testimonialId)
@@ -336,23 +351,38 @@ export default function App() {
             <span className="text-emerald-400 font-semibold">
               {getLocalizedText(data.settings.heroTag, language, DEFAULT_SETTINGS.heroTag || { ua: 'Готовий до співпраці', en: 'Available for work' })}
             </span>
-            <span className="text-neutral-600 hidden sm:inline">|</span>
-            <span className="text-neutral-300">
-              {getLocalizedText(data.settings.title, language, DEFAULT_SETTINGS.title)}
-            </span>
-            <span className="text-neutral-600 hidden sm:inline">|</span>
-            <span className="hidden sm:inline text-neutral-500">
-              {getLocalizedText(data.settings.location, language, DEFAULT_SETTINGS.location)}
-            </span>
+            {Boolean(getLocalizedText(data.settings.title, language).trim()) && (
+              <>
+                <span className="text-neutral-600 hidden sm:inline">|</span>
+                <span className="text-neutral-300">
+                  {getLocalizedText(data.settings.title, language)}
+                </span>
+              </>
+            )}
+            {Boolean(getLocalizedText(data.settings.location, language).trim()) && (
+              <>
+                <span className="text-neutral-600 hidden sm:inline">|</span>
+                <span className="hidden sm:inline text-neutral-500">
+                  {getLocalizedText(data.settings.location, language)}
+                </span>
+              </>
+            )}
           </div>
 
           <div className="relative">
             {/* Main Monumental Heading: SEL over IVAN, IVAN solid fill, SEL & OV outline, OV after IVAN */}
-            <h1 className="text-[13vw] lg:text-[11vw] xl:text-[12vw] leading-[0.82] font-black tracking-tighter uppercase select-none flex flex-col items-start shrink-0 mb-8 lg:mb-12">
-              <span className="text-stroke-light inline-block">SEL</span>
+            <h1 
+              aria-label="SELIVANOV"
+              className="hero-monument-title text-[13vw] lg:text-[11vw] xl:text-[12vw] leading-[0.82] font-black tracking-tighter uppercase select-none pointer-events-none flex flex-col items-start shrink-0 mb-8 lg:mb-12"
+            >
+              <span className="text-stroke-layer inline-block" data-text="SEL">
+                <span className="invisible pointer-events-none select-none">SEL</span>
+              </span>
               <span className="inline-flex items-baseline">
                 <span className="text-[#f4f4f0]">IVAN</span>
-                <span className="text-stroke-light">OV</span>
+                <span className="text-stroke-layer inline-block" data-text="OV">
+                  <span className="invisible pointer-events-none select-none">OV</span>
+                </span>
               </span>
             </h1>
 
@@ -388,7 +418,7 @@ export default function App() {
                   onClick={scrollToWork}
                   className="flex items-center gap-4 text-xs font-mono uppercase tracking-widest text-[#f4f4f0] bg-[#0a0a0a]/70 hover:bg-[#0a0a0a] backdrop-blur-md px-6 py-4 border border-neutral-800 transition-colors group cursor-pointer"
                 >
-                  <span>{language === 'ua' ? 'Дослідити кейси' : 'Explore Portfolio'}</span>
+                  <span>{getLocalizedText(data.settings.ui?.heroCta, language, { ua: 'Дослідити кейси', en: 'Explore Portfolio' })}</span>
                   <ArrowDown className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
                 </a>
               </div>
@@ -415,15 +445,15 @@ export default function App() {
       <section id="work" className="scroll-mt-20 pt-8 pb-24 px-6 lg:px-12 bg-[#0d0d0d] text-[#f4f4f0] border-t border-neutral-900 relative">
         <div className="max-w-[1600px] mx-auto">
           {/* Sticky Section Header */}
-          <div className="sticky top-[58px] sm:top-[73px] z-30 bg-[#0d0d0d]/95 backdrop-blur-md -mx-6 px-6 lg:-mx-12 lg:px-12 pt-4 pb-0 mb-10 transition-all">
+          <div className="sticky top-[58px] sm:top-[73px] z-35 bg-[#0d0d0d]/95 backdrop-blur-md -mx-6 px-6 lg:-mx-12 lg:px-12 pt-4 pb-0 mb-10 transition-all">
             <div className="max-w-[1600px] mx-auto">
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6">
                 <div>
                   <span className="font-mono text-xs uppercase tracking-widest text-neutral-400 block mb-1">
-                    01 // INDEXED CASE STUDIES
+                    {getLocalizedText(data.settings.ui?.workIndex, language, { ua: '01 // INDEXED CASE STUDIES', en: '01 // INDEXED CASE STUDIES' })}
                   </span>
                   <h2 className="text-3xl md:text-5xl font-medium tracking-tight uppercase">
-                    {language === 'ua' ? 'Вибрані Роботи' : 'Selected Works'}
+                    {getLocalizedText(data.settings.ui?.workTitle, language, { ua: 'Вибрані Роботи', en: 'Selected Works' })}
                   </h2>
                 </div>
 
@@ -433,7 +463,7 @@ export default function App() {
                     <button
                       type="button"
                       onClick={() => setLayoutMode('bento-masonry')}
-                      title={language === 'ua' ? 'Каскадний вигляд (Masonry)' : 'Masonry View'}
+                      title={getLocalizedText(data.settings.ui?.layoutCascade, language, { ua: 'Каскадний вигляд (Masonry)', en: 'Masonry View' })}
                       className={`px-3 py-1.5 flex items-center gap-1.5 cursor-pointer transition-all ${
                         layoutMode === 'bento-masonry'
                           ? 'bg-[#f4f4f0] text-black font-semibold shadow-sm'
@@ -441,13 +471,15 @@ export default function App() {
                       }`}
                     >
                       <Columns3 className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">{language === 'ua' ? 'Каскад' : 'Masonry'}</span>
+                      <span className="hidden sm:inline">
+                        {getLocalizedText(data.settings.ui?.layoutCascade, language, { ua: 'Каскад', en: 'Masonry' })}
+                      </span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => setLayoutMode('bento-grid')}
-                      title={language === 'ua' ? 'Модульна сітка (Grid)' : 'Grid View'}
+                      title={getLocalizedText(data.settings.ui?.layoutGrid, language, { ua: 'Модульна сітка (Grid)', en: 'Grid View' })}
                       className={`px-3 py-1.5 flex items-center gap-1.5 cursor-pointer transition-all ${
                         layoutMode === 'bento-grid'
                           ? 'bg-[#f4f4f0] text-black font-semibold shadow-sm'
@@ -455,7 +487,9 @@ export default function App() {
                       }`}
                     >
                       <LayoutGrid className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">{language === 'ua' ? 'Сітка' : 'Grid'}</span>
+                      <span className="hidden sm:inline">
+                        {getLocalizedText(data.settings.ui?.layoutGrid, language, { ua: 'Сітка', en: 'Grid' })}
+                      </span>
                     </button>
                   </div>
 
@@ -475,7 +509,7 @@ export default function App() {
             {/* Category Filter Axis */}
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-neutral-500 uppercase tracking-wider mr-2 hidden sm:inline">
-                {language === 'ua' ? 'Напрямок:' : 'Discipline:'}
+                {getLocalizedText(data.settings.ui?.filterCategoryLabel, language, { ua: 'Напрямок:', en: 'Discipline:' })}
               </span>
               {categoryLabels.map(cat => (
                 <button
@@ -495,7 +529,7 @@ export default function App() {
             {/* Status Filter Axis */}
             <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-neutral-900">
               <span className="text-neutral-500 uppercase tracking-wider mr-2 hidden sm:inline">
-                {language === 'ua' ? 'Статус:' : 'Status:'}
+                {getLocalizedText(data.settings.ui?.filterStatusLabel, language, { ua: 'Статус:', en: 'Status:' })}
               </span>
               {statusLabels.map(st => (
                 <button
@@ -522,22 +556,26 @@ export default function App() {
                     key={project.id}
                     project={project}
                     index={index}
+                    featuredIndex={featuredIndices.get(project.id) ?? 0}
                     language={language}
                     onSelect={setActiveProject}
                     isBentoGrid={false}
+                    ui={data.settings.ui}
                   />
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 [grid-auto-flow:_dense] gap-6">
                 {filteredProjects.map((project, index) => (
                   <ProjectCard
                     key={project.id}
                     project={project}
                     index={index}
+                    featuredIndex={featuredIndices.get(project.id) ?? 0}
                     language={language}
                     onSelect={setActiveProject}
                     isBentoGrid={true}
+                    ui={data.settings.ui}
                   />
                 ))}
               </div>
@@ -567,22 +605,28 @@ export default function App() {
       </section>
 
       {/* Expertise & Architecture (Bento Grid) */}
-      <BentoExpertise language={language} expertise={data.settings.expertise} />
+      <BentoExpertise language={language} expertise={data.settings.expertise} ui={data.settings.ui} />
 
       {/* Philosophy Quote */}
       <section className="py-32 px-6 lg:px-12 flex items-center justify-center bg-[#070707] border-t border-neutral-900">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-3xl md:text-5xl lg:text-6xl font-medium leading-[1.1] tracking-tight text-[#f4f4f0]">
-            "Good design is <span className="italic font-serif text-neutral-500">as little design</span> as possible. It concentrates on the essential aspects, and the products are not burdened with non-essentials."
+            {getLocalizedText(data.settings.ui?.quoteText, language, {
+              ua: '"Good design is as little design as possible. It concentrates on the essential aspects, and the products are not burdened with non-essentials."',
+              en: '"Good design is as little design as possible. It concentrates on the essential aspects, and the products are not burdened with non-essentials."'
+            })}
           </p>
           <p className="mt-8 text-neutral-500 font-mono uppercase tracking-widest text-xs sm:text-sm">
-            — Dieter Rams (Ten Principles for Good Design)
+            {getLocalizedText(data.settings.ui?.quoteAuthor, language, {
+              ua: '— Dieter Rams (Ten Principles for Good Design)',
+              en: '— Dieter Rams (Ten Principles for Good Design)'
+            })}
           </p>
         </div>
       </section>
 
       {/* Experience Timeline */}
-      <ExperienceTimeline experience={data.experience} language={language} />
+      <ExperienceTimeline experience={data.experience} language={language} ui={data.settings.ui} />
 
       {/* Massive Footer with legal modals trigger */}
       <Footer
@@ -599,6 +643,7 @@ export default function App() {
         allProjects={filteredProjects.length > 0 ? filteredProjects : data.projects}
         testimonial={activeTestimonial}
         language={language}
+        ui={data.settings.ui}
         onClose={() => setActiveProject(null)}
         onSelectProject={setActiveProject}
       />
