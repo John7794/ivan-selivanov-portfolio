@@ -57,7 +57,7 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
 
   if (!isOpen) return null;
 
-  const projectsHeadersRow = 'id\ttitle_ua\ttitle_en\tyear\tclient\trole_ua\trole_en\tcategory\tstatus\tfeatured\tthumbnailUrl\theroImage\tliveLink\tfigmaUrl\tfigmaEmbedUrl\ttagline_ua\ttagline_en\toverview_ua\toverview_en\tmetrics\ttools\tpalette\tchallenge_ua\tchallenge_en\tsolution_ua\tsolution_en\timpact_ua\timpact_en\tfonts_ua\tfonts_en\tcolors_ua\tcolors_en';
+  const projectsHeadersRow = 'id\ttitle_ua\ttitle_en\tyear\trole_ua\trole_en\tclient_ua\tclient_en\tcategory\tstatus\tfeatured\tthumbnailUrl\tmobileThumbnailUrl\theroImage\tliveLink\ttagline_ua\ttagline_en\toverview_ua\toverview_en\ttools\tchallenge_ua\tchallenge_en\tsolution_ua\tsolution_en\timpact_ua\timpact_en\tfonts\tfonts_ua\tfonts_en\tpalette\tcolors_ua\tcolors_en\tfigmaUrl\tfigmaEmbedUrl';
 
   const handleCopyProjectsHeaders = () => {
     navigator.clipboard.writeText(projectsHeadersRow);
@@ -374,7 +374,13 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
                     <div className="p-3 bg-black border border-neutral-800 font-mono text-xs text-neutral-300 overflow-x-auto whitespace-pre select-all">
                       {projectsHeadersRow}
                     </div>
-                    <div className="mt-3 text-xs text-neutral-400 space-y-1">
+                    <div className="mt-3 text-xs text-neutral-400 space-y-1.5">
+                      <p>
+                        <strong className="text-emerald-400">client_ua / client_en</strong> — {language === 'ua' ? 'Назва клієнта/замовника окремо українською та англійською мовами (також підтримується спільна колонка "client").' : 'Client name in Ukrainian and English (single "client" column also supported).'}
+                      </p>
+                      <p>
+                        <strong className="text-emerald-400">mobileThumbnailUrl</strong> — {language === 'ua' ? 'Посилання на мобільне прев’ю/скріншот. Якщо це поле заповнено, у кейсі автоматично активується кнопка "Mobile" для інтерактивного мобільного фрейму.' : 'URL to mobile preview/screenshot. When provided, the "Mobile" preview button is automatically enabled in the viewer.'}
+                      </p>
                       <p>
                         <strong className="text-emerald-400">role_ua / role_en</strong> — {language === 'ua' ? 'Ваша посада чи роль у проєкті окремо українською та англійською (наприклад: "Провідний дизайнер" / "Lead Designer"). Також підтримується спільна колонка "role".' : 'Your position or role in the project.'}
                       </p>

@@ -435,7 +435,13 @@ function stripFigJam(text: string | undefined): string {
     .trim();
 }
 
-function parseProjectImages(p: any): { thumbnailUrl: string; galleryUrls: string[] } {
+function parseProjectImages(p: any): { 
+  thumbnailUrl: string; 
+  galleryUrls: string[];
+  mobileThumbnailUrl?: string;
+  mobilePreviewUrl?: string;
+  mobileGalleryUrls?: string[];
+} {
   const images: string[] = [];
 
   const addUrl = (raw: any) => {
@@ -502,9 +508,53 @@ function parseProjectImages(p: any): { thumbnailUrl: string; galleryUrls: string
   const defaultImage = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1600';
   const finalUrls = images.length > 0 ? images : [defaultImage];
 
+  // Parse Mobile specific preview images
+  const mobileImages: string[] = [];
+  const addMobileUrl = (u: any) => {
+    if (!u) return;
+    const str = String(u).trim();
+    if (!str || str === '-' || str === '–' || str === '—' || str === '#') return;
+    const formatted = formatImageUrl(str);
+    if (formatted && !mobileImages.includes(formatted)) {
+      mobileImages.push(formatted);
+    }
+  };
+
+  const mobileKeys = [
+    'mobilePreview', 'mobilePreviewUrl', 'mobileThumbnailUrl', 'mobileImage', 'mobile_image',
+    'mobile_preview', 'mobile_preview_url', 'mobile_thumb', 'mobileThumbnail',
+    'mobile_screenshot', 'mobile_screens', 'mobile_gallery', 'mobileGalleryUrls'
+  ];
+  for (const mk of mobileKeys) {
+    if (p[mk]) {
+      const val = p[mk];
+      if (Array.isArray(val)) {
+        val.forEach(item => typeof item === 'string' && addMobileUrl(item));
+      } else if (typeof val === 'string') {
+        val.split(/[\n;,]+/).map(s => s.trim()).filter(Boolean).forEach(addMobileUrl);
+      }
+    }
+  }
+
+  // Also check numbered mobile keys: mobile_image_1..5, mobile1..5
+  for (let m = 1; m <= 5; m++) {
+    const numKeys = [`mobile_image_${m}`, `mobile_image${m}`, `mobile_${m}`, `mobile${m}`, `mobile_screen_${m}`];
+    for (const nk of numKeys) {
+      if (p[nk]) {
+        const val = p[nk];
+        if (typeof val === 'string') {
+          val.split(/[\n;,]+/).map(s => s.trim()).filter(Boolean).forEach(addMobileUrl);
+        }
+      }
+    }
+  }
+
   return {
     thumbnailUrl: finalUrls[0],
-    galleryUrls: finalUrls
+    galleryUrls: finalUrls,
+    mobileThumbnailUrl: mobileImages[0] || undefined,
+    mobilePreviewUrl: mobileImages[0] || undefined,
+    mobileGalleryUrls: mobileImages.length > 0 ? mobileImages : undefined
   };
 }
 
@@ -799,7 +849,7 @@ function mapProjectFromSheet(
   const parsedColors = parseColors(p);
   const parsedColorsDescription = parseColorsDescription(p);
   const parsedGrid = String(p.gridType || p.grid || p.designSystem?.gridType || '').trim();
-  const { thumbnailUrl, galleryUrls } = parseProjectImages(p);
+  const { thumbnailUrl, galleryUrls, mobileThumbnailUrl, mobilePreviewUrl, mobileGalleryUrls } = parseProjectImages(p);
 
   const rawTitleUa = p.title_ua || p.title || p.name_ua || p.name || '';
   const rawTitleEn = p.title_en || (p.title_ua ? '' : p.title) || p.name_en || p.name || '';
@@ -823,13 +873,30 @@ function mapProjectFromSheet(
     en: titleEn || titleUa
   };
 
+  // Client parsing (client_ua, client_en, or client)
+  let resolvedClient: string | { ua: string; en: string } | undefined = undefined;
+  if (p.client_ua || p.client_en) {
+    const ua = String(p.client_ua || p.client || '').trim();
+    const en = String(p.client_en || p.client || ua).trim();
+    resolvedClient = { ua, en };
+  } else if (typeof p.client === 'object' && p.client !== null) {
+    resolvedClient = {
+      ua: String(p.client.ua || '').trim(),
+      en: String(p.client.en || p.client.ua || '').trim()
+    };
+  } else if (p.client) {
+    resolvedClient = String(p.client).trim();
+  }
+
   return {
     id: String(p.id || `p-${idx + 1}`),
     slug: String(p.slug || p.id || `project-${idx + 1}`),
     title: resolvedTitle,
     title_ua: resolvedTitle.ua,
     title_en: resolvedTitle.en,
-    client: p.client ? String(p.client).trim() : undefined,
+    client: resolvedClient,
+    client_ua: typeof resolvedClient === 'object' ? resolvedClient.ua : (resolvedClient || undefined),
+    client_en: typeof resolvedClient === 'object' ? resolvedClient.en : (resolvedClient || undefined),
     category: catId,
     categoryLabel: catLabel,
     status: statusId,
@@ -869,7 +936,10 @@ function mapProjectFromSheet(
       gridType: parsedGrid || undefined
     },
     thumbnailUrl,
+    mobileThumbnailUrl,
+    mobilePreviewUrl,
     galleryUrls,
+    mobileGalleryUrls,
     liveLink: cleanLiveLink(p.liveLink ?? p.live_link ?? p.livelink ?? p.link ?? p.url ?? p.projectUrl ?? p.project_url ?? p.website),
     figmaUrl: cleanLiveLink(p.figmaUrl ?? p.figma_url ?? p.figma ?? p.figmaLink ?? p.figma_link),
     figmaEmbedUrl: cleanLiveLink(p.figmaEmbedUrl ?? p.figma_embed ?? p.figma_embed_url ?? p.figmaEmbed ?? p.figma_prototype),
@@ -2126,33 +2196,36 @@ export function generateProjectsTSV(projects: any[]): string {
     'title_ua',
     'title_en',
     'year',
-    'client',
     'role_ua',
     'role_en',
+    'client_ua',
+    'client_en',
     'category',
     'status',
     'featured',
     'thumbnailUrl',
+    'mobileThumbnailUrl',
     'heroImage',
     'liveLink',
-    'figmaUrl',
-    'figmaEmbedUrl',
     'tagline_ua',
     'tagline_en',
     'overview_ua',
     'overview_en',
     'tools',
-    'palette',
     'challenge_ua',
     'challenge_en',
     'solution_ua',
     'solution_en',
     'impact_ua',
     'impact_en',
+    'fonts',
     'fonts_ua',
     'fonts_en',
+    'palette',
     'colors_ua',
-    'colors_en'
+    'colors_en',
+    'figmaUrl',
+    'figmaEmbedUrl'
   ];
 
   const escapeCell = (val: any) => {
@@ -2165,6 +2238,8 @@ export function generateProjectsTSV(projects: any[]): string {
     const roleEn = typeof p.role === 'object' && p.role !== null ? p.role.en : String(p.role || p.role_en || '');
     const titleUa = typeof p.title === 'object' && p.title !== null ? p.title.ua : String(p.title_ua || p.title || '');
     const titleEn = typeof p.title === 'object' && p.title !== null ? p.title.en : String(p.title_en || p.title || '');
+    const clientUa = typeof p.client === 'object' && p.client !== null ? p.client.ua : String(p.client_ua || p.client || '');
+    const clientEn = typeof p.client === 'object' && p.client !== null ? p.client.en : String(p.client_en || p.client || clientUa);
     const taglineUa = typeof p.tagline === 'object' && p.tagline !== null ? p.tagline.ua : String(p.tagline_ua || p.tagline || '');
     const taglineEn = typeof p.tagline === 'object' && p.tagline !== null ? p.tagline.en : String(p.tagline_en || p.tagline || '');
     const descUa = typeof p.description === 'object' && p.description !== null ? p.description.ua : String(p.overview_ua || p.description_ua || p.description || '');
@@ -2179,24 +2254,30 @@ export function generateProjectsTSV(projects: any[]): string {
     
     // Fonts resolution
     const fontsRaw = p.designSystem?.fonts;
+    let fontsGeneral = '';
     let fontsUa = '';
     let fontsEn = '';
     if (Array.isArray(fontsRaw)) {
+      fontsGeneral = fontsRaw.join(', ');
       fontsUa = fontsRaw.join(', ');
       fontsEn = fontsRaw.join(', ');
     } else if (fontsRaw && typeof fontsRaw === 'object') {
       fontsUa = Array.isArray(fontsRaw.ua) ? fontsRaw.ua.join(', ') : String(fontsRaw.ua || '');
       fontsEn = Array.isArray(fontsRaw.en) ? fontsRaw.en.join(', ') : String(fontsRaw.en || fontsUa);
+      fontsGeneral = fontsUa || fontsEn;
     } else {
+      fontsGeneral = String(p.fonts || p.fonts_ua || '');
       fontsUa = String(p.fonts_ua || p.fonts || '');
       fontsEn = String(p.fonts_en || p.fonts || fontsUa);
     }
 
     // Colors resolution
     const colorsRaw = p.designSystem?.colors;
+    let paletteGeneral = '';
     let colorsUa = '';
     let colorsEn = '';
     if (Array.isArray(colorsRaw)) {
+      paletteGeneral = colorsRaw.map((c: any) => c.hex).filter(Boolean).join(', ');
       colorsUa = colorsRaw.map((c: any) => {
         const name = typeof c.name === 'object' && c.name !== null ? (c.name.ua || c.name.en) : c.name;
         return `${name}: ${c.hex}`;
@@ -2206,6 +2287,7 @@ export function generateProjectsTSV(projects: any[]): string {
         return `${name}: ${c.hex}`;
       }).join(', ');
     } else {
+      paletteGeneral = String(p.palette || p.palette_ua || p.colors || '');
       colorsUa = String(p.colors_ua || p.palette_ua || p.colors || p.palette || '');
       colorsEn = String(p.colors_en || p.palette_en || p.colors || p.palette || colorsUa);
     }
@@ -2215,33 +2297,36 @@ export function generateProjectsTSV(projects: any[]): string {
       escapeCell(titleUa),
       escapeCell(titleEn),
       escapeCell(p.timeline || p.year),
-      escapeCell(p.client || ''),
       escapeCell(roleUa),
       escapeCell(roleEn),
+      escapeCell(clientUa),
+      escapeCell(clientEn),
       escapeCell(p.category),
       escapeCell(p.status),
       escapeCell(p.isFeatured || p.featured ? 'TRUE' : 'FALSE'),
       escapeCell(p.thumbnailUrl || ''),
+      escapeCell(p.mobileThumbnailUrl || p.mobilePreviewUrl || ''),
       escapeCell((p.galleryUrls && p.galleryUrls[0]) || p.heroImage || ''),
       escapeCell(p.liveLink || ''),
-      escapeCell(p.figmaUrl || ''),
-      escapeCell(p.figmaEmbedUrl || ''),
       escapeCell(taglineUa),
       escapeCell(taglineEn),
       escapeCell(descUa),
       escapeCell(descEn),
       escapeCell(toolsStr),
-      escapeCell(colorsUa),
       escapeCell(challengeUa),
       escapeCell(challengeEn),
       escapeCell(solutionUa),
       escapeCell(solutionEn),
       escapeCell(impactUa),
       escapeCell(impactEn),
+      escapeCell(fontsGeneral),
       escapeCell(fontsUa),
       escapeCell(fontsEn),
+      escapeCell(paletteGeneral),
       escapeCell(colorsUa),
-      escapeCell(colorsEn)
+      escapeCell(colorsEn),
+      escapeCell(p.figmaUrl || ''),
+      escapeCell(p.figmaEmbedUrl || '')
     ].join('\t');
   });
 

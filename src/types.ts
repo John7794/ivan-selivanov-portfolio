@@ -32,7 +32,12 @@ export interface Project {
     ua: string;
     en: string;
   };
-  client?: string;
+  client?: string | {
+    ua: string;
+    en: string;
+  };
+  client_ua?: string;
+  client_en?: string;
   role: {
     ua: string;
     en: string;
@@ -67,7 +72,10 @@ export interface Project {
     gridType?: string;
   };
   thumbnailUrl: string;
+  mobileThumbnailUrl?: string;
+  mobilePreviewUrl?: string;
   galleryUrls: string[];
+  mobileGalleryUrls?: string[];
   liveLink?: string;
   figmaUrl?: string;
   figmaEmbedUrl?: string;

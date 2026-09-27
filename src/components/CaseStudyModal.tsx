@@ -39,9 +39,10 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
     setActiveImageIndex(0);
     setFullscreenZoom(false);
     setActiveTab('screens');
+    setDeviceView('desktop');
   }, [project?.id]);
 
-  const allImages = React.useMemo(() => {
+  const desktopImages = React.useMemo(() => {
     if (!project) return [];
     const list: string[] = [];
     if (project.thumbnailUrl) {
@@ -59,7 +60,31 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
     return list.length > 0 ? list : ['https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=90&w=2400'];
   }, [project]);
 
-  const currentImage = allImages[activeImageIndex] || allImages[0];
+  const mobileImages = React.useMemo(() => {
+    if (!project) return [];
+    const list: string[] = [];
+    const mobileFirst = project.mobileThumbnailUrl || project.mobilePreviewUrl;
+    if (mobileFirst) {
+      const formatted = formatImageUrl(mobileFirst);
+      if (formatted) list.push(formatted);
+    }
+    if (Array.isArray(project.mobileGalleryUrls)) {
+      project.mobileGalleryUrls.forEach((url) => {
+        if (url) {
+          const formatted = formatImageUrl(url);
+          if (formatted && !list.includes(formatted)) list.push(formatted);
+        }
+      });
+    }
+    return list;
+  }, [project]);
+
+  const hasMobilePreview = mobileImages.length > 0;
+
+  // Selected images based on deviceView
+  const allImages = (deviceView === 'mobile' && hasMobilePreview) ? mobileImages : desktopImages;
+
+  const currentImage = allImages[activeImageIndex] || allImages[0] || desktopImages[0];
 
   const handlePrevImage = () => {
     setActiveImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
@@ -158,6 +183,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
     prev: getLocalizedText(ui?.modalPrev, language, { ua: 'Попередній', en: 'Previous' }),
     next: getLocalizedText(ui?.modalNext, language, { ua: 'Наступний', en: 'Next' }),
     close: getLocalizedText(ui?.modalClose, language, { ua: 'Закрити', en: 'Close' }),
+    clientLabel: getLocalizedText(ui?.modalClient, language, { ua: 'Клієнт', en: 'Client' }),
     live: getLocalizedText(ui?.modalLive, language, { ua: 'Live', en: 'Live' }),
     role: getLocalizedText(ui?.modalRole, language, { ua: 'Роль', en: 'Role' }),
     timeline: getLocalizedText(ui?.modalTimeline, language, { ua: 'Період', en: 'Timeline' }),
@@ -318,24 +344,40 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
               })()}
 
               {/* Meta Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-6 font-mono text-xs border-t border-neutral-800/80">
-                <div>
-                  <span className="text-neutral-500 uppercase tracking-wider block mb-1">{t.role}</span>
-                  <span className="text-neutral-200">{getLocalizedText(project.role, language, { ua: 'Lead Designer', en: 'Lead Designer' })}</span>
-                </div>
-                <div>
-                  <span className="text-neutral-500 uppercase tracking-wider block mb-1">{t.timeline}</span>
-                  <span className="text-neutral-200">{project.timeline}</span>
-                </div>
-                <div>
-                  <span className="text-neutral-500 uppercase tracking-wider block mb-1">{t.category}</span>
-                  <span className="text-neutral-200">{getLocalizedText(project.categoryLabel, language, { ua: 'UI/UX Продукт', en: 'UI/UX Product' })}</span>
-                </div>
-                <div>
-                  <span className="text-neutral-500 uppercase tracking-wider block mb-1">{t.deliverables}</span>
-                  <span className="text-neutral-200">{project.toolsUsed.slice(0, 3).join(', ')}</span>
-                </div>
-              </div>
+              {(() => {
+                const clientText = project.client
+                  ? (typeof project.client === 'object'
+                      ? getLocalizedText(project.client, language, { ua: '', en: '' })
+                      : String(project.client))
+                  : '';
+
+                return (
+                  <div className={`grid ${clientText ? 'grid-cols-2 sm:grid-cols-5' : 'grid-cols-2 sm:grid-cols-4'} gap-6 pt-6 font-mono text-xs border-t border-neutral-800/80`}>
+                    <div>
+                      <span className="text-neutral-500 uppercase tracking-wider block mb-1">{t.role}</span>
+                      <span className="text-neutral-200">{getLocalizedText(project.role, language, { ua: 'Lead Designer', en: 'Lead Designer' })}</span>
+                    </div>
+                    {clientText && (
+                      <div>
+                        <span className="text-neutral-500 uppercase tracking-wider block mb-1">{t.clientLabel}</span>
+                        <span className="text-neutral-200 truncate block" title={clientText}>{clientText}</span>
+                      </div>
+                    )}
+                    <div>
+                      <span className="text-neutral-500 uppercase tracking-wider block mb-1">{t.timeline}</span>
+                      <span className="text-neutral-200">{project.timeline}</span>
+                    </div>
+                    <div>
+                      <span className="text-neutral-500 uppercase tracking-wider block mb-1">{t.category}</span>
+                      <span className="text-neutral-200">{getLocalizedText(project.categoryLabel, language, { ua: 'UI/UX Продукт', en: 'UI/UX Product' })}</span>
+                    </div>
+                    <div>
+                      <span className="text-neutral-500 uppercase tracking-wider block mb-1">{t.deliverables}</span>
+                      <span className="text-neutral-200">{project.toolsUsed.slice(0, 3).join(', ')}</span>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Specialized Interactive Viewer */}
@@ -405,26 +447,36 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                     </div>
                   )}
 
-                  {activeTab === 'screens' && project.category === 'ui-ux' && (
+                  {activeTab === 'screens' && (
                     <div className="flex items-center bg-neutral-900 border border-neutral-800 p-0.5">
                       <button
-                        onClick={() => setDeviceView('desktop')}
+                        onClick={() => {
+                          setDeviceView('desktop');
+                          setActiveImageIndex(0);
+                        }}
                         className={`px-2.5 py-1 flex items-center gap-1.5 cursor-pointer text-xs transition-colors ${
                           deviceView === 'desktop' ? 'bg-neutral-800 text-white' : 'text-neutral-500 hover:text-neutral-300'
                         }`}
+                        title="Desktop view"
                       >
                         <Laptop className="w-3.5 h-3.5" />
                         <span>Desktop</span>
                       </button>
-                      <button
-                        onClick={() => setDeviceView('mobile')}
-                        className={`px-2.5 py-1 flex items-center gap-1.5 cursor-pointer text-xs transition-colors ${
-                          deviceView === 'mobile' ? 'bg-neutral-800 text-white' : 'text-neutral-500 hover:text-neutral-300'
-                        }`}
-                      >
-                        <Smartphone className="w-3.5 h-3.5" />
-                        <span>Mobile</span>
-                      </button>
+                      {hasMobilePreview && (
+                        <button
+                          onClick={() => {
+                            setDeviceView('mobile');
+                            setActiveImageIndex(0);
+                          }}
+                          className={`px-2.5 py-1 flex items-center gap-1.5 cursor-pointer text-xs transition-colors ${
+                            deviceView === 'mobile' ? 'bg-neutral-800 text-white' : 'text-neutral-500 hover:text-neutral-300'
+                          }`}
+                          title="Mobile view"
+                        >
+                          <Smartphone className="w-3.5 h-3.5" />
+                          <span>Mobile</span>
+                        </button>
+                      )}
                     </div>
                   )}
 
@@ -510,12 +562,12 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                     className={`transition-all duration-300 overflow-hidden border border-neutral-700 shadow-2xl bg-neutral-900 ${
                       deviceView === 'desktop'
                         ? 'w-full rounded-lg'
-                        : 'w-full max-w-[360px] aspect-[9/19] rounded-3xl p-2 border-4 border-neutral-700'
+                        : 'w-full max-w-[360px] aspect-[9/19] rounded-[2.5rem] p-2.5 border-[6px] border-neutral-800 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] flex flex-col'
                     }`}
                   >
                     {/* Simulated browser/device chrome */}
                     {deviceView === 'desktop' ? (
-                      <div className="h-8 bg-neutral-900 border-b border-neutral-800 flex items-center justify-between px-4 gap-2 select-none">
+                      <div className="h-8 bg-neutral-900 border-b border-neutral-800 flex items-center justify-between px-4 gap-2 select-none shrink-0">
                         <div className="flex items-center gap-1.5">
                           <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
                           <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
@@ -557,21 +609,41 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                         </div>
                       </div>
                     ) : (
-                      <div className="h-4 flex justify-center items-center select-none">
-                        <div className="w-16 h-2 bg-neutral-700 rounded-full" />
+                      <div className="h-6 flex justify-between items-center px-4 select-none shrink-0 border-b border-neutral-800/60 pb-1">
+                        <span className="font-mono text-[10px] text-neutral-400 font-medium">9:41</span>
+                        <div className="w-16 h-3.5 bg-black rounded-full border border-neutral-800 flex items-center justify-center">
+                          <div className="w-2.5 h-2.5 rounded-full bg-neutral-900 border border-neutral-700/80" />
+                        </div>
+                        <div className="flex items-center gap-1.5 text-neutral-400">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                          <span className="font-mono text-[9px] uppercase tracking-wider text-neutral-500">5G</span>
+                        </div>
                       </div>
                     )}
 
-                    {/* Viewport Frame with Single Continuous Scroll (No nested double scroll) */}
+                    {/* Viewport Frame with Conflict-Free Internal Scroll */}
                     <div
-                      className={`relative group/viewer w-full bg-neutral-950 transition-all ${
+                      onWheel={(e) => {
+                        const el = e.currentTarget;
+                        const hasOverflow = el.scrollHeight > el.clientHeight;
+                        if (!hasOverflow) return;
+
+                        const isAtTop = el.scrollTop <= 0 && e.deltaY < 0;
+                        const isAtBottom = Math.ceil(el.scrollTop + el.clientHeight) >= el.scrollHeight && e.deltaY > 0;
+
+                        // Stop propagation so inner scrolling never accidentally pulls or jerks the outer modal
+                        if (!isAtTop && !isAtBottom) {
+                          e.stopPropagation();
+                        }
+                      }}
+                      className={`relative group/viewer w-full bg-neutral-950 device-viewport-scroll ${
                         deviceView === 'desktop'
                           ? fitMode === 'fill'
-                            ? 'w-full h-auto'
-                            : 'w-full h-auto max-h-[80vh] flex items-center justify-center p-2 sm:p-4 overflow-hidden'
+                            ? 'w-full max-h-[82vh] overflow-y-auto'
+                            : 'w-full max-h-[80vh] flex items-center justify-center p-2 sm:p-4 overflow-hidden'
                           : fitMode === 'fill'
-                          ? 'w-full h-auto'
-                          : 'max-h-[80vh] flex items-center justify-center p-2 overflow-hidden'
+                          ? 'w-full flex-1 min-h-0 overflow-y-auto rounded-b-[1.75rem]'
+                          : 'w-full flex-1 min-h-0 flex items-center justify-center p-2 overflow-hidden rounded-b-[1.75rem]'
                       }`}
                     >
                       {/* Interactive Next/Prev arrows on hover inside viewer */}
@@ -611,8 +683,8 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                               ? 'w-full h-auto block'
                               : 'max-h-[76vh] w-auto max-w-full h-auto object-contain block mx-auto'
                             : fitMode === 'fill'
-                            ? 'w-full h-auto block rounded-2xl'
-                            : 'max-h-[76vh] w-auto max-w-full h-auto object-contain block mx-auto rounded-2xl'
+                            ? 'w-full h-auto block'
+                            : 'max-h-[76vh] w-auto max-w-full h-auto object-contain block mx-auto'
                         }`}
                       />
                     </div>

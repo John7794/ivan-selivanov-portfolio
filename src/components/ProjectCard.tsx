@@ -291,6 +291,14 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             <p className="text-neutral-400 text-xs sm:text-sm font-light mt-1.5 line-clamp-2 leading-relaxed">
               {getLocalizedText(project.tagline, language, { ua: '', en: '' })}
             </p>
+            {project.client && (
+              <div className="mt-1 font-mono text-[11px] text-neutral-500 truncate">
+                <span className="text-neutral-600">// </span>
+                {typeof project.client === 'object'
+                  ? getLocalizedText(project.client, language, { ua: '', en: '' })
+                  : String(project.client)}
+              </div>
+            )}
           </div>
 
           <div className="w-8 h-8 shrink-0 rounded-full border border-neutral-700 flex items-center justify-center text-neutral-400 group-hover:border-white group-hover:bg-white group-hover:text-black transition-all duration-300">

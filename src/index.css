@@ -81,6 +81,31 @@ body::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.45);
 }
 
+/* Device screen scrollbar - dedicated isolated scroll with overscroll containment */
+.device-viewport-scroll {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.28) rgba(0, 0, 0, 0.3);
+}
+
+.device-viewport-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.device-viewport-scroll::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.device-viewport-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 9999px;
+}
+
+.device-viewport-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
 /* Hide scrollbar utility when needed */
 .no-scrollbar::-webkit-scrollbar {
   display: none;

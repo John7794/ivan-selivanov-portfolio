@@ -212,6 +212,10 @@ export const DEFAULT_PROJECTS: Project[] = [
       en: 'UI/UX Product'
     },
     status: 'realized',
+    client: {
+      ua: 'Aura Global Capital Inc.',
+      en: 'Aura Global Capital Inc.'
+    },
     role: {
       ua: 'Lead Product Designer & Design Architect',
       en: 'Lead Product Designer & Design Architect'
@@ -250,6 +254,7 @@ export const DEFAULT_PROJECTS: Project[] = [
       gridType: '16-Column Liquid Flex Grid / 4px Baseline'
     },
     thumbnailUrl: 'https://images.unsplash.com/photo-1618761714954-0b8cd0026356?auto=format&fit=crop&q=80&w=1200',
+    mobileThumbnailUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800',
     galleryUrls: [
       'https://images.unsplash.com/photo-1618761714954-0b8cd0026356?auto=format&fit=crop&q=80&w=1400',
       'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1400',
