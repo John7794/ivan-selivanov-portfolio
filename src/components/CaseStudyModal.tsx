@@ -166,9 +166,33 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
         }
       }
     };
+
+    // Lock background page scroll while project modal is active
+    if (project) {
+      const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
+      const originalBodyOverflow = document.body.style.overflow;
+      const originalBodyPaddingRight = document.body.style.paddingRight;
+      const originalHtmlOverflow = document.documentElement.style.overflow;
+
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+      if (scrollBarWidth > 0) {
+        document.body.style.paddingRight = `${scrollBarWidth}px`;
+      }
+
+      window.addEventListener('keydown', handleKeyDown);
+
+      return () => {
+        document.body.style.overflow = originalBodyOverflow;
+        document.body.style.paddingRight = originalBodyPaddingRight;
+        document.documentElement.style.overflow = originalHtmlOverflow;
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isFullscreen, allImages.length, onClose, prevProject, nextProject]);
+  }, [isFullscreen, allImages.length, onClose, prevProject, nextProject, project]);
 
   if (!project) return null;
 
@@ -210,7 +234,10 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto custom-scrollbar bg-black/85 backdrop-blur-md p-2 sm:p-4 md:p-8">
+      <div 
+        className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain custom-scrollbar bg-black/85 backdrop-blur-md p-2 sm:p-4 md:p-8"
+        style={{ overscrollBehavior: 'contain' }}
+      >
         {/* Modal Backdrop click */}
         <div className="fixed inset-0" onClick={onClose} />
 
