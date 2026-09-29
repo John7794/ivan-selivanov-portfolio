@@ -48,6 +48,7 @@ export const BackToTop: React.FC<BackToTopProps> = ({ language }) => {
     <AnimatePresence>
       {isVisible && (
         <motion.button
+          key="back-to-top-button"
           type="button"
           onClick={scrollToTop}
           initial={{ opacity: 0, y: 20, scale: 0.9 }}

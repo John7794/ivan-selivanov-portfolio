@@ -126,6 +126,41 @@ export interface Testimonial {
   avatarUrl: string;
 }
 
+export interface WorkflowStep {
+  id: string;
+  stepNumber: string;
+  title: {
+    ua: string;
+    en: string;
+  };
+  description: {
+    ua: string;
+    en: string;
+  };
+  deliverables?: {
+    ua: string[];
+    en: string[];
+  };
+  tools?: string[];
+  highlightTool?: string;
+}
+
+export interface FAQItem {
+  id: string;
+  question: {
+    ua: string;
+    en: string;
+  };
+  answer: {
+    ua: string;
+    en: string;
+  };
+  category?: {
+    ua: string;
+    en: string;
+  };
+}
+
 export interface GeneralSettings {
   name: {
     ua: string;
@@ -242,6 +277,18 @@ export interface GeneralSettings {
     badgeConcept?: { ua: string; en: string };
     badgeProduction?: { ua: string; en: string };
     cardViewCase?: { ua: string; en: string };
+    // Workflow Section UI strings
+    workflowIndex?: { ua: string; en: string };
+    workflowTitle?: { ua: string; en: string };
+    workflowSubtitle?: { ua: string; en: string };
+    workflowDeliverablesLabel?: { ua: string; en: string };
+    workflowToolsLabel?: { ua: string; en: string };
+    // FAQ Section UI strings
+    faqIndex?: { ua: string; en: string };
+    faqTitle?: { ua: string; en: string };
+    faqSubtitle?: { ua: string; en: string };
+    faqContactPrompt?: { ua: string; en: string };
+    faqContactCta?: { ua: string; en: string };
   };
 }
 

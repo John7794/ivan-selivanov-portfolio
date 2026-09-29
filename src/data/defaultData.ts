@@ -1,4 +1,4 @@
-import { Project, ExperienceItem, Testimonial, GeneralSettings, LegalAndBannersData, ContactsData } from '../types';
+import { Project, ExperienceItem, Testimonial, GeneralSettings, LegalAndBannersData, ContactsData, WorkflowStep, FAQItem } from '../types';
 
 export const DEFAULT_SETTINGS: GeneralSettings = {
   name: {
@@ -164,7 +164,25 @@ export const DEFAULT_SETTINGS: GeneralSettings = {
     badgeFeatured: { ua: 'Флагман', en: 'Featured' },
     badgeConcept: { ua: 'Концепт', en: 'Concept' },
     badgeProduction: { ua: 'Продакшн', en: 'Production' },
-    cardViewCase: { ua: 'Відкрити кейс', en: 'View Case' }
+    cardViewCase: { ua: 'Відкрити кейс', en: 'View Case' },
+    // Workflow Section UI
+    workflowIndex: { ua: '04 // WORKFLOW & PIPELINE', en: '04 // WORKFLOW & PIPELINE' },
+    workflowTitle: { ua: 'Як Побудовано Робочий Процес', en: 'Design Execution & Delivery Pipeline' },
+    workflowSubtitle: { 
+      ua: 'Прозорий та передбачуваний 4-етапний пайплайн від первинного брифу до піксель-перфект системи, інтерактивних прототипів та продакшну.', 
+      en: 'A transparent, structured 4-phase methodology from initial briefing to pixel-perfect design tokens, interactive prototypes, and production.' 
+    },
+    workflowDeliverablesLabel: { ua: 'Ключові результати:', en: 'Core Deliverables:' },
+    workflowToolsLabel: { ua: 'Інструменти:', en: 'Tooling:' },
+    // FAQ Section UI
+    faqIndex: { ua: '05 // FREQUENTLY ASKED QUESTIONS', en: '05 // FREQUENTLY ASKED QUESTIONS' },
+    faqTitle: { ua: 'Часті Запитання & Умови Співпраці', en: 'Frequently Asked Questions & Terms' },
+    faqSubtitle: { 
+      ua: 'Відповіді на ключові організаційні, технічні та юридичні питання перед стартом спільної роботи над проєктом.', 
+      en: 'Direct answers on engagement models, confidentiality, developer handoff, and turnaround times.' 
+    },
+    faqContactPrompt: { ua: 'Залишились додаткові питання щодо вашого проєкту?', en: 'Have specific questions about your upcoming product?' },
+    faqContactCta: { ua: 'Написати напряму', en: 'Get In Touch Directly' }
   }
 };
 
@@ -882,4 +900,177 @@ export const DEFAULT_CONTACTS: ContactsData = {
     en: 'Lviv, Ukraine (Available Worldwide)'
   }
 };
+
+export const DEFAULT_WORKFLOW: WorkflowStep[] = [
+  {
+    id: 'wf-1',
+    stepNumber: '01',
+    title: {
+      ua: 'Дослідження & Стратегічний Бриф',
+      en: 'Discovery & Strategic Briefing'
+    },
+    description: {
+      ua: 'Глибоке занурення в бізнес-завдання, аудиторію та контекст ринку. Формування чітких цілей проєкту, функціональних вимог і прозорих очікувань.',
+      en: 'Deep dive into business goals, user audience, and competitive benchmarks. Defining crystal-clear scope, technical constraints, and strategic milestones.'
+    },
+    deliverables: {
+      ua: [
+        'Структурований бриф проєкту',
+        'Аналіз конкурентів та референсів',
+        'Карта сайту та ключові сценарії'
+      ],
+      en: [
+        'Structured Project Brief',
+        'Competitive & Style Benchmarking',
+        'Information Architecture Sitemap'
+      ]
+    },
+    tools: ['Notion', 'FigJam', 'Miro']
+  },
+  {
+    id: 'wf-2',
+    stepNumber: '02',
+    title: {
+      ua: 'UX-архітектура & Вайрфрейми',
+      en: 'UX Architecture & Wireframing'
+    },
+    description: {
+      ua: 'Проєктування користувацьких сценаріїв (User Flows) та низькодеталізованих вайрфреймів. Усунення логічних помилок і тестування зручності до початку візуалу.',
+      en: 'Designing intuitive user journey flows and monochrome structural wireframes. Eliminating friction points and stress-testing logic prior to visual styling.'
+    },
+    deliverables: {
+      ua: [
+        'Сценарії взаємодії (User Flows)',
+        'Чорно-білі вайрфрейми екранів',
+        'Базова сітка та лейаут'
+      ],
+      en: [
+        'User Journey & Interaction Flows',
+        'Low-Fidelity UX Wireframes',
+        'Structural Grid Systems'
+      ]
+    },
+    tools: ['Figma', 'FigJam']
+  },
+  {
+    id: 'wf-3',
+    stepNumber: '03',
+    title: {
+      ua: 'UI-дизайн & Прототипування у Stitch',
+      en: 'UI Craft & Stitch Prototyping'
+    },
+    description: {
+      ua: 'Створення виразного візуального стилю, типографічної ієрархії та дизайн-токенів. Швидка генерація концепцій та сучасне інтерактивне прототипування за допомогою інструменту Stitch у поєднанні з Figma.',
+      en: 'Crafting distinctive visual identity, typographic scales, and design tokens. Rapid layout synthesis, ideation, and modern UI prototyping powered by Stitch alongside Figma.'
+    },
+    deliverables: {
+      ua: [
+        'Піксель-перфект UI-макети',
+        'Дизайн-токени (кольори, шрифти, відступи)',
+        'Адаптивні екрани (Desktop & Mobile)'
+      ],
+      en: [
+        'High-Fidelity Interface Screens',
+        'Semantic Design Tokens Architecture',
+        'Responsive Layouts (Desktop & Mobile)'
+      ]
+    },
+    tools: ['Figma', 'Stitch', 'Tokens Studio'],
+    highlightTool: 'Stitch'
+  },
+  {
+    id: 'wf-4',
+    stepNumber: '04',
+    title: {
+      ua: 'Прототип & Передача в розробку',
+      en: 'Prototyping & Developer Handoff'
+    },
+    description: {
+      ua: 'Складання клікабельного інтерактивного прототипу, пакування компонентів з Auto Layout та підготовка детальних специфікацій для розробників без зайвих питань.',
+      en: 'Interactive clickable prototypes, modular component architecture with Auto Layout, and detailed specifications for smooth, frictionless engineering.'
+    },
+    deliverables: {
+      ua: [
+        'Клікабельний інтерактивний прототип',
+        'Компонентна бібліотека (Auto Layout)',
+        'Авторський нагляд та QA-ревʼю верстки'
+      ],
+      en: [
+        'Interactive Figma Prototype',
+        'Component Library with Auto Layout',
+        'Engineering Specs & QA Review'
+      ]
+    },
+    tools: ['Figma Dev Mode', 'GitHub', 'Vercel']
+  }
+];
+
+export const DEFAULT_FAQ: FAQItem[] = [
+  {
+    id: 'faq-1',
+    question: {
+      ua: 'Які формати співпраці доступні?',
+      en: 'What collaboration models do you offer?'
+    },
+    answer: {
+      ua: 'Працюю у трьох прозорих форматах:\n• Fixed-Price — фіксована вартість за чітко погодженим обсягом робіт (найкраще для лендінгів, редизайнів або MVP);\n• Time & Material (погодинна ставка) — для гнучких задач, аудитів та консультацій;\n• Monthly Retainer — щомісячний супровід продукту для компаній, яким потрібен надійний дизайн-партнер на регулярній основі.',
+      en: 'I provide three transparent engagement formats:\n• Fixed-Price — defined project scope with locked deliverables and milestone payments (ideal for MVPs, landings, or redesigns);\n• Time & Material (hourly rate) — for flexible, evolving design needs and consultations;\n• Monthly Retainer — ongoing product design partnership for companies requiring steady dedicated capacity.'
+    }
+  },
+  {
+    id: 'faq-2',
+    question: {
+      ua: 'Чи підписуєте ви договір про нерозголошення (NDA)?',
+      en: 'Do you sign Non-Disclosure Agreements (NDA)?'
+    },
+    answer: {
+      ua: 'Так, абсолютно. Будь-які ідеї, комерційні дані, напрацювання та інтелектуальна власність клієнта захищаються за замовчуванням. За потреби ми підписуємо двосторонній NDA ще до початку первинного детального обговорення чи аналізу матеріалів.',
+      en: 'Yes, unconditionally. Proprietary business data, intellectual property, and product ideas are treated with strict confidentiality. A mutual NDA can be signed prior to any detailed briefing or asset sharing.'
+    }
+  },
+  {
+    id: 'faq-3',
+    question: {
+      ua: 'Як саме організовано передачу макетів розробникам?',
+      en: 'How do you handle design handoff to developers?'
+    },
+    answer: {
+      ua: 'Макет у Figma передається в ідеальному інженерному стані: компоненти побудовані на Auto Layout, організовані семантичні змінні (Variables / Design Tokens), винесені всі стани кнопок та полів (Hover, Active, Focus, Disabled, Error). Завдяки моєму розумінню веброзробки (HTML, CSS, Tailwind, TypeScript) розробники отримують макети, які легко й передбачувано верстаються.',
+      en: 'Figma files are delivered fully production-ready: modular component hierarchy, Auto Layout, semantic design tokens (colors, typography, spacing), and comprehensive component states. My foundational front-end understanding (HTML, CSS, Tailwind CSS, TypeScript) ensures frictionless translation into real code.'
+    }
+  },
+  {
+    id: 'faq-4',
+    question: {
+      ua: 'Скільки часу зазвичай триває робота над проєктом?',
+      en: 'What is the typical project turnaround time?'
+    },
+    answer: {
+      ua: 'Терміни завжди залежать від обсягу та складності завдань:\n• Цільовий лендінг або концепт: 5–10 робочих днів;\n• Комплексний вебсайт або багатосторінковий інтерфейс: 2–4 тижні;\n• Повноцінний цифровий продукт, SaaS чи додаток із дизайн-системою: 4–6 тижнів.\nГрафік робіт та проміжні дедлайни завжди чітко фіксуються на старті.',
+      en: 'Turnaround depends on project scope and system complexity:\n• High-impact landing page or concept: 5–10 business days;\n• Multi-page website or web interface: 2–4 weeks;\n• Full-scale SaaS product, mobile app, or design system: 4–6 weeks.\nMilestones and review cadences are locked in at project inception.'
+    }
+  },
+  {
+    id: 'faq-5',
+    question: {
+      ua: 'Що потрібно надати для старту співпраці?',
+      en: 'What is required to get started?'
+    },
+    answer: {
+      ua: 'Достатньо загального опису вашого проєкту, очікуваних бізнес-цілей, бажаних термінів та прикладів стилістики чи сайтів, які вам імпонують (якщо є). Якщо у вас ще немає детального технічного завдання — я допоможу його сформулювати та структурувати під час первинного зідзвону або в листуванні.',
+      en: 'A high-level outline of your product, target audience, ideal timeline, and any visual benchmarks you appreciate. If you do not have an established specification yet, I will guide you through an efficient discovery questionnaire.'
+    }
+  },
+  {
+    id: 'faq-6',
+    question: {
+      ua: 'Які інструменти використовуються в роботі (Figma, Stitch тощо)?',
+      en: 'What design tools and software are utilized (Figma, Stitch, etc.)?'
+    },
+    answer: {
+      ua: 'Основним інструментом є Figma для UI/UX дизайну та побудови систем. Також активно інтегрую інструмент Stitch для надшвидкого концептуального прототипування, FigJam для інформаційної архітектури, Tokens Studio для дизайн-систем, а також практичні знання HTML/CSS/Tailwind для гарантії технічної здійсненності дизайну.',
+      en: 'My primary environment is Figma for UI architecture and component systems. I also actively leverage Stitch for rapid AI-assisted ideation and interactive prototyping, FigJam for mapping, Tokens Studio for design tokens, and web engineering fluency (HTML/CSS/Tailwind) to guarantee technical feasibility.'
+    }
+  }
+];
 

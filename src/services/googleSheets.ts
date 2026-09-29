@@ -1,5 +1,5 @@
-import { Project, ExperienceItem, Testimonial, GeneralSettings, LegalAndBannersData, ContactsData, FilterOption } from '../types';
-import { DEFAULT_PROJECTS, DEFAULT_EXPERIENCE, DEFAULT_TESTIMONIALS, DEFAULT_SETTINGS, DEFAULT_LEGAL_AND_BANNERS, DEFAULT_CONTACTS } from '../data/defaultData';
+import { Project, ExperienceItem, Testimonial, GeneralSettings, LegalAndBannersData, ContactsData, FilterOption, WorkflowStep, FAQItem } from '../types';
+import { DEFAULT_PROJECTS, DEFAULT_EXPERIENCE, DEFAULT_TESTIMONIALS, DEFAULT_SETTINGS, DEFAULT_LEGAL_AND_BANNERS, DEFAULT_CONTACTS, DEFAULT_WORKFLOW, DEFAULT_FAQ } from '../data/defaultData';
 import { translateToEnglishIfNeeded, hasCyrillic } from '../utils/i18n';
 
 const CACHE_KEY = 'ivan_portfolio_sheets_data';
@@ -11,6 +11,8 @@ export interface PortfolioData {
   statuses?: FilterOption[];
   experience: ExperienceItem[];
   testimonials: Testimonial[];
+  workflow: WorkflowStep[];
+  faq: FAQItem[];
   settings: GeneralSettings;
   contacts: ContactsData;
   legalAndBanners: LegalAndBannersData;
@@ -476,16 +478,33 @@ function parseProjectImages(p: any): {
     }
   };
 
+  // Helper to lookup property values case-insensitively from the raw row object
+  const getValuesForKeys = (targetKeys: string[]): any[] => {
+    const list: any[] = [];
+    const pKeys = Object.keys(p || {});
+    for (const target of targetKeys) {
+      const cleanTarget = target.toLowerCase().replace(/[^a-z0-9]/g, '');
+      for (const pk of pKeys) {
+        if (pk.toLowerCase().replace(/[^a-z0-9]/g, '') === cleanTarget) {
+          if (p[pk] !== undefined && p[pk] !== null && p[pk] !== '') {
+            list.push(p[pk]);
+          }
+        }
+      }
+    }
+    return list;
+  };
+
   // 1. Check primary/cover fields first
   const primaryKeys = ['thumbnailUrl', 'heroImage', 'cover', 'coverImage', 'image', 'mainImage'];
-  for (const k of primaryKeys) {
-    if (p[k]) processEntry(p[k]);
+  for (const val of getValuesForKeys(primaryKeys)) {
+    processEntry(val);
   }
 
   // 2. Check multi-image fields
   const multiKeys = ['galleryUrls', 'gallery', 'images', 'screenshots', 'screens', 'additional_images', 'additionalImages', 'photos'];
-  for (const k of multiKeys) {
-    if (p[k]) processEntry(p[k]);
+  for (const val of getValuesForKeys(multiKeys)) {
+    processEntry(val);
   }
 
   // 3. Check numbered columns: image_1..20, image1..20, gallery1..20, screen1..20
@@ -500,13 +519,12 @@ function parseProjectImages(p: any): {
       `screenshot_${i}`,
       `screenshot${i}`
     ];
-    for (const key of numberedKeys) {
-      if (p[key]) processEntry(p[key]);
+    for (const val of getValuesForKeys(numberedKeys)) {
+      processEntry(val);
     }
   }
 
   const defaultImage = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1600';
-  const finalUrls = images.length > 0 ? images : [defaultImage];
 
   // Parse Mobile specific preview images
   const mobileImages: string[] = [];
@@ -520,38 +538,52 @@ function parseProjectImages(p: any): {
     }
   };
 
+  const processMobileEntry = (val: any) => {
+    if (!val) return;
+    if (Array.isArray(val)) {
+      val.forEach(item => typeof item === 'string' && addMobileUrl(item));
+    } else if (typeof val === 'string') {
+      val.split(/[\n;,]+/).map(s => s.trim()).filter(Boolean).forEach(addMobileUrl);
+    }
+  };
+
   const mobileKeys = [
     'mobilePreview', 'mobilePreviewUrl', 'mobileThumbnailUrl', 'mobileImage', 'mobile_image',
     'mobile_preview', 'mobile_preview_url', 'mobile_thumb', 'mobileThumbnail',
-    'mobile_screenshot', 'mobile_screens', 'mobile_gallery', 'mobileGalleryUrls'
+    'mobile_screenshot', 'mobile_screens', 'mobile_gallery', 'mobileGalleryUrls',
+    'mobile', 'mobileUrl', 'mobile_url', 'mobileVersion', 'mobile_version',
+    'mobileView', 'mobile_view', 'phone', 'phone_image', 'phone_url', 'smartphone',
+    'app_preview', 'app_image', 'app_screen', 'app_screens'
   ];
-  for (const mk of mobileKeys) {
-    if (p[mk]) {
-      const val = p[mk];
-      if (Array.isArray(val)) {
-        val.forEach(item => typeof item === 'string' && addMobileUrl(item));
-      } else if (typeof val === 'string') {
-        val.split(/[\n;,]+/).map(s => s.trim()).filter(Boolean).forEach(addMobileUrl);
-      }
-    }
+  for (const val of getValuesForKeys(mobileKeys)) {
+    processMobileEntry(val);
   }
 
   // Also check numbered mobile keys: mobile_image_1..5, mobile1..5
   for (let m = 1; m <= 5; m++) {
     const numKeys = [`mobile_image_${m}`, `mobile_image${m}`, `mobile_${m}`, `mobile${m}`, `mobile_screen_${m}`];
-    for (const nk of numKeys) {
-      if (p[nk]) {
-        const val = p[nk];
-        if (typeof val === 'string') {
-          val.split(/[\n;,]+/).map(s => s.trim()).filter(Boolean).forEach(addMobileUrl);
-        }
-      }
+    for (const val of getValuesForKeys(numKeys)) {
+      processMobileEntry(val);
     }
   }
 
+  // Normalize URLs to detect duplicates cleanly
+  const normalizeForCompare = (url: string) => url.toLowerCase().trim().replace(/\/+$/, '');
+  const mobileNormSet = new Set(mobileImages.map(normalizeForCompare));
+
+  // Determine if there are actual distinct desktop images (not just duplicates of the mobile images)
+  const distinctDesktopImages = images.filter(url => !mobileNormSet.has(normalizeForCompare(url)));
+
+  // If distinct desktop images were provided, use them;
+  // If only mobile images exist, leave desktop gallery empty so that CaseStudyModal knows only mobile exists!
+  // (Only fallback to defaultImage if neither desktop nor mobile exists)
+  const finalDesktopUrls = distinctDesktopImages.length > 0
+    ? distinctDesktopImages
+    : (mobileImages.length > 0 ? [] : [defaultImage]);
+
   return {
-    thumbnailUrl: finalUrls[0],
-    galleryUrls: finalUrls,
+    thumbnailUrl: finalDesktopUrls[0] || mobileImages[0] || defaultImage,
+    galleryUrls: finalDesktopUrls,
     mobileThumbnailUrl: mobileImages[0] || undefined,
     mobilePreviewUrl: mobileImages[0] || undefined,
     mobileGalleryUrls: mobileImages.length > 0 ? mobileImages : undefined
@@ -1018,6 +1050,76 @@ function mapTestimonialFromSheet(t: any, idx: number): Testimonial {
       en: t.content_en || t.text_en || t.text || ''
     },
     avatarUrl: formatImageUrl(t.avatarUrl) || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200'
+  };
+}
+
+function mapWorkflowFromSheet(w: any, idx: number): WorkflowStep {
+  const stepNum = String(w.stepNumber || w.step || w.number || `0${idx + 1}`).trim();
+  const rawTitleUa = w.title_ua || w.title || w.name_ua || w.name || `Етап ${idx + 1}`;
+  const rawTitleEn = w.title_en || (w.title_ua ? '' : w.title) || w.name_en || w.name || `Phase ${idx + 1}`;
+  
+  const titleUa = String(typeof w.title === 'object' && w.title ? (w.title.ua || rawTitleUa) : rawTitleUa).trim();
+  const titleEn = String(typeof w.title === 'object' && w.title ? (w.title.en || rawTitleEn || titleUa) : (rawTitleEn || translateToEnglishIfNeeded(titleUa))).trim();
+
+  const descUa = String(typeof w.description === 'object' && w.description ? (w.description.ua || w.description_ua || '') : (w.description_ua || w.description || w.desc || '')).trim();
+  const descEn = String(typeof w.description === 'object' && w.description ? (w.description.en || w.description_en || descUa) : (w.description_en || (!w.description_ua ? w.description : '') || translateToEnglishIfNeeded(descUa))).trim();
+
+  const parseList = (val: any) => {
+    if (Array.isArray(val)) return val.map(String).map(s => s.trim()).filter(Boolean);
+    if (typeof val === 'string' && val.trim()) {
+      return val.split(/[\n,;]+/).map(s => s.trim()).filter(Boolean);
+    }
+    return [];
+  };
+
+  const delivUa = parseList(w.deliverables_ua || w.deliverables);
+  const delivEn = parseList(w.deliverables_en || (w.deliverables_ua ? undefined : w.deliverables));
+  const deliverables = (delivUa.length > 0 || delivEn.length > 0) ? {
+    ua: delivUa.length > 0 ? delivUa : delivEn,
+    en: delivEn.length > 0 ? delivEn : delivUa.map(d => translateToEnglishIfNeeded(d))
+  } : undefined;
+
+  const tools = parseList(w.tools || w.technologies || w.software);
+  const highlightTool = w.highlightTool || (tools.find((t: string) => t.toLowerCase() === 'stitch') ? 'Stitch' : undefined);
+
+  return {
+    id: String(w.id || `wf-${idx + 1}`),
+    stepNumber: stepNum.startsWith('0') || Number(stepNum) >= 10 ? stepNum : `0${stepNum}`,
+    title: { ua: titleUa, en: titleEn },
+    description: { ua: descUa, en: descEn },
+    deliverables,
+    tools: tools.length > 0 ? tools : undefined,
+    highlightTool
+  };
+}
+
+function mapFAQFromSheet(f: any, idx: number): FAQItem {
+  const rawQUa = f.question_ua || f.question || f.q_ua || f.q || `Запитання ${idx + 1}`;
+  const rawQEn = f.question_en || (f.question_ua ? '' : f.question) || f.q_en || `Question ${idx + 1}`;
+  
+  const qUa = String(typeof f.question === 'object' && f.question ? (f.question.ua || rawQUa) : rawQUa).trim();
+  const qEn = String(typeof f.question === 'object' && f.question ? (f.question.en || rawQEn || qUa) : (rawQEn || translateToEnglishIfNeeded(qUa))).trim();
+
+  const rawAUa = f.answer_ua || f.answer || f.a_ua || f.a || '';
+  const rawAEn = f.answer_en || (f.answer_ua ? '' : f.answer) || f.a_en || '';
+
+  const aUa = String(typeof f.answer === 'object' && f.answer ? (f.answer.ua || rawAUa) : rawAUa).trim();
+  const aEn = String(typeof f.answer === 'object' && f.answer ? (f.answer.en || rawAEn || aUa) : (rawAEn || translateToEnglishIfNeeded(aUa))).trim();
+
+  let category: { ua: string; en: string } | undefined = undefined;
+  if (f.category || f.category_ua || f.category_en) {
+    const cUa = String(f.category_ua || f.category || '').trim();
+    const cEn = String(f.category_en || f.category || cUa).trim();
+    if (cUa || cEn) {
+      category = { ua: cUa || cEn, en: cEn || cUa };
+    }
+  }
+
+  return {
+    id: String(f.id || `faq-${idx + 1}`),
+    question: { ua: qUa, en: qEn },
+    answer: { ua: aUa, en: aEn },
+    category
   };
 }
 
@@ -1601,6 +1703,16 @@ export function getStoredData(): PortfolioData {
       if (Array.isArray(parsed.testimonials)) {
         parsed.testimonials = parsed.testimonials.map(mapTestimonialFromSheet);
       }
+      if (Array.isArray(parsed.workflow)) {
+        parsed.workflow = parsed.workflow.map(mapWorkflowFromSheet);
+      } else {
+        parsed.workflow = DEFAULT_WORKFLOW;
+      }
+      if (Array.isArray(parsed.faq)) {
+        parsed.faq = parsed.faq.map(mapFAQFromSheet);
+      } else {
+        parsed.faq = DEFAULT_FAQ;
+      }
       if (parsed.legalAndBanners) {
         parsed.legalAndBanners = mapLegalAndBannersFromSheet(parsed.legalAndBanners, parsed.settings);
       } else {
@@ -1633,6 +1745,8 @@ export function getStoredData(): PortfolioData {
     projects: DEFAULT_PROJECTS,
     experience: DEFAULT_EXPERIENCE,
     testimonials: DEFAULT_TESTIMONIALS,
+    workflow: DEFAULT_WORKFLOW,
+    faq: DEFAULT_FAQ,
     settings: DEFAULT_SETTINGS,
     contacts: DEFAULT_CONTACTS,
     legalAndBanners: DEFAULT_LEGAL_AND_BANNERS,
@@ -1728,6 +1842,14 @@ export async function syncWithGoogleSheets(endpointUrl: string = DEFAULT_SHEETS_
     ? json.testimonials.map(mapTestimonialFromSheet)
     : DEFAULT_TESTIMONIALS;
 
+  const parsedWorkflow = json.workflow && Array.isArray(json.workflow) && json.workflow.length > 0
+    ? json.workflow.map(mapWorkflowFromSheet)
+    : (json.process && Array.isArray(json.process) && json.process.length > 0 ? json.process.map(mapWorkflowFromSheet) : DEFAULT_WORKFLOW);
+
+  const parsedFAQ = json.faq && Array.isArray(json.faq) && json.faq.length > 0
+    ? json.faq.map(mapFAQFromSheet)
+    : (json.questions && Array.isArray(json.questions) && json.questions.length > 0 ? json.questions.map(mapFAQFromSheet) : DEFAULT_FAQ);
+
   const combinedSettings = {
     ...(json.legalAndBanners && typeof json.legalAndBanners === 'object' ? json.legalAndBanners : {}),
     ...(json.settings && typeof json.settings === 'object' ? json.settings : {})
@@ -1767,6 +1889,8 @@ export async function syncWithGoogleSheets(endpointUrl: string = DEFAULT_SHEETS_
     statuses: parsedStatuses.length > 0 ? parsedStatuses : undefined,
     experience: parsedExperience,
     testimonials: parsedTestimonials,
+    workflow: parsedWorkflow,
+    faq: parsedFAQ,
     settings: parsedSettings,
     contacts: parsedContacts,
     legalAndBanners: parsedLegalAndBanners,
@@ -1828,6 +1952,8 @@ function doGet(e) {
   var contactsSheet = findSheet(["Contacts", "contacts", "Contact", "contact", "Socials", "socials"]);
   var expSheet = findSheet(["Experience", "experience"]);
   var testSheet = findSheet(["Testimonials", "testimonials"]);
+  var workflowSheet = findSheet(["Workflow", "workflow", "Process", "process"]);
+  var faqSheet = findSheet(["FAQ", "faq", "Questions", "questions"]);
   var legalSheet = findSheet(["Legal_And_Banners", "legal_and_banners", "Legal and Banners", "Legal", "legal", "Banners", "banners", "Cookies", "cookies"]);
   
   var result = {
@@ -1841,6 +1967,8 @@ function doGet(e) {
     contacts: parseContactsSheet(contactsSheet),
     experience: parseSheetToObjects(expSheet),
     testimonials: parseSheetToObjects(testSheet),
+    workflow: parseSheetToObjects(workflowSheet),
+    faq: parseSheetToObjects(faqSheet),
     legalAndBanners: parseLegalSheet(legalSheet)
   };
   

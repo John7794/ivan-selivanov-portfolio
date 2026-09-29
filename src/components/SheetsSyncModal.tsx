@@ -13,9 +13,12 @@ import {
   CheckCircle2, 
   AlertCircle,
   Mail,
-  Briefcase
+  Briefcase,
+  Compass,
+  HelpCircle
 } from 'lucide-react';
 import { Language, LegalAndBannersData } from '../types';
+import { DEFAULT_WORKFLOW, DEFAULT_FAQ } from '../data/defaultData';
 import { 
   getGoogleAppsScriptTemplate, 
   getLegalSheetTsvTemplate, 
@@ -41,12 +44,16 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
   portfolioData,
   onDataUpdated
 }) => {
-  const [activeTab, setActiveTab] = useState<'projects' | 'contacts' | 'general' | 'legal' | 'sync' | 'script'>('projects');
+  const [activeTab, setActiveTab] = useState<'projects' | 'contacts' | 'general' | 'workflow' | 'faq' | 'legal' | 'sync' | 'script'>('projects');
   const [copiedProjectsHeaders, setCopiedProjectsHeaders] = useState(false);
   const [copiedProjectsTsv, setCopiedProjectsTsv] = useState(false);
   const [copiedTsv, setCopiedTsv] = useState(false);
   const [copiedGeneralTsv, setCopiedGeneralTsv] = useState(false);
   const [copiedContactsTsv, setCopiedContactsTsv] = useState(false);
+  const [copiedWorkflowTsv, setCopiedWorkflowTsv] = useState(false);
+  const [copiedWorkflowHeaders, setCopiedWorkflowHeaders] = useState(false);
+  const [copiedFaqTsv, setCopiedFaqTsv] = useState(false);
+  const [copiedFaqHeaders, setCopiedFaqHeaders] = useState(false);
   const [copiedScript, setCopiedScript] = useState(false);
   const [endpointUrl, setEndpointUrl] = useState(portfolioData.settings.appsScriptUrl || '');
   const [isSyncing, setIsSyncing] = useState(false);
@@ -118,6 +125,60 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
     navigator.clipboard.writeText(tsv);
     setCopiedTsv(true);
     setTimeout(() => setCopiedTsv(false), 2200);
+  };
+
+  const workflowHeadersRow = 'id\tstepNumber\ttitle_ua\ttitle_en\tdescription_ua\tdescription_en\tdeliverables_ua\tdeliverables_en\ttools\thighlightTool';
+
+  const handleCopyWorkflowHeaders = () => {
+    navigator.clipboard.writeText(workflowHeadersRow);
+    setCopiedWorkflowHeaders(true);
+    setTimeout(() => setCopiedWorkflowHeaders(false), 2200);
+  };
+
+  const handleCopyWorkflowTsv = () => {
+    const rows = [
+      workflowHeadersRow,
+      ...DEFAULT_WORKFLOW.map(w => [
+        w.id,
+        w.stepNumber,
+        w.title.ua,
+        w.title.en,
+        w.description.ua,
+        w.description.en,
+        (w.deliverables?.ua || []).join('; '),
+        (w.deliverables?.en || []).join('; '),
+        (w.tools || []).join(', '),
+        w.highlightTool || ''
+      ].join('\t'))
+    ].join('\n');
+    navigator.clipboard.writeText(rows);
+    setCopiedWorkflowTsv(true);
+    setTimeout(() => setCopiedWorkflowTsv(false), 2200);
+  };
+
+  const faqHeadersRow = 'id\tquestion_ua\tquestion_en\tanswer_ua\tanswer_en\tcategory';
+
+  const handleCopyFaqHeaders = () => {
+    navigator.clipboard.writeText(faqHeadersRow);
+    setCopiedFaqHeaders(true);
+    setTimeout(() => setCopiedFaqHeaders(false), 2200);
+  };
+
+  const handleCopyFaqTsv = () => {
+    const rows = [
+      faqHeadersRow,
+      ...DEFAULT_FAQ.map(f => [
+        f.id,
+        f.question.ua,
+        f.question.en,
+        f.answer.ua.replace(/\n/g, ' '),
+        f.answer.en.replace(/\n/g, ' '),
+        f.category?.ua || 'Загальне'
+      ].join('\t'))
+    ].join('\n');
+    navigator.clipboard.writeText(rows);
+    setCopiedFaqTsv(true);
+    setTimeout(() => setCopiedFaqTsv(false), 2200);
   };
 
   const handleCopyScript = () => {
@@ -234,7 +295,7 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md overflow-y-auto">
+      <div key="sheets-sync-modal-backdrop" className="fixed inset-0 z-[70] flex items-center justify-center p-3 sm:p-6 pt-[75px] sm:pt-[86px] bg-black/85 backdrop-blur-md overflow-y-auto">
         <div className="fixed inset-0" onClick={onClose} />
 
         <motion.div
@@ -305,6 +366,32 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
             >
               <Table className="w-3.5 h-3.5" />
               <span>{language === 'ua' ? 'Вкладка General_Data' : 'General_Data Tab'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('workflow')}
+              className={`px-4 py-3 flex items-center gap-2 border-b-2 font-medium cursor-pointer transition-colors shrink-0 ${
+                activeTab === 'workflow'
+                  ? 'border-emerald-400 text-white bg-neutral-900/60'
+                  : 'border-transparent text-neutral-400 hover:text-neutral-200'
+              }`}
+            >
+              <Compass className="w-3.5 h-3.5" />
+              <span>{language === 'ua' ? 'Вкладка Workflow' : 'Workflow Tab'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('faq')}
+              className={`px-4 py-3 flex items-center gap-2 border-b-2 font-medium cursor-pointer transition-colors shrink-0 ${
+                activeTab === 'faq'
+                  ? 'border-emerald-400 text-white bg-neutral-900/60'
+                  : 'border-transparent text-neutral-400 hover:text-neutral-200'
+              }`}
+            >
+              <HelpCircle className="w-3.5 h-3.5" />
+              <span>{language === 'ua' ? 'Вкладка FAQ' : 'FAQ Tab'}</span>
             </button>
 
             <button
@@ -406,7 +493,7 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
                         <strong className="text-emerald-400">client_ua / client_en</strong> — {language === 'ua' ? 'Назва клієнта/замовника окремо українською та англійською мовами (також підтримується спільна колонка "client").' : 'Client name in Ukrainian and English (single "client" column also supported).'}
                       </p>
                       <p>
-                        <strong className="text-emerald-400">mobileThumbnailUrl</strong> — {language === 'ua' ? 'Посилання на мобільне прев’ю/скріншот. Якщо це поле заповнено, у кейсі автоматично активується кнопка "Mobile" для інтерактивного мобільного фрейму.' : 'URL to mobile preview/screenshot. When provided, the "Mobile" preview button is automatically enabled in the viewer.'}
+                        <strong className="text-emerald-400">mobileThumbnailUrl</strong> — {language === 'ua' ? 'Посилання на мобільне прев’ю/скріншот для веб- та UI/UX-дизайнів. Якщо є обидві версії — виводяться кнопки [Desktop / Mobile]; якщо завантажено лише мобільну — виводиться тільки [Mobile]; для інших категорій (3D, книги, брендинг) ці кнопки приховані.' : 'URL to mobile preview/screenshot for web and UI/UX designs. If both versions exist — [Desktop / Mobile] switcher appears; if only mobile is uploaded — only [Mobile] appears; for other design categories (3D, books, branding) device buttons remain hidden.'}
                       </p>
                       <p>
                         <strong className="text-emerald-400">role_ua / role_en</strong> — {language === 'ua' ? 'Ваша посада чи роль у проєкті окремо українською та англійською (наприклад: "Провідний дизайнер" / "Lead Designer"). Також підтримується спільна колонка "role".' : 'Your position or role in the project.'}
@@ -483,8 +570,8 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-neutral-900 text-neutral-300">
-                        {contactsPreviewRows.map(row => (
-                          <tr key={row.key} className="hover:bg-neutral-900/50">
+                        {contactsPreviewRows.map((row, idx) => (
+                          <tr key={`${row.key}-${idx}`} className="hover:bg-neutral-900/50">
                             <td className="p-2.5 font-bold text-emerald-400">{row.key}</td>
                             <td className="p-2.5 max-w-[280px] truncate">{row.valUa}</td>
                             <td className="p-2.5 max-w-[280px] truncate">{row.valEn}</td>
@@ -554,8 +641,8 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-neutral-900 text-neutral-300">
-                        {generalPreviewRows.map(row => (
-                          <tr key={row.key} className="hover:bg-neutral-900/50">
+                        {generalPreviewRows.map((row, idx) => (
+                          <tr key={`${row.key}-${idx}`} className="hover:bg-neutral-900/50">
                             <td className="p-2.5 font-bold text-emerald-400">{row.key}</td>
                             <td className="p-2.5 max-w-[280px] truncate">{row.valUa}</td>
                             <td className="p-2.5 max-w-[280px] truncate">{row.valEn}</td>
@@ -569,6 +656,155 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
                       ? 'Всі текстові поля мають окремі колонки ua та en, а системні поля (email, linkedin, heroImage) однакові або локалізовані.' 
                       : 'All text fields have separated ua and en columns, while email, linkedin, and heroImage work seamlessly.'}
                   </p>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'workflow' && (
+              <div className="space-y-6">
+                <div className="bg-neutral-900/80 border border-neutral-800 p-5 space-y-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                      <h4 className="font-mono text-xs uppercase tracking-widest text-emerald-400 font-semibold">
+                        {language === 'ua' ? 'Вкладка "Workflow" (4 етапи робочого процесу)' : '"Workflow" Tab (4-phase delivery process)'}
+                      </h4>
+                      <p className="text-neutral-300 text-xs sm:text-sm mt-1 leading-relaxed">
+                        {language === 'ua'
+                          ? 'Створіть у вашій Google-таблиці окрему вкладку з назвою '
+                          : 'Create a new tab in your Google Sheet named '}
+                        <strong className="text-white font-mono bg-black px-2 py-0.5 border border-neutral-700">Workflow</strong>
+                        {language === 'ua' ? ' (або Process).' : ' (or Process).'}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleCopyWorkflowHeaders}
+                        className="px-3.5 py-2 border border-neutral-700 hover:border-neutral-500 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 transition-colors font-mono text-xs flex items-center gap-2 cursor-pointer shadow"
+                      >
+                        {copiedWorkflowHeaders ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{copiedWorkflowHeaders ? (language === 'ua' ? 'Скопійовано' : 'Copied') : (language === 'ua' ? 'Заголовки' : 'Headers')}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleCopyWorkflowTsv}
+                        className="px-4 py-2 bg-[#f4f4f0] text-black hover:bg-white transition-all font-mono text-xs uppercase tracking-wider font-semibold flex items-center gap-2 cursor-pointer shadow"
+                      >
+                        {copiedWorkflowTsv ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                        <span>{copiedWorkflowTsv ? (language === 'ua' ? 'Скопійовано!' : 'Copied!') : (language === 'ua' ? 'Скопіювати шаблон' : 'Copy Template')}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-black border border-neutral-800 font-mono text-xs text-neutral-300 overflow-x-auto whitespace-pre select-all">
+                    {workflowHeadersRow}
+                  </div>
+                </div>
+
+                {/* Preview Table */}
+                <div>
+                  <h5 className="font-mono text-xs uppercase tracking-widest text-neutral-400 mb-3">
+                    {language === 'ua' ? 'Попередній перегляд етапів:' : 'Workflow phases preview:'}
+                  </h5>
+                  <div className="border border-neutral-800 bg-neutral-950 font-mono text-xs overflow-x-auto">
+                    <table className="w-full text-left">
+                      <thead className="bg-neutral-900 border-b border-neutral-800 text-neutral-400">
+                        <tr>
+                          <th className="p-2.5">stepNumber</th>
+                          <th className="p-2.5">title_ua</th>
+                          <th className="p-2.5">title_en</th>
+                          <th className="p-2.5">tools</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-900 text-neutral-300">
+                        {DEFAULT_WORKFLOW.map((w, idx) => (
+                          <tr key={`${w.id}-${idx}`} className="hover:bg-neutral-900/50">
+                            <td className="p-2.5 font-bold text-cyan-400">{w.stepNumber}</td>
+                            <td className="p-2.5 font-medium">{w.title.ua}</td>
+                            <td className="p-2.5 text-neutral-400">{w.title.en}</td>
+                            <td className="p-2.5 text-emerald-400">{(w.tools || []).join(', ')}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="text-[11px] font-mono text-neutral-500 mt-2">
+                    {language === 'ua'
+                      ? 'Підказка: колонка highlightTool дозволяє виділити бейджем інструмент (наприклад, Stitch як сучасний AI-інструмент швидкого прототипування).'
+                      : 'Tip: highlightTool column displays an accent badge for the selected tool (e.g. Stitch).'}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'faq' && (
+              <div className="space-y-6">
+                <div className="bg-neutral-900/80 border border-neutral-800 p-5 space-y-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                      <h4 className="font-mono text-xs uppercase tracking-widest text-emerald-400 font-semibold">
+                        {language === 'ua' ? 'Вкладка "FAQ" (Часті запитання та умови співпраці)' : '"FAQ" Tab (Frequently asked questions)'}
+                      </h4>
+                      <p className="text-neutral-300 text-xs sm:text-sm mt-1 leading-relaxed">
+                        {language === 'ua'
+                          ? 'Створіть у вашій Google-таблиці окрему вкладку з назвою '
+                          : 'Create a new tab in your Google Sheet named '}
+                        <strong className="text-white font-mono bg-black px-2 py-0.5 border border-neutral-700">FAQ</strong>
+                        {language === 'ua' ? ' (або Questions).' : ' (or Questions).'}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleCopyFaqHeaders}
+                        className="px-3.5 py-2 border border-neutral-700 hover:border-neutral-500 bg-neutral-900 hover:bg-neutral-800 text-neutral-200 transition-colors font-mono text-xs flex items-center gap-2 cursor-pointer shadow"
+                      >
+                        {copiedFaqHeaders ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{copiedFaqHeaders ? (language === 'ua' ? 'Скопійовано' : 'Copied') : (language === 'ua' ? 'Заголовки' : 'Headers')}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleCopyFaqTsv}
+                        className="px-4 py-2 bg-[#f4f4f0] text-black hover:bg-white transition-all font-mono text-xs uppercase tracking-wider font-semibold flex items-center gap-2 cursor-pointer shadow"
+                      >
+                        {copiedFaqTsv ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                        <span>{copiedFaqTsv ? (language === 'ua' ? 'Скопійовано!' : 'Copied!') : (language === 'ua' ? 'Скопіювати шаблон' : 'Copy Template')}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-black border border-neutral-800 font-mono text-xs text-neutral-300 overflow-x-auto whitespace-pre select-all">
+                    {faqHeadersRow}
+                  </div>
+                </div>
+
+                {/* Preview Table */}
+                <div>
+                  <h5 className="font-mono text-xs uppercase tracking-widest text-neutral-400 mb-3">
+                    {language === 'ua' ? 'Попередній перегляд запитань:' : 'Questions preview:'}
+                  </h5>
+                  <div className="border border-neutral-800 bg-neutral-950 font-mono text-xs overflow-x-auto">
+                    <table className="w-full text-left">
+                      <thead className="bg-neutral-900 border-b border-neutral-800 text-neutral-400">
+                        <tr>
+                          <th className="p-2.5">question_ua</th>
+                          <th className="p-2.5">question_en</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-900 text-neutral-300">
+                        {DEFAULT_FAQ.map((f, idx) => (
+                          <tr key={`${f.id}-${idx}`} className="hover:bg-neutral-900/50">
+                            <td className="p-2.5 font-medium">{f.question.ua}</td>
+                            <td className="p-2.5 text-neutral-400">{f.question.en}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             )}
@@ -624,8 +860,8 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-neutral-900 text-neutral-300">
-                        {legalPreviewRows.map(row => (
-                          <tr key={row.key} className="hover:bg-neutral-900/50">
+                        {legalPreviewRows.map((row, idx) => (
+                          <tr key={`${row.key}-${idx}`} className="hover:bg-neutral-900/50">
                             <td className="p-2.5 font-bold text-emerald-400">{row.key}</td>
                             <td className="p-2.5 max-w-[280px] truncate">{row.valUa}</td>
                             <td className="p-2.5 max-w-[280px] truncate">{row.valEn}</td>

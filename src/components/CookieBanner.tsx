@@ -201,7 +201,7 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({
   return (
     <AnimatePresence>
       {isVisible && !isSuppressed && (
-        <div className="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 lg:bottom-8 lg:left-8 z-[60] max-w-[calc(100vw-2rem)] sm:max-w-xl w-full pointer-events-none">
+        <div key="cookie-banner-outer" className="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 lg:bottom-8 lg:left-8 z-[60] max-w-[calc(100vw-2rem)] sm:max-w-xl w-full pointer-events-none">
           <motion.div
             initial={{ opacity: 0, y: 30, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -251,6 +251,7 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({
           <AnimatePresence initial={false}>
             {isExpanded && (
               <motion.div
+                key="cookie-expanded-toggles"
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
@@ -263,9 +264,9 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({
                 </div>
 
                 <div className="space-y-2">
-                  {toggleItems.map(item => (
+                  {toggleItems.map((item, idx) => (
                     <div
-                      key={item.id}
+                      key={`${item.id}-${idx}`}
                       className="p-3 bg-neutral-950 border border-neutral-850 hover:border-neutral-700 transition-colors flex items-center justify-between gap-4"
                     >
                       <div className="space-y-1 min-w-0">

@@ -4,6 +4,7 @@ import { ArrowUpRight, Sparkles, Box, BookOpen, Layers, Images, Figma } from 'lu
 import { Project, Language, GeneralSettings } from '../types';
 import { getLocalizedText } from '../utils/i18n';
 import { getFigmaDirectUrl } from '../utils/figma';
+import { BorderTrace } from './BorderTrace';
 
 interface ProjectCardProps {
   project: Project;
@@ -121,42 +122,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
       } ${bentoSpanClass}`}
     >
       {/* Smooth Perimeter Border Tracing Effect on Hover (Subtle Neutral Line) */}
-      <span
-        aria-hidden="true"
-        className={`pointer-events-none absolute top-0 left-0 h-[1px] w-full bg-neutral-600 transform origin-left transition-transform duration-300 ease-out z-10 ${
-          isHovered ? 'scale-x-100' : 'scale-x-0'
-        }`}
-        style={{
-          transitionDelay: isHovered ? '0ms' : '450ms',
-        }}
-      />
-      <span
-        aria-hidden="true"
-        className={`pointer-events-none absolute top-0 right-0 w-[1px] h-full bg-neutral-600 transform origin-top transition-transform duration-300 ease-out z-10 ${
-          isHovered ? 'scale-y-100' : 'scale-y-0'
-        }`}
-        style={{
-          transitionDelay: isHovered ? '150ms' : '300ms',
-        }}
-      />
-      <span
-        aria-hidden="true"
-        className={`pointer-events-none absolute bottom-0 right-0 h-[1px] w-full bg-neutral-600 transform origin-right transition-transform duration-300 ease-out z-10 ${
-          isHovered ? 'scale-x-100' : 'scale-x-0'
-        }`}
-        style={{
-          transitionDelay: isHovered ? '300ms' : '150ms',
-        }}
-      />
-      <span
-        aria-hidden="true"
-        className={`pointer-events-none absolute bottom-0 left-0 w-[1px] h-full bg-neutral-600 transform origin-bottom transition-transform duration-300 ease-out z-10 ${
-          isHovered ? 'scale-y-100' : 'scale-y-0'
-        }`}
-        style={{
-          transitionDelay: isHovered ? '450ms' : '0ms',
-        }}
-      />
+      <BorderTrace isHovered={isHovered} color="bg-neutral-600" />
 
       {/* Top Bento Header Bar */}
       <div className="flex items-center justify-between gap-2 mb-3 font-mono text-[11px] text-neutral-400">
@@ -258,7 +224,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           >
             {imagesList.slice(0, 5).map((img, i) => (
               <button
-                key={i}
+                key={`thumb-preview-${project.id}-${i}`}
                 type="button"
                 onMouseEnter={() => setActivePreviewIndex(i)}
                 onClick={() => setActivePreviewIndex(i)}
@@ -284,15 +250,15 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
       {/* Bento Card Meta Information */}
       <div className="pt-3.5 flex flex-col flex-1">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex-1">
-            <h3 className="text-xl sm:text-2xl font-medium uppercase tracking-tight text-neutral-100 group-hover:text-white transition-colors leading-tight">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg sm:text-xl md:text-2xl font-medium uppercase tracking-tight text-neutral-100 group-hover:text-white transition-colors leading-snug sm:leading-tight break-words">
               {getLocalizedText(project.title, language, { ua: 'Без назви', en: 'Untitled' })}
             </h3>
-            <p className="text-neutral-400 text-xs sm:text-sm font-light mt-1.5 line-clamp-2 leading-relaxed">
+            <p className="text-neutral-400 text-xs sm:text-sm font-light mt-1.5 line-clamp-3 sm:line-clamp-2 leading-relaxed break-words">
               {getLocalizedText(project.tagline, language, { ua: '', en: '' })}
             </p>
             {project.client && (
-              <div className="mt-1 font-mono text-[11px] text-neutral-500 truncate">
+              <div className="mt-1 font-mono text-[11px] text-neutral-500 line-clamp-2 sm:truncate break-words">
                 <span className="text-neutral-600">// </span>
                 {typeof project.client === 'object'
                   ? getLocalizedText(project.client, language, { ua: '', en: '' })
@@ -301,7 +267,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             )}
           </div>
 
-          <div className="w-8 h-8 shrink-0 rounded-full border border-neutral-700 flex items-center justify-center text-neutral-400 group-hover:border-white group-hover:bg-white group-hover:text-black transition-all duration-300">
+          <div className="w-8 h-8 shrink-0 rounded-full border border-neutral-700 flex items-center justify-center text-neutral-400 group-hover:border-white group-hover:bg-white group-hover:text-black transition-all duration-300 mt-0.5">
             <ArrowUpRight className="w-4 h-4 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </div>
         </div>
@@ -312,7 +278,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             <div className="flex flex-wrap items-center gap-1.5 overflow-hidden">
               {project.toolsUsed.slice(0, 3).map((tool, idx) => (
                 <span
-                  key={idx}
+                  key={`tool-${project.id}-${tool}-${idx}`}
                   className="font-mono text-[10px] px-2 py-0.5 bg-neutral-900/90 text-neutral-400 border border-neutral-800"
                 >
                   {tool}

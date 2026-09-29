@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Layout, Type, Box, Cpu, Compass, CheckCircle2 } from 'lucide-react';
 import { Language, GeneralSettings } from '../types';
 import { DEFAULT_SETTINGS } from '../data/defaultData';
-import { AnimatedDivider } from './AnimatedDivider';
+import { BorderTrace } from './BorderTrace';
 import { getLocalizedText, getLocalizedArray } from '../utils/i18n';
 
 interface BentoExpertiseProps {
@@ -44,11 +44,11 @@ export const BentoExpertise: React.FC<BentoExpertiseProps> = ({ language, expert
   const technologies = rawTechnologies.filter(tech => !tech.toLowerCase().includes('figjam'));
 
   return (
-    <section id="expertise" className="scroll-mt-20 pt-8 pb-24 px-6 lg:px-12 border-t border-neutral-900 bg-[#080808] text-[#f4f4f0] relative">
+    <section id="expertise" className="scroll-mt-20 pt-8 pb-24 px-6 lg:px-12 border-t border-neutral-900 bg-[#0a0a0a] text-[#f4f4f0] relative">
       <div className="max-w-[1600px] mx-auto">
-        {/* Sticky Section Header */}
-        <div className="sticky top-[58px] sm:top-[73px] z-30 bg-[#080808]/95 backdrop-blur-md -mx-6 px-6 lg:-mx-12 lg:px-12 pt-4 pb-0 mb-12 transition-all">
-          <div className="max-w-[1600px] mx-auto pb-6">
+        {/* Sticky Section Header (Matches top navbar glassmorphism, blur, and bottom border effect) */}
+        <div className="sticky top-[58px] sm:top-[73px] z-30 bg-[#0a0a0a]/85 backdrop-blur-md -mx-6 px-6 lg:-mx-12 lg:px-12 pt-4 pb-4 mb-8 sm:mb-12 border-b border-neutral-900/90 transition-all">
+          <div className="max-w-[1600px] mx-auto">
             <span className="font-mono text-xs uppercase tracking-widest text-neutral-400 block mb-1">
               {getLocalizedText(ui?.expertiseIndex, language, { ua: '02 // METHODOLOGY & CAPABILITIES', en: '02 // METHODOLOGY & CAPABILITIES' })}
             </span>
@@ -59,9 +59,6 @@ export const BentoExpertise: React.FC<BentoExpertiseProps> = ({ language, expert
               {t.subtitle}
             </p>
           </div>
-
-          {/* Animated divider line with gentle moving glint reflection */}
-          <AnimatedDivider />
         </div>
 
         {/* Bento Grid */}
@@ -71,8 +68,10 @@ export const BentoExpertise: React.FC<BentoExpertiseProps> = ({ language, expert
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="md:col-span-2 bg-[#101010] border border-neutral-800/90 p-8 md:p-10 flex flex-col justify-start hover:border-neutral-700 transition-colors"
+            className="group relative md:col-span-2 bg-[#101010]/95 hover:bg-[#141414] border border-neutral-800/80 transition-colors duration-500 rounded-sm overflow-hidden p-8 md:p-10 flex flex-col justify-start shadow-xl hover:shadow-2xl"
           >
+            <BorderTrace color="bg-neutral-500" />
+
             <div className="flex justify-between items-start mb-6">
               <div className="w-12 h-12 bg-neutral-900 border border-neutral-800 flex items-center justify-center text-emerald-400 shrink-0">
                 <Layout className="w-6 h-6" />
@@ -95,8 +94,10 @@ export const BentoExpertise: React.FC<BentoExpertiseProps> = ({ language, expert
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="bg-[#101010] border border-neutral-800/90 p-8 md:p-10 flex flex-col justify-start hover:border-neutral-700 transition-colors relative overflow-hidden"
+            className="group relative bg-[#101010]/95 hover:bg-[#141414] border border-neutral-800/80 transition-colors duration-500 rounded-sm overflow-hidden p-8 md:p-10 flex flex-col justify-start shadow-xl hover:shadow-2xl"
           >
+            <BorderTrace color="bg-neutral-500" />
+
             <div className="absolute -bottom-6 -right-6 text-9xl font-serif italic text-neutral-900 pointer-events-none select-none">
               Aa
             </div>
@@ -123,8 +124,10 @@ export const BentoExpertise: React.FC<BentoExpertiseProps> = ({ language, expert
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.15 }}
-            className="bg-[#101010] border border-neutral-800/90 p-8 md:p-10 flex flex-col justify-start hover:border-neutral-700 transition-colors"
+            className="group relative bg-[#101010]/95 hover:bg-[#141414] border border-neutral-800/80 transition-colors duration-500 rounded-sm overflow-hidden p-8 md:p-10 flex flex-col justify-start shadow-xl hover:shadow-2xl"
           >
+            <BorderTrace color="bg-neutral-500" />
+
             <div className="flex justify-between items-start mb-6">
               <div className="w-12 h-12 bg-neutral-900 border border-neutral-800 flex items-center justify-center text-cyan-400 shrink-0">
                 <Box className="w-6 h-6" />
@@ -147,8 +150,10 @@ export const BentoExpertise: React.FC<BentoExpertiseProps> = ({ language, expert
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="bg-[#101010] border border-neutral-800/90 p-8 md:p-10 flex flex-col justify-start hover:border-neutral-700 transition-colors"
+            className="group relative bg-[#101010]/95 hover:bg-[#141414] border border-neutral-800/80 transition-colors duration-500 rounded-sm overflow-hidden p-8 md:p-10 flex flex-col justify-start shadow-xl hover:shadow-2xl"
           >
+            <BorderTrace color="bg-neutral-500" />
+
             <div className="flex justify-between items-start mb-6">
               <div className="w-12 h-12 bg-neutral-900 border border-neutral-800 flex items-center justify-center text-rose-400 shrink-0">
                 <Compass className="w-6 h-6" />
@@ -173,8 +178,10 @@ export const BentoExpertise: React.FC<BentoExpertiseProps> = ({ language, expert
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.25 }}
-            className="bg-[#101010] border border-neutral-800/90 p-8 md:p-10 flex flex-col justify-start hover:border-neutral-700 transition-colors"
+            className="group relative bg-[#101010]/95 hover:bg-[#141414] border border-neutral-800/80 transition-colors duration-500 rounded-sm overflow-hidden p-8 md:p-10 flex flex-col justify-start shadow-xl hover:shadow-2xl"
           >
+            <BorderTrace color="bg-neutral-500" />
+
             <div className="flex justify-between items-start mb-6">
               <div className="w-12 h-12 bg-neutral-900 border border-neutral-800 flex items-center justify-center text-blue-400 shrink-0">
                 <Cpu className="w-6 h-6" />
@@ -188,7 +195,7 @@ export const BentoExpertise: React.FC<BentoExpertiseProps> = ({ language, expert
               <div className="flex flex-wrap gap-2">
                 {technologies.map((tech, i) => (
                   <span
-                    key={i}
+                    key={`tech-${tech}-${i}`}
                     className="px-2.5 py-1 text-[11px] font-mono bg-neutral-900 border border-neutral-800 text-neutral-300"
                   >
                     {tech}

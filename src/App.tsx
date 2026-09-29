@@ -21,7 +21,8 @@ import { BackToTop } from './components/BackToTop';
 import { LegalModal, LegalDocType } from './components/LegalModal';
 import { AnnouncementBanner } from './components/AnnouncementBanner';
 import { SheetsSyncModal } from './components/SheetsSyncModal';
-import { AnimatedDivider } from './components/AnimatedDivider';
+import { WorkflowSection } from './components/WorkflowSection';
+import { FAQSection } from './components/FAQSection';
 
 export default function App() {
   const [data, setData] = useState<PortfolioData>(() => getStoredData());
@@ -296,6 +297,7 @@ export default function App() {
         contacts={data.contacts}
         onOpenLegal={(doc) => setLegalDoc(doc)}
         onOpenCookies={() => setIsCookieBannerOpen(true)}
+        onCloseModal={() => setActiveProject(null)}
       />
 
       {/* Hero Section with Interactive Ambient Grid */}
@@ -304,10 +306,10 @@ export default function App() {
         onMouseMove={handleHeroMouseMove}
         onMouseEnter={() => setIsHeroHovered(true)}
         onMouseLeave={handleHeroMouseLeave}
-        className="relative w-full flex flex-col p-6 pb-12 lg:p-12 lg:pb-24 pt-36"
+        className="relative w-full flex flex-col px-4 sm:px-6 lg:p-12 pt-20 sm:pt-24 lg:pt-32 pb-8 sm:pb-12 lg:pb-24"
       >
-        {/* Subtle background ambient line structure with softened interactive spotlight */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Subtle background ambient line structure - hidden on mobile to eliminate harsh background grid frames */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden hidden sm:block">
           {/* Base ambient grid - softened to 0.08 */}
           <div
             className="w-full h-full opacity-[0.08]"
@@ -340,28 +342,28 @@ export default function App() {
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          className="z-10 w-full max-w-[1600px] mx-auto relative pt-12 lg:pt-24"
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="z-10 w-full max-w-[1600px] mx-auto relative pt-1 sm:pt-4 lg:pt-14"
         >
           {/* Status badge */}
-          <div className="mb-6 flex flex-wrap items-center gap-3 text-xs font-mono uppercase tracking-widest text-neutral-400">
-            <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-emerald-400 font-semibold">
+          <div className="mb-4 sm:mb-6 flex flex-wrap items-center gap-2 sm:gap-3 text-[11px] sm:text-xs font-mono uppercase tracking-widest text-neutral-400">
+            <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            <span className="text-emerald-400 font-semibold shrink-0">
               {getLocalizedText(data.settings.heroTag, language, DEFAULT_SETTINGS.heroTag || { ua: 'Готовий до співпраці', en: 'Available for work' })}
             </span>
             {Boolean(getLocalizedText(data.settings.title, language).trim()) && (
               <>
-                <span className="text-neutral-600 hidden sm:inline">|</span>
-                <span className="text-neutral-300">
+                <span className="text-neutral-700 hidden sm:inline">|</span>
+                <span className="text-neutral-400 text-[10px] sm:text-xs">
                   {getLocalizedText(data.settings.title, language)}
                 </span>
               </>
             )}
             {Boolean(getLocalizedText(data.settings.location, language).trim()) && (
               <>
-                <span className="text-neutral-600 hidden sm:inline">|</span>
+                <span className="text-neutral-700 hidden sm:inline">|</span>
                 <span className="hidden sm:inline text-neutral-500">
                   {getLocalizedText(data.settings.location, language)}
                 </span>
@@ -370,30 +372,28 @@ export default function App() {
           </div>
 
           <div className="relative">
-            {/* Main Monumental Heading: SEL over IVAN, IVAN solid fill, SEL & OV outline, OV after IVAN */}
+            {/* Main Monumental Heading: SEL & OV crisp architectural outline, IVAN solid fill */}
             <h1 
               aria-label="SELIVANOV"
-              className="hero-monument-title text-[13vw] lg:text-[11vw] xl:text-[12vw] leading-[0.82] font-black tracking-tighter uppercase select-none pointer-events-none flex flex-col items-start shrink-0 mb-8 lg:mb-12"
+              className="hero-monument-title text-[18vw] xs:text-[17vw] sm:text-[14.5vw] md:text-[12.5vw] lg:text-[11vw] xl:text-[12vw] leading-[0.84] font-black tracking-tighter uppercase select-none pointer-events-none flex flex-col items-start shrink-0 mb-6 lg:mb-12"
             >
-              <span className="text-stroke-layer inline-block" data-text="SEL">
-                <span className="invisible pointer-events-none select-none">SEL</span>
+              <span className="text-stroke-outline">
+                SEL
               </span>
               <span className="inline-flex items-baseline">
                 <span className="text-[#f4f4f0]">IVAN</span>
-                <span className="text-stroke-layer inline-block" data-text="OV">
-                  <span className="invisible pointer-events-none select-none">OV</span>
-                </span>
+                <span className="text-stroke-outline">OV</span>
               </span>
             </h1>
 
             {/* Bio & CTA Row */}
-            <div className="flex flex-col items-start gap-8 pt-8 w-full lg:w-[calc(100%-380px-2rem)] xl:w-[calc(100%-480px-2rem)] relative z-20 pointer-events-none">
-              {/* Animated Line with Continuous Soft Ambient Sheen */}
+            <div className="flex flex-col items-start gap-6 sm:gap-8 pt-4 sm:pt-8 w-full lg:w-[calc(100%-380px-2rem)] xl:w-[calc(100%-480px-2rem)] relative z-20 pointer-events-none">
+              {/* Animated Line with Continuous Soft Ambient Sheen - hidden on mobile to avoid dividing box lines */}
               <motion.div 
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
                 transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-                className="absolute top-0 left-0 h-[1px] bg-neutral-800 origin-left w-full overflow-hidden"
+                className="hidden sm:block absolute top-0 left-0 h-[1px] bg-neutral-800/80 origin-left w-full overflow-hidden"
               >
                 <motion.div 
                   initial={{ x: "-100%" }}
@@ -408,15 +408,15 @@ export default function App() {
                 />
               </motion.div>
 
-              <p className="text-lg sm:text-xl md:text-2xl max-w-xl font-light leading-snug text-neutral-300 pointer-events-auto min-h-[75px] sm:min-h-[84px] md:min-h-[100px]">
+              <p className="text-base sm:text-xl md:text-2xl max-w-xl font-light leading-relaxed sm:leading-snug text-neutral-300 pointer-events-auto min-h-[60px] sm:min-h-[84px] md:min-h-[100px]">
                 {getLocalizedText(data.settings.bioShort, language, DEFAULT_SETTINGS.bioShort)}
               </p>
 
-              <div className="flex items-center gap-6 pointer-events-auto mt-2">
+              <div className="flex items-center gap-6 pointer-events-auto mt-1 sm:mt-2 w-full sm:w-auto">
                 <a
                   href="#work"
                   onClick={scrollToWork}
-                  className="flex items-center gap-4 text-xs font-mono uppercase tracking-widest text-[#f4f4f0] bg-[#0a0a0a]/70 hover:bg-[#0a0a0a] backdrop-blur-md px-6 py-4 border border-neutral-800 transition-colors group cursor-pointer"
+                  className="flex items-center justify-center gap-3 sm:gap-4 text-xs font-mono uppercase tracking-widest text-[#f4f4f0] bg-neutral-900/90 hover:bg-neutral-800 active:bg-neutral-950 px-6 py-3.5 sm:py-4 border border-neutral-800/80 hover:border-neutral-600 transition-all group cursor-pointer w-full sm:w-auto text-center"
                 >
                   <span>{getLocalizedText(data.settings.ui?.heroCta, language, { ua: 'Дослідити кейси', en: 'Explore Portfolio' })}</span>
                   <ArrowDown className="w-4 h-4 group-hover:translate-y-1 transition-transform" />
@@ -424,30 +424,31 @@ export default function App() {
               </div>
             </div>
 
-            {/* Hero Image (Absolute on Desktop to overlap bio, static on mobile) */}
+            {/* Hero Image (Absolute on Desktop to overlap bio, natural integrated portrait on mobile without harsh box frames) */}
             <motion.div 
               style={{ y: heroImageY }}
-              className="mt-12 lg:mt-0 lg:absolute lg:right-0 lg:bottom-0 w-full lg:w-[380px] xl:w-[480px] group z-10"
+              className="mt-8 sm:mt-12 lg:mt-0 lg:absolute lg:right-0 lg:bottom-0 w-full max-w-[280px] sm:max-w-[340px] lg:max-w-none lg:w-[380px] xl:w-[480px] group z-10 mx-auto lg:mx-0 relative"
             >
               <img 
                 src={data.settings.heroImage || "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=1200&auto=format&fit=crop"} 
                 alt={data.settings.name[language]}
-                className="w-full h-auto object-contain object-bottom filter grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700 ease-out scale-105 group-hover:scale-100"
+                className="w-full h-auto object-contain object-bottom filter grayscale opacity-75 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700 ease-out"
                 referrerPolicy="no-referrer"
               />
-              <div className="absolute inset-0 border border-neutral-800 pointer-events-none" />
+              {/* Soft organic bottom vignette to seamlessly merge into the dark background, no harsh rectangular wireframes */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent pointer-events-none opacity-60 lg:opacity-30" />
             </motion.div>
           </div>
         </motion.div>
       </section>
 
       {/* Selected Work Section */}
-      <section id="work" className="scroll-mt-20 pt-8 pb-24 px-6 lg:px-12 bg-[#0d0d0d] text-[#f4f4f0] border-t border-neutral-900 relative">
+      <section id="work" className="scroll-mt-20 pt-6 sm:pt-8 pb-20 sm:pb-24 px-3 sm:px-6 lg:px-12 bg-[#0a0a0a] text-[#f4f4f0] border-t border-neutral-900 relative">
         <div className="max-w-[1600px] mx-auto">
-          {/* Sticky Section Header */}
-          <div className="sticky top-[58px] sm:top-[73px] z-35 bg-[#0d0d0d]/95 backdrop-blur-md -mx-6 px-6 lg:-mx-12 lg:px-12 pt-4 pb-0 mb-10 transition-all">
+          {/* Sticky Section Header (Matches top navbar glassmorphism, blur, and bottom border effect) */}
+          <div className="sticky top-[58px] sm:top-[73px] z-35 bg-[#0a0a0a]/85 backdrop-blur-md -mx-3 px-3 sm:-mx-6 sm:px-6 lg:-mx-12 lg:px-12 pt-4 pb-4 mb-8 sm:mb-10 border-b border-neutral-900/90 transition-all">
             <div className="max-w-[1600px] mx-auto">
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
                   <span className="font-mono text-xs uppercase tracking-widest text-neutral-400 block mb-1">
                     {getLocalizedText(data.settings.ui?.workIndex, language, { ua: '01 // INDEXED CASE STUDIES', en: '01 // INDEXED CASE STUDIES' })}
@@ -458,8 +459,8 @@ export default function App() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  {/* Masonry vs Structured Grid View Toggle */}
-                  <div className="flex items-center bg-neutral-900 border border-neutral-800 p-1 font-mono text-xs">
+                  {/* Masonry vs Structured Grid View Toggle - hidden on mobile since both modes render single-column */}
+                  <div className="hidden sm:flex items-center bg-neutral-900 border border-neutral-800 p-1 font-mono text-xs">
                     <button
                       type="button"
                       onClick={() => setLayoutMode('bento-masonry')}
@@ -493,29 +494,26 @@ export default function App() {
                     </button>
                   </div>
 
-                  <span className="text-sm sm:text-base font-mono text-neutral-400 border-l border-neutral-800 pl-4">
+                  <span className="text-sm sm:text-base font-mono text-neutral-400 sm:border-l sm:border-neutral-800 sm:pl-4">
                     ( {filteredProjects.length < 10 ? `0${filteredProjects.length}` : filteredProjects.length} / {data.projects.length} )
                   </span>
                 </div>
               </div>
-
-              {/* Animated divider line with gentle moving glint reflection */}
-              <AnimatedDivider />
             </div>
           </div>
 
           {/* Two-Axis Filter Bar: Category & Status */}
-          <div className="mb-14 space-y-4 font-mono text-xs">
+          <div className="mb-8 sm:mb-14 space-y-3 sm:space-y-4 font-mono text-xs">
             {/* Category Filter Axis */}
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
               <span className="text-neutral-500 uppercase tracking-wider mr-2 hidden sm:inline">
                 {getLocalizedText(data.settings.ui?.filterCategoryLabel, language, { ua: 'Напрямок:', en: 'Discipline:' })}
               </span>
-              {categoryLabels.map(cat => (
+              {categoryLabels.map((cat, catIdx) => (
                 <button
-                  key={cat.id}
+                  key={`${cat.id || 'cat'}-${catIdx}`}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-3.5 py-1.5 border transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 sm:px-3.5 sm:py-1.5 text-[11px] sm:text-xs border transition-all cursor-pointer ${
                     selectedCategory === cat.id
                       ? 'border-white bg-[#f4f4f0] text-black font-semibold'
                       : 'border-neutral-800 text-neutral-400 hover:border-neutral-600 hover:text-white'
@@ -527,15 +525,15 @@ export default function App() {
             </div>
 
             {/* Status Filter Axis */}
-            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-neutral-900">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-2 border-t border-neutral-900">
               <span className="text-neutral-500 uppercase tracking-wider mr-2 hidden sm:inline">
                 {getLocalizedText(data.settings.ui?.filterStatusLabel, language, { ua: 'Статус:', en: 'Status:' })}
               </span>
-              {statusLabels.map(st => (
+              {statusLabels.map((st, stIdx) => (
                 <button
-                  key={st.id}
+                  key={`${st.id || 'st'}-${stIdx}`}
                   onClick={() => setSelectedStatus(st.id)}
-                  className={`px-3 py-1 text-[11px] border transition-all cursor-pointer ${
+                  className={`px-2.5 py-1 sm:px-3 sm:py-1 text-[10px] sm:text-[11px] border transition-all cursor-pointer ${
                     selectedStatus === st.id
                       ? 'border-neutral-400 bg-neutral-800 text-white font-medium'
                       : 'border-neutral-900 text-neutral-500 hover:border-neutral-700 hover:text-neutral-300'
@@ -550,10 +548,10 @@ export default function App() {
           {/* Project List: Pinterest Bento Masonry or Bento Grid */}
           {filteredProjects.length > 0 ? (
             layoutMode === 'bento-masonry' ? (
-              <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 [column-fill:_balance]">
+              <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 sm:gap-6 [column-fill:_balance]">
                 {filteredProjects.map((project, index) => (
                   <ProjectCard
-                    key={project.id}
+                    key={`${project.id || 'project'}-${index}`}
                     project={project}
                     index={index}
                     featuredIndex={featuredIndices.get(project.id) ?? 0}
@@ -565,10 +563,10 @@ export default function App() {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 [grid-auto-flow:_dense] gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 [grid-auto-flow:_dense] gap-4 sm:gap-6">
                 {filteredProjects.map((project, index) => (
                   <ProjectCard
-                    key={project.id}
+                    key={`${project.id || 'project'}-${index}`}
                     project={project}
                     index={index}
                     featuredIndex={featuredIndices.get(project.id) ?? 0}
@@ -627,6 +625,22 @@ export default function App() {
 
       {/* Experience Timeline */}
       <ExperienceTimeline experience={data.experience} language={language} ui={data.settings.ui} />
+
+      {/* Workflow & Process Pipeline */}
+      <WorkflowSection
+        workflow={data.workflow}
+        language={language}
+        ui={data.settings.ui}
+      />
+
+      {/* Frequently Asked Questions */}
+      <FAQSection
+        faq={data.faq}
+        language={language}
+        ui={data.settings.ui}
+        contactEmail={data.contacts?.email || data.settings?.email}
+        telegram={data.contacts?.telegram || data.settings?.telegram}
+      />
 
       {/* Massive Footer with legal modals trigger */}
       <Footer

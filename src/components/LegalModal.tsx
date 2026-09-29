@@ -88,7 +88,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center p-3 sm:p-6 md:p-10 bg-black/85 backdrop-blur-md overflow-y-auto">
+        <div key="legal-modal-backdrop" className="fixed inset-0 z-[70] flex items-center justify-center p-3 sm:p-6 md:p-10 pt-[75px] sm:pt-[86px] bg-black/85 backdrop-blur-md overflow-y-auto">
           {/* Backdrop click */}
           <div className="fixed inset-0" onClick={onClose} />
 
@@ -197,7 +197,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
               {/* Sections from Google Sheet */}
               <div className="space-y-6">
                 {currentDocMeta.sections.map((section, idx) => (
-                  <section key={section.id || idx} className="space-y-3">
+                  <section key={`${section.id || 'sec'}-${idx}`} className="space-y-3">
                     <h3 className="text-lg font-medium text-white uppercase tracking-wider font-mono text-xs text-emerald-400">
                       {section.title[lang]}
                     </h3>

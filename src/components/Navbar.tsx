@@ -24,6 +24,7 @@ interface NavbarProps {
   contacts?: ContactsData;
   onOpenLegal?: (doc: 'privacy' | 'terms') => void;
   onOpenCookies?: () => void;
+  onCloseModal?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -33,7 +34,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   settings,
   contacts,
   onOpenLegal,
-  onOpenCookies
+  onOpenCookies,
+  onCloseModal
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -65,6 +67,9 @@ export const Navbar: React.FC<NavbarProps> = ({
     e.preventDefault();
     playClickSound();
     setIsMenuOpen(false);
+    if (onCloseModal) {
+      onCloseModal();
+    }
     
     setTimeout(() => {
       const element = document.getElementById(targetId);
@@ -85,6 +90,9 @@ export const Navbar: React.FC<NavbarProps> = ({
     e.preventDefault();
     playClickSound();
     setIsMenuOpen(false);
+    if (onCloseModal) {
+      onCloseModal();
+    }
     window.scrollTo({
       top: 0,
       behavior: 'smooth'
@@ -126,8 +134,24 @@ export const Navbar: React.FC<NavbarProps> = ({
       descEn: getLocalizedText(menuTexts?.item3Desc, 'en', { ua: 'Кар’єрний шлях та ролі', en: 'Professional trajectory & milestones' }) 
     },
     { 
-      id: 'contact', 
+      id: 'workflow', 
       num: '04', 
+      titleUa: 'Процес', 
+      titleEn: 'Workflow', 
+      descUa: '4 етапи від брифу до передачі в розробку', 
+      descEn: '4-phase delivery from brief to dev handoff' 
+    },
+    { 
+      id: 'faq', 
+      num: '05', 
+      titleUa: 'FAQ', 
+      titleEn: 'FAQ', 
+      descUa: 'Формати співпраці, NDA та умови', 
+      descEn: 'Collaboration models, NDA & turnaround' 
+    },
+    { 
+      id: 'contact', 
+      num: '06', 
       titleUa: getLocalizedText(menuTexts?.item4Title, 'ua', { ua: 'Контакти', en: 'Get In Touch' }), 
       titleEn: getLocalizedText(menuTexts?.item4Title, 'en', { ua: 'Контакти', en: 'Get In Touch' }), 
       descUa: getLocalizedText(menuTexts?.item4Desc, 'ua', { ua: 'Зв’язок для нових викликів', en: 'Direct collaboration inquiries' }), 
@@ -155,7 +179,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full p-4 sm:p-6 flex justify-between items-center z-50 bg-[#0a0a0a]/85 backdrop-blur-md border-b border-neutral-900/90 transition-all">
+      <header className="fixed top-0 left-0 w-full p-4 sm:p-6 flex justify-between items-center z-[100] bg-[#0a0a0a]/95 backdrop-blur-md border-b border-neutral-900/90 transition-all">
         {/* Brand Monogram "IS" */}
         <a
           href="#"
@@ -208,23 +232,63 @@ export const Navbar: React.FC<NavbarProps> = ({
               className={`px-2 py-1 sm:px-2.5 sm:py-1 text-xs font-semibold cursor-pointer transition-colors flex items-center gap-1.5 sm:gap-2 ${
                 language === 'en' ? 'bg-[#f4f4f0] text-black font-bold' : 'text-neutral-400 hover:text-white'
               }`}
-              title="English"
+              title="English (US)"
             >
-              {/* UK Flag */}
-              <span className="w-3.5 h-2.5 sm:w-4 rounded-[1px] overflow-hidden flex shrink-0 border border-neutral-700/60">
-                <svg viewBox="0 0 60 30" className="w-full h-full">
-                  <clipPath id="nav-s">
-                    <path d="M0,0 v30 h60 v-30 z"/>
-                  </clipPath>
-                  <clipPath id="nav-t">
-                    <path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/>
-                  </clipPath>
-                  <g clipPath="url(#nav-s)">
-                    <path d="M0,0 v30 h60 v-30 z" fill="#012169"/>
-                    <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6"/>
-                    <path d="M0,0 L60,30 M60,0 L0,30" clipPath="url(#nav-t)" stroke="#C8102E" strokeWidth="4"/>
-                    <path d="M30,0 v30 M0,15 h60" stroke="#fff" strokeWidth="10"/>
-                    <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" strokeWidth="6"/>
+              {/* US Flag */}
+              <span className="w-3.5 h-2.5 sm:w-4 rounded-[1px] overflow-hidden flex shrink-0 border border-neutral-700/60 shadow-sm">
+                <svg viewBox="0 0 60 36" className="w-full h-full block">
+                  {/* 13 Stripes */}
+                  <rect width="60" height="36" fill="#B22234" />
+                  <path d="M0,2.77h60v2.77H0z M0,8.31h60v2.77H0z M0,13.85h60v2.77H0z M0,19.38h60v2.77H0z M0,24.92h60v2.77H0z M0,30.46h60v2.77H0z" fill="#ffffff" />
+                  {/* Blue Canton */}
+                  <rect width="25" height="19.38" fill="#3C3B6E" />
+                  {/* Micro Stars Grid */}
+                  <g fill="#ffffff">
+                    <circle cx="3" cy="2.5" r="0.9" />
+                    <circle cx="7" cy="2.5" r="0.9" />
+                    <circle cx="11" cy="2.5" r="0.9" />
+                    <circle cx="15" cy="2.5" r="0.9" />
+                    <circle cx="19" cy="2.5" r="0.9" />
+                    <circle cx="23" cy="2.5" r="0.9" />
+
+                    <circle cx="5" cy="4.8" r="0.9" />
+                    <circle cx="9" cy="4.8" r="0.9" />
+                    <circle cx="13" cy="4.8" r="0.9" />
+                    <circle cx="17" cy="4.8" r="0.9" />
+                    <circle cx="21" cy="4.8" r="0.9" />
+
+                    <circle cx="3" cy="7.1" r="0.9" />
+                    <circle cx="7" cy="7.1" r="0.9" />
+                    <circle cx="11" cy="7.1" r="0.9" />
+                    <circle cx="15" cy="7.1" r="0.9" />
+                    <circle cx="19" cy="7.1" r="0.9" />
+                    <circle cx="23" cy="7.1" r="0.9" />
+
+                    <circle cx="5" cy="9.4" r="0.9" />
+                    <circle cx="9" cy="9.4" r="0.9" />
+                    <circle cx="13" cy="9.4" r="0.9" />
+                    <circle cx="17" cy="9.4" r="0.9" />
+                    <circle cx="21" cy="9.4" r="0.9" />
+
+                    <circle cx="3" cy="11.7" r="0.9" />
+                    <circle cx="7" cy="11.7" r="0.9" />
+                    <circle cx="11" cy="11.7" r="0.9" />
+                    <circle cx="15" cy="11.7" r="0.9" />
+                    <circle cx="19" cy="11.7" r="0.9" />
+                    <circle cx="23" cy="11.7" r="0.9" />
+
+                    <circle cx="5" cy="14.0" r="0.9" />
+                    <circle cx="9" cy="14.0" r="0.9" />
+                    <circle cx="13" cy="14.0" r="0.9" />
+                    <circle cx="17" cy="14.0" r="0.9" />
+                    <circle cx="21" cy="14.0" r="0.9" />
+
+                    <circle cx="3" cy="16.3" r="0.9" />
+                    <circle cx="7" cy="16.3" r="0.9" />
+                    <circle cx="11" cy="16.3" r="0.9" />
+                    <circle cx="15" cy="16.3" r="0.9" />
+                    <circle cx="19" cy="16.3" r="0.9" />
+                    <circle cx="23" cy="16.3" r="0.9" />
                   </g>
                 </svg>
               </span>
@@ -242,10 +306,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             aria-label={isMenuOpen ? 'Закрити меню' : 'Відкрити меню'}
             className="flex items-center gap-2 px-3 py-1.5 bg-neutral-900/90 hover:bg-neutral-800 text-[#f4f4f0] border border-neutral-800 hover:border-neutral-600 transition-all cursor-pointer font-mono text-xs uppercase tracking-wider select-none shadow-sm"
           >
-            <div className="w-4 h-3.5 flex flex-col justify-between items-center py-0.5">
-              <span className={`w-full h-0.5 bg-current transition-transform duration-300 ${isMenuOpen ? 'rotate-45 translate-y-1' : ''}`} />
-              <span className={`w-full h-0.5 bg-current transition-opacity duration-300 ${isMenuOpen ? 'opacity-0' : 'opacity-100'}`} />
-              <span className={`w-full h-0.5 bg-current transition-transform duration-300 ${isMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`} />
+            <div className="w-4 h-4 flex items-center justify-center shrink-0">
+              {isMenuOpen ? (
+                <X className="w-4 h-4 text-white" />
+              ) : (
+                <Menu className="w-4 h-4 text-white" />
+              )}
             </div>
             <span className="text-[11px] font-medium hidden xs:inline">
               {isMenuOpen 
@@ -256,10 +322,10 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </header>
 
-      {/* Enhanced Popup Menu Overlay */}
+      {/* Enhanced Popup Menu Overlay with Fixed Header Pinned on Top (z-[95] displays above any open project modal) */}
       <AnimatePresence>
         {isMenuOpen && (
-          <div className="fixed inset-0 z-[60] flex flex-col">
+          <div key="navbar-menu-overlay" className="fixed inset-0 z-[95] flex flex-col pt-[65px] sm:pt-[76px]">
             {/* Dark Backdrop with High-Fidelity Blur */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -272,78 +338,28 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             {/* Menu Drawer Content Container */}
             <motion.div
-              initial={{ opacity: 0, y: -20, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.98 }}
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              className="relative z-10 w-full max-h-[95vh] overflow-y-auto custom-scrollbar bg-[#0c0c0c] border-b border-neutral-800 text-[#f4f4f0] shadow-2xl flex flex-col"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="relative z-10 w-full h-[calc(100dvh-65px)] sm:h-[calc(100dvh-76px)] overflow-y-auto custom-scrollbar bg-[#0c0c0c] border-b border-neutral-800 text-[#f4f4f0] shadow-2xl flex flex-col"
             >
-              {/* Top Bar inside Menu */}
-              <div className="p-4 sm:p-6 border-b border-neutral-800/80 flex items-center justify-between">
+              {/* Top Sub-Bar inside Menu Drawer */}
+              <div className="bg-[#0e0e0e]/95 px-4 py-2.5 sm:px-8 sm:py-3 border-b border-neutral-800/80 flex items-center justify-between shrink-0 font-mono text-[11px] text-neutral-400">
                 <div className="flex items-center gap-3">
                   <span className="font-mono text-xs uppercase tracking-widest text-[#f4f4f0] font-bold">
                     {getLocalizedText(menuTexts?.systemTitle, language, { ua: 'IS // СИСТЕМА НАВІГАЦІЇ', en: 'IS // NAVIGATION SYSTEM' })}
                   </span>
-                  <span className="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="hidden sm:inline-block font-mono text-[11px] text-neutral-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="hidden sm:inline-block text-neutral-400">
                     {getLocalizedText(settings?.heroTag, language, { ua: 'Готовий до співпраці', en: 'Available for work' })}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2 sm:gap-3">
-                  {/* Language Switcher inside Menu */}
-                  <div className="flex items-center border border-neutral-800 bg-neutral-900/90 p-0.5 shadow-sm">
-                    <button
-                      type="button"
-                      onClick={() => { playClickSound(); onLanguageChange('ua'); }}
-                      className={`px-2 py-1 sm:px-2.5 sm:py-1 text-xs font-semibold cursor-pointer transition-colors flex items-center gap-1.5 ${
-                        language === 'ua' ? 'bg-[#f4f4f0] text-black font-bold' : 'text-neutral-400 hover:text-white'
-                      }`}
-                      title="Українська"
-                    >
-                      <span className="w-3.5 h-2.5 rounded-[1px] overflow-hidden flex flex-col border border-neutral-700/60 shrink-0">
-                        <span className="w-full h-1/2 bg-[#0057b7]" />
-                        <span className="w-full h-1/2 bg-[#ffd700]" />
-                      </span>
-                      <span className="text-[11px] font-mono">UA</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { playClickSound(); onLanguageChange('en'); }}
-                      className={`px-2 py-1 sm:px-2.5 sm:py-1 text-xs font-semibold cursor-pointer transition-colors flex items-center gap-1.5 ${
-                        language === 'en' ? 'bg-[#f4f4f0] text-black font-bold' : 'text-neutral-400 hover:text-white'
-                      }`}
-                      title="English"
-                    >
-                      <span className="w-3.5 h-2.5 rounded-[1px] overflow-hidden flex shrink-0 border border-neutral-700/60">
-                        <svg viewBox="0 0 60 30" className="w-full h-full">
-                          <clipPath id="nav-s-menu">
-                            <path d="M0,0 v30 h60 v-30 z"/>
-                          </clipPath>
-                          <clipPath id="nav-t-menu">
-                            <path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z"/>
-                          </clipPath>
-                          <g clipPath="url(#nav-s-menu)">
-                            <path d="M0,0 v30 h60 v-30 z" fill="#012169"/>
-                            <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6"/>
-                            <path d="M0,0 L60,30 M60,0 L0,30" clipPath="url(#nav-t-menu)" stroke="#C8102E" strokeWidth="4"/>
-                            <path d="M30,0 v30 M0,15 h60" stroke="#fff" strokeWidth="10"/>
-                            <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" strokeWidth="6"/>
-                          </g>
-                        </svg>
-                      </span>
-                      <span className="text-[11px] font-mono">EN</span>
-                    </button>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => { playClickSound(); setIsMenuOpen(false); }}
-                    className="w-9 h-9 rounded-full border border-neutral-800 hover:border-neutral-600 bg-neutral-900/80 hover:bg-neutral-800 flex items-center justify-center transition-colors cursor-pointer text-neutral-300 hover:text-white"
-                    aria-label={language === 'ua' ? 'Закрити' : 'Close'}
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-500">
+                    {language === 'ua' ? 'ШВИДКИЙ ПЕРЕХІД' : 'QUICK ACCESS'}
+                  </span>
                 </div>
               </div>
 
@@ -353,7 +369,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <div className="lg:col-span-7 flex flex-col divide-y divide-neutral-800/80">
                   {navItems.map((item, index) => (
                     <motion.a
-                      key={item.id}
+                      key={`nav-item-${item.id}-${index}`}
                       href={`#${item.id}`}
                       onClick={(e) => handleNavClick(e, item.id)}
                       initial={{ opacity: 0, x: -16 }}
@@ -460,11 +476,11 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                           return (
                             <div className={`grid gap-2 ${socials.length > 1 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
-                              {socials.map((soc) => {
+                              {socials.map((soc, sIdx) => {
                                 const Icon = soc.icon;
                                 return (
                                   <a
-                                    key={soc.name}
+                                    key={`${soc.name}-${sIdx}`}
                                     href={soc.url}
                                     target="_blank"
                                     rel="noopener noreferrer"

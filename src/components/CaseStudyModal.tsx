@@ -35,32 +35,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
 
   const modalBodyRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    setActiveImageIndex(0);
-    setFullscreenZoom(false);
-    setActiveTab('screens');
-    setDeviceView('desktop');
-  }, [project?.id]);
-
-  const desktopImages = React.useMemo(() => {
-    if (!project) return [];
-    const list: string[] = [];
-    if (project.thumbnailUrl) {
-      const formatted = formatImageUrl(project.thumbnailUrl);
-      if (formatted) list.push(formatted);
-    }
-    if (Array.isArray(project.galleryUrls)) {
-      project.galleryUrls.forEach((url) => {
-        if (url) {
-          const formatted = formatImageUrl(url);
-          if (formatted && !list.includes(formatted)) list.push(formatted);
-        }
-      });
-    }
-    return list.length > 0 ? list : ['https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=90&w=2400'];
-  }, [project]);
-
-  const mobileImages = React.useMemo(() => {
+  const rawMobileImages = React.useMemo(() => {
     if (!project) return [];
     const list: string[] = [];
     const mobileFirst = project.mobileThumbnailUrl || project.mobilePreviewUrl;
@@ -79,10 +54,111 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
     return list;
   }, [project]);
 
-  const hasMobilePreview = mobileImages.length > 0;
+  const rawDesktopImages = React.useMemo(() => {
+    if (!project) return [];
+    const list: string[] = [];
+    const normalize = (u: string) => formatImageUrl(u).toLowerCase().trim().replace(/\/+$/, '');
+    const mobileNorms = new Set(rawMobileImages.map(normalize));
 
-  // Selected images based on deviceView
-  const allImages = (deviceView === 'mobile' && hasMobilePreview) ? mobileImages : desktopImages;
+    // Desktop gallery images
+    if (Array.isArray(project.galleryUrls)) {
+      project.galleryUrls.forEach((url) => {
+        if (url) {
+          const formatted = formatImageUrl(url);
+          if (formatted && !list.includes(formatted)) {
+            // Only add if not identical to a mobile preview image
+            if (!mobileNorms.has(normalize(formatted))) {
+              list.push(formatted);
+            }
+          }
+        }
+      });
+    }
+
+    // Thumbnail URL:
+    // If thumbnailUrl is set, but is identical to one of the mobile preview images
+    // (which occurs because Google Sheets or data helpers populate thumbnailUrl with the mobile image as a fallback for the project card preview on the main page),
+    // do NOT treat it as a desktop screenshot when mobile images are present!
+    if (project.thumbnailUrl) {
+      const formatted = formatImageUrl(project.thumbnailUrl);
+      if (formatted && !list.includes(formatted)) {
+        if (!mobileNorms.has(normalize(formatted))) {
+          list.unshift(formatted);
+        }
+      }
+    }
+
+    return list;
+  }, [project, rawMobileImages]);
+
+  // Is this project an interactive digital interface / website / app?
+  const isWebOrApp = React.useMemo(() => {
+    if (!project) return false;
+    const cat = (project.category || '').toLowerCase();
+    const labelUa = (project.categoryLabel?.ua || '').toLowerCase();
+    const labelEn = (project.categoryLabel?.en || '').toLowerCase();
+    return (
+      cat === 'ui-ux' ||
+      cat === 'website' ||
+      cat === 'web' ||
+      cat === 'mobile' ||
+      cat === 'app' ||
+      cat === 'product' ||
+      cat.includes('ui') ||
+      cat.includes('ux') ||
+      cat.includes('web') ||
+      cat.includes('app') ||
+      labelUa.includes('сайт') ||
+      labelUa.includes('веб') ||
+      labelUa.includes('ui/ux') ||
+      labelUa.includes('інтерфейс') ||
+      labelUa.includes('додаток') ||
+      labelEn.includes('site') ||
+      labelEn.includes('web') ||
+      labelEn.includes('ui/ux') ||
+      labelEn.includes('interface') ||
+      labelEn.includes('app')
+    );
+  }, [project]);
+
+  const hasDesktopImages = rawDesktopImages.length > 0;
+  const hasMobileImages = rawMobileImages.length > 0;
+
+  const hasMobilePreview = hasMobileImages;
+  const hasDesktopPreview = hasDesktopImages;
+
+  // Safe effective device view that guarantees no desktop frame is forced when only mobile exists
+  const effectiveDeviceView = (hasMobilePreview && !hasDesktopPreview)
+    ? 'mobile'
+    : ((hasDesktopPreview && !hasMobilePreview) ? 'desktop' : deviceView);
+
+  // Fallback if no images were provided at all
+  const fallbackImage = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=90&w=2400';
+
+  const desktopImages = hasDesktopImages 
+    ? rawDesktopImages 
+    : (hasMobileImages ? rawMobileImages : [fallbackImage]);
+
+  const mobileImages = hasMobileImages 
+    ? rawMobileImages 
+    : (hasDesktopImages ? rawDesktopImages : [fallbackImage]);
+
+  useEffect(() => {
+    setActiveImageIndex(0);
+    setFullscreenZoom(false);
+    setActiveTab('screens');
+    // If project only has mobile images, default directly to mobile view
+    if (hasMobileImages && !hasDesktopImages) {
+      setDeviceView('mobile');
+    } else {
+      setDeviceView('desktop');
+    }
+  }, [project?.id, hasMobileImages, hasDesktopImages]);
+
+  // Selected images based on effectiveDeviceView
+  const allImages = (effectiveDeviceView === 'mobile' && hasMobilePreview) 
+    ? mobileImages 
+    : desktopImages;
 
   const currentImage = allImages[activeImageIndex] || allImages[0] || desktopImages[0];
 
@@ -233,40 +309,42 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
   };
 
   return (
-    <AnimatePresence>
+    <>
       <div 
-        className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overscroll-contain custom-scrollbar bg-black/85 backdrop-blur-md p-2 sm:p-4 md:p-8"
+        key={`case-study-modal-${project.id}`}
+        className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto overflow-x-hidden overscroll-contain custom-scrollbar bg-black/90 backdrop-blur-md pt-[65px] sm:pt-[76px] p-0 sm:p-4 md:p-8"
         style={{ overscrollBehavior: 'contain' }}
       >
         {/* Modal Backdrop click */}
-        <div className="fixed inset-0" onClick={onClose} />
+        <div className="fixed inset-0 -z-10" onClick={onClose} />
 
         {/* Modal Window */}
         <motion.div
-          initial={{ opacity: 0, y: 40, scale: 0.98 }}
+          key={`case-study-window-${project.id}`}
+          initial={{ opacity: 0, y: 30, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 30, scale: 0.98 }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full max-w-6xl bg-[#0e0e0e] text-[#f4f4f0] border border-neutral-800 shadow-2xl z-10 max-h-[92vh] flex flex-col overflow-hidden"
+          exit={{ opacity: 0, y: 20, scale: 0.98 }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className="relative w-full max-w-6xl h-full sm:h-auto sm:max-h-[calc(100vh-100px)] bg-[#0e0e0e] text-[#f4f4f0] border-0 sm:border sm:border-neutral-800 shadow-2xl z-10 flex flex-col overflow-hidden"
         >
-          {/* Top Bar / Navigation */}
-          <div className="sticky top-0 z-40 bg-[#0e0e0e]/95 backdrop-blur-md border-b border-neutral-800 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="relative flex h-2 w-2">
+          {/* Top Bar / Navigation - Always pinned at top directly under the site header */}
+          <div className="sticky top-0 z-40 bg-[#0e0e0e]/98 backdrop-blur-md border-b border-neutral-800 px-3 sm:px-6 py-2.5 sm:py-3.5 flex items-center justify-between gap-2 sm:gap-4 w-full max-w-full min-w-0 shadow-md">
+            <div className="flex items-center gap-2 sm:gap-3.5 min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                <span className="relative flex h-2 w-2 shrink-0">
                   {project.status === 'realized' && (
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   )}
-                  <span className={`relative inline-flex rounded-full h-2 w-2 ${
+                  <span className={`relative inline-flex rounded-full h-2 w-2 shrink-0 ${
                     project.status === 'realized' ? 'bg-emerald-500' : 'bg-amber-500'
                   }`}></span>
                 </span>
-                <span className="font-mono text-xs uppercase tracking-widest text-neutral-300 font-medium truncate max-w-[130px] sm:max-w-[240px] md:max-w-none">
+                <span className="font-mono text-xs uppercase tracking-widest text-neutral-300 font-medium truncate max-w-[90px] xs:max-w-[140px] sm:max-w-[240px] md:max-w-none">
                   {t.caseStudy} {project.slug.toUpperCase()}
                 </span>
               </div>
 
-              <span className={`hidden xs:inline-flex px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider ${
+              <span className={`hidden sm:inline-flex px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider shrink-0 ${
                 project.status === 'realized'
                   ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/80'
                   : 'bg-neutral-900 text-neutral-400 border border-neutral-800'
@@ -275,19 +353,19 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
               </span>
 
               {allProjects.length > 0 && (
-                <span className="hidden md:inline-block font-mono text-[11px] text-neutral-500 border-l border-neutral-800 pl-3">
+                <span className="hidden md:inline-block font-mono text-[11px] text-neutral-500 border-l border-neutral-800 pl-3 shrink-0">
                   {String(currentIndex + 1).padStart(2, '0')} / {String(allProjects.length).padStart(2, '0')}
                 </span>
               )}
             </div>
 
-            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
               {hasFigmaDirect && (
                 <a
                   href={figmaDirectUrl!}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#1e1e1e] hover:bg-[#282828] text-neutral-200 hover:text-white border border-[#a259ff]/40 hover:border-[#a259ff] font-mono text-xs transition-colors shadow-sm"
+                  className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1.5 bg-[#1e1e1e] hover:bg-[#282828] text-neutral-200 hover:text-white border border-[#a259ff]/40 hover:border-[#a259ff] font-mono text-xs transition-colors shadow-sm shrink-0"
                   title={language === 'ua' ? 'Перейти в макет Figma' : 'Open in Figma'}
                 >
                   <Figma className="w-3.5 h-3.5 text-[#0acf83]" />
@@ -301,7 +379,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                   href={liveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-800 hover:border-neutral-700 font-mono text-xs transition-colors"
+                  className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-800 hover:border-neutral-700 font-mono text-xs transition-colors shrink-0"
                   title={language === 'ua' ? 'Відкрити live проєкт' : 'Open live project'}
                 >
                   <span>{t.live}</span>
@@ -311,10 +389,10 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
 
               {/* Project Stepper */}
               {prevProject && nextProject && (
-                <div className="flex items-center bg-neutral-900 border border-neutral-800 p-0.5 font-mono text-xs">
+                <div className="flex items-center bg-neutral-900 border border-neutral-800 p-0.5 font-mono text-xs shrink-0">
                   <button
                     onClick={() => onSelectProject(prevProject)}
-                    className="px-2 sm:px-2.5 py-1 text-neutral-400 hover:text-white hover:bg-neutral-800 flex items-center gap-1 cursor-pointer transition-colors"
+                    className="px-1.5 sm:px-2.5 py-1 text-neutral-400 hover:text-white hover:bg-neutral-800 flex items-center gap-1 cursor-pointer transition-colors"
                     title={`${t.prev} (←)`}
                   >
                     <ChevronLeft className="w-3.5 h-3.5" />
@@ -323,7 +401,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                   <div className="w-[1px] h-3.5 bg-neutral-800 my-auto" />
                   <button
                     onClick={() => onSelectProject(nextProject)}
-                    className="px-2 sm:px-2.5 py-1 text-neutral-400 hover:text-white hover:bg-neutral-800 flex items-center gap-1 cursor-pointer transition-colors"
+                    className="px-1.5 sm:px-2.5 py-1 text-neutral-400 hover:text-white hover:bg-neutral-800 flex items-center gap-1 cursor-pointer transition-colors"
                     title={`${t.next} (→)`}
                   >
                     <span className="hidden sm:inline">{t.next}</span>
@@ -332,21 +410,23 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                 </div>
               )}
 
-              {/* Close button with ESC hint */}
+              {/* Prominent High-Contrast Close button */}
               <button
+                type="button"
                 onClick={onClose}
-                className="group flex items-center gap-1.5 pl-2.5 pr-2 py-1 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-600 text-neutral-400 hover:text-white transition-all cursor-pointer rounded-sm"
-                aria-label="Close modal"
+                className="group flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-700 hover:border-neutral-500 text-neutral-200 hover:text-white transition-all cursor-pointer rounded-sm shrink-0 font-mono text-xs uppercase shadow-sm"
+                aria-label={t.close}
                 title={`${t.close} (ESC)`}
               >
-                <span className="hidden md:inline font-mono text-[10px] text-neutral-500 group-hover:text-neutral-300">ESC</span>
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4 text-neutral-300 group-hover:text-white" />
+                <span className="font-semibold tracking-wider">{t.close}</span>
+                <span className="hidden md:inline text-[10px] text-neutral-500 group-hover:text-neutral-400 font-normal ml-0.5">(ESC)</span>
               </button>
             </div>
           </div>
 
           {/* Scrollable Body */}
-          <div ref={modalBodyRef} className="overflow-y-auto custom-scrollbar px-6 py-8 md:px-12 md:py-12 space-y-12">
+          <div ref={modalBodyRef} className="overflow-y-auto overflow-x-hidden custom-scrollbar px-3 py-6 sm:px-6 sm:py-8 md:px-12 md:py-12 space-y-8 sm:space-y-12 w-full max-w-full">
             {/* Header / Hero */}
             <div className="space-y-6 border-b border-neutral-800 pb-10">
               <p className="font-mono text-xs uppercase tracking-widest text-neutral-400">
@@ -409,9 +489,9 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
 
             {/* Specialized Interactive Viewer */}
             <div id="project-interactive-viewer" className="space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-xs uppercase tracking-widest text-neutral-400">
-                <div className="flex items-center gap-2">
-                  <span>{t.interactiveExperience}</span>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 font-mono text-xs uppercase tracking-widest text-neutral-400 w-full max-w-full">
+                <div className="flex items-center gap-2 flex-wrap min-w-0">
+                  <span className="truncate">{t.interactiveExperience}</span>
                   {activeTab === 'screens' && (
                     <span className="text-[10px] text-neutral-500 hidden sm:inline">
                       [{fitMode === 'fill' ? t.maxSpace : t.fitFrame}]
@@ -424,84 +504,93 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                   )}
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 max-w-full w-full sm:w-auto">
                   {/* Mode switcher: Static Screens vs Live Figma Embed */}
                   {hasFigmaEmbed && (
-                    <div className="flex items-center bg-neutral-900 border border-neutral-800 p-0.5">
+                    <div className="flex items-center bg-neutral-900 border border-neutral-800 p-0.5 shrink-0">
                       <button
                         type="button"
                         onClick={() => setActiveTab('screens')}
-                        className={`px-2.5 py-1 flex items-center gap-1.5 cursor-pointer text-xs transition-colors ${
+                        className={`px-2 sm:px-2.5 py-1 flex items-center gap-1.5 cursor-pointer text-xs transition-colors ${
                           activeTab === 'screens' ? 'bg-neutral-800 text-white font-medium' : 'text-neutral-400 hover:text-neutral-200'
                         }`}
                       >
-                        <Images className="w-3.5 h-3.5 text-cyan-400" />
-                        <span>{language === 'ua' ? 'Макети' : 'Screens'}</span>
+                        <Images className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                        <span className="hidden xs:inline">{language === 'ua' ? 'Макети' : 'Screens'}</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => setActiveTab('figma')}
-                        className={`px-2.5 py-1 flex items-center gap-1.5 cursor-pointer text-xs transition-colors ${
+                        className={`px-2 sm:px-2.5 py-1 flex items-center gap-1.5 cursor-pointer text-xs transition-colors ${
                           activeTab === 'figma' ? 'bg-[#1e1e1e] text-[#0acf83] font-medium border border-[#0acf83]/40' : 'text-neutral-400 hover:text-white'
                         }`}
                       >
-                        <Figma className="w-3.5 h-3.5 text-[#a259ff]" />
-                        <span>{language === 'ua' ? 'Інтерактивна Figma' : 'Interactive Figma'}</span>
+                        <Figma className="w-3.5 h-3.5 text-[#a259ff] shrink-0" />
+                        <span className="hidden sm:inline">{language === 'ua' ? 'Інтерактивна Figma' : 'Interactive Figma'}</span>
+                        <span className="sm:hidden text-xs">Figma</span>
                       </button>
                     </div>
                   )}
 
                   {/* Multi-screen Switcher (only in screens tab) */}
                   {activeTab === 'screens' && allImages.length > 1 && (
-                    <div className="flex items-center bg-neutral-900 border border-neutral-800 p-0.5">
+                    <div className="flex items-center bg-neutral-900 border border-neutral-800 p-0.5 shrink-0">
                       <button
                         onClick={handlePrevImage}
                         title={language === 'ua' ? 'Попередній макет' : 'Previous screen'}
-                        className="px-2 py-1 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors cursor-pointer flex items-center"
+                        className="px-1.5 sm:px-2 py-1 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors cursor-pointer flex items-center"
                       >
                         <ChevronLeft className="w-3.5 h-3.5" />
                       </button>
-                      <span className="px-2 text-[11px] font-mono text-cyan-300 font-medium whitespace-nowrap">
+                      <span className="px-1.5 sm:px-2 text-[10px] sm:text-[11px] font-mono text-cyan-300 font-medium whitespace-nowrap">
                         {activeImageIndex + 1} / {allImages.length}
                       </span>
                       <button
                         onClick={handleNextImage}
                         title={language === 'ua' ? 'Наступний макет' : 'Next screen'}
-                        className="px-2 py-1 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors cursor-pointer flex items-center"
+                        className="px-1.5 sm:px-2 py-1 text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors cursor-pointer flex items-center"
                       >
                         <ChevronRight className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   )}
 
-                  {activeTab === 'screens' && (
-                    <div className="flex items-center bg-neutral-900 border border-neutral-800 p-0.5">
-                      <button
-                        onClick={() => {
-                          setDeviceView('desktop');
-                          setActiveImageIndex(0);
-                        }}
-                        className={`px-2.5 py-1 flex items-center gap-1.5 cursor-pointer text-xs transition-colors ${
-                          deviceView === 'desktop' ? 'bg-neutral-800 text-white' : 'text-neutral-500 hover:text-neutral-300'
-                        }`}
-                        title="Desktop view"
-                      >
-                        <Laptop className="w-3.5 h-3.5" />
-                        <span>Desktop</span>
-                      </button>
+                  {/* Device Switcher (Desktop / Mobile):
+                      - Only displayed for websites, web & app digital interfaces (isWebOrApp)
+                      - If only mobile is available: show only the Mobile button
+                      - If only desktop is available: show only the Desktop button
+                      - If both are available: show both Desktop and Mobile buttons
+                      - For other categories (3D, books, branding, identity, etc.): completely hidden */}
+                  {activeTab === 'screens' && isWebOrApp && (hasDesktopPreview || hasMobilePreview) && (
+                    <div className="flex items-center bg-neutral-900 border border-neutral-800 p-0.5 shrink-0">
+                      {hasDesktopPreview && (
+                        <button
+                          onClick={() => {
+                            setDeviceView('desktop');
+                            setActiveImageIndex(0);
+                          }}
+                          className={`px-2 sm:px-2.5 py-1 flex items-center gap-1 sm:gap-1.5 cursor-pointer text-xs transition-colors ${
+                            effectiveDeviceView === 'desktop' ? 'bg-neutral-800 text-white font-medium' : 'text-neutral-500 hover:text-neutral-300'
+                          }`}
+                          title="Desktop view"
+                        >
+                          <Laptop className="w-3.5 h-3.5 shrink-0" />
+                          <span className="hidden sm:inline">Desktop</span>
+                        </button>
+                      )}
                       {hasMobilePreview && (
                         <button
                           onClick={() => {
                             setDeviceView('mobile');
                             setActiveImageIndex(0);
                           }}
-                          className={`px-2.5 py-1 flex items-center gap-1.5 cursor-pointer text-xs transition-colors ${
-                            deviceView === 'mobile' ? 'bg-neutral-800 text-white' : 'text-neutral-500 hover:text-neutral-300'
+                          className={`px-2 sm:px-2.5 py-1 flex items-center gap-1 sm:gap-1.5 cursor-pointer text-xs transition-colors ${
+                            effectiveDeviceView === 'mobile' ? 'bg-neutral-800 text-white font-medium' : 'text-neutral-500 hover:text-neutral-300'
                           }`}
                           title="Mobile view"
                         >
-                          <Smartphone className="w-3.5 h-3.5" />
-                          <span>Mobile</span>
+                          <Smartphone className="w-3.5 h-3.5 shrink-0" />
+                          <span className="hidden sm:inline">Mobile</span>
                         </button>
                       )}
                     </div>
@@ -509,25 +598,25 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
 
                   {/* Display Mode: Maximum Space vs Fit (available in screens mode) */}
                   {activeTab === 'screens' && (
-                    <div className="flex items-center bg-neutral-900 border border-neutral-800 p-0.5">
+                    <div className="flex items-center bg-neutral-900 border border-neutral-800 p-0.5 shrink-0">
                       <button
                         onClick={() => setFitMode('fill')}
                         title={t.maxSpace}
-                        className={`px-2.5 py-1 flex items-center gap-1.5 cursor-pointer text-xs transition-colors ${
+                        className={`px-2 sm:px-2.5 py-1 flex items-center gap-1.5 cursor-pointer text-xs transition-colors ${
                           fitMode === 'fill' ? 'bg-neutral-800 text-white' : 'text-neutral-500 hover:text-neutral-300'
                         }`}
                       >
-                        <Maximize2 className="w-3.5 h-3.5" />
+                        <Maximize2 className="w-3.5 h-3.5 shrink-0" />
                         <span className="hidden sm:inline">{t.maxSpace}</span>
                       </button>
                       <button
                         onClick={() => setFitMode('fit')}
                         title={t.fitFrame}
-                        className={`px-2.5 py-1 flex items-center gap-1.5 cursor-pointer text-xs transition-colors ${
+                        className={`px-2 sm:px-2.5 py-1 flex items-center gap-1.5 cursor-pointer text-xs transition-colors ${
                           fitMode === 'fit' ? 'bg-neutral-800 text-white' : 'text-neutral-500 hover:text-neutral-300'
                         }`}
                       >
-                        <Minimize2 className="w-3.5 h-3.5" />
+                        <Minimize2 className="w-3.5 h-3.5 shrink-0" />
                         <span className="hidden sm:inline">{t.fitFrame}</span>
                       </button>
                     </div>
@@ -537,10 +626,10 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                   {activeTab === 'screens' && (
                     <button
                       onClick={() => setIsFullscreen(true)}
-                      className="px-2.5 py-1 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 hover:text-white text-neutral-400 flex items-center gap-1.5 cursor-pointer text-xs transition-colors"
+                      className="px-2 sm:px-2.5 py-1 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 hover:text-white text-neutral-400 flex items-center gap-1.5 cursor-pointer text-xs transition-colors shrink-0"
                       title={t.fullscreen}
                     >
-                      <Expand className="w-3.5 h-3.5" />
+                      <Expand className="w-3.5 h-3.5 shrink-0" />
                       <span className="hidden sm:inline">{t.fullscreen}</span>
                     </button>
                   )}
@@ -582,33 +671,33 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
               ) : (
                 /* Standard High-Fidelity Artwork / Device View */
                 <>
-                  {project.category === 'ui-ux' ? (
-                /* UI/UX Simulated Interactive Device Frame */
+                  {isWebOrApp ? (
+                /* UI/UX Simulated Interactive Device Frame (Browser or Mobile) */
                 <div className="bg-neutral-950 border border-neutral-800 p-1 sm:p-2 md:p-3 flex justify-center items-center shadow-inner rounded-sm">
                   <div
                     className={`transition-all duration-300 overflow-hidden border border-neutral-700 shadow-2xl bg-neutral-900 ${
-                      deviceView === 'desktop'
+                      effectiveDeviceView === 'desktop'
                         ? 'w-full rounded-lg'
                         : 'w-full max-w-[360px] aspect-[9/19] rounded-[2.5rem] p-2.5 border-[6px] border-neutral-800 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] flex flex-col'
                     }`}
                   >
                     {/* Simulated browser/device chrome */}
-                    {deviceView === 'desktop' ? (
-                      <div className="h-8 bg-neutral-900 border-b border-neutral-800 flex items-center justify-between px-4 gap-2 select-none shrink-0">
-                        <div className="flex items-center gap-1.5">
+                    {effectiveDeviceView === 'desktop' ? (
+                      <div className="h-8 bg-neutral-900 border-b border-neutral-800 flex items-center justify-between px-2 sm:px-4 gap-1.5 sm:gap-2 select-none shrink-0 min-w-0">
+                        <div className="flex items-center gap-1.5 shrink-0">
                           <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
                           <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
                           <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
-                          <span className="text-[10px] font-mono text-neutral-400 ml-2 hidden md:inline truncate max-w-[200px]">
+                          <span className="text-[10px] font-mono text-neutral-400 ml-1.5 hidden md:inline truncate max-w-[200px]">
                             {resolvedProjectTitle}
                           </span>
                         </div>
-                        <div className="bg-neutral-950 px-4 py-0.5 rounded text-[10px] font-mono text-neutral-400 border border-neutral-800/80 max-w-sm truncate text-center">
-                          https://{project.slug}.internal/terminal
+                        <div className="hidden xs:block bg-neutral-950 px-2 sm:px-4 py-0.5 rounded text-[10px] font-mono text-neutral-400 border border-neutral-800/80 max-w-[130px] sm:max-w-sm truncate text-center min-w-0">
+                          https://{project.slug}.internal
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                           {allImages.length > 1 && (
-                            <div className="flex items-center gap-1 font-mono text-[10px] text-neutral-400 bg-neutral-950 px-2 py-0.5 rounded border border-neutral-800">
+                            <div className="flex items-center gap-1 font-mono text-[10px] text-neutral-400 bg-neutral-950 px-1.5 sm:px-2 py-0.5 rounded border border-neutral-800">
                               <button
                                 onClick={handlePrevImage}
                                 className="p-0.5 hover:text-white transition-colors cursor-pointer"
@@ -664,7 +753,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                         }
                       }}
                       className={`relative group/viewer w-full bg-neutral-950 device-viewport-scroll ${
-                        deviceView === 'desktop'
+                        effectiveDeviceView === 'desktop'
                           ? fitMode === 'fill'
                             ? 'w-full max-h-[82vh] overflow-y-auto'
                             : 'w-full max-h-[80vh] flex items-center justify-center p-2 sm:p-4 overflow-hidden'
@@ -705,7 +794,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                           backfaceVisibility: 'hidden'
                         }}
                         className={`transition-all ${
-                          deviceView === 'desktop'
+                          effectiveDeviceView === 'desktop'
                             ? fitMode === 'fill'
                               ? 'w-full h-auto block'
                               : 'max-h-[76vh] w-auto max-w-full h-auto object-contain block mx-auto'
@@ -722,21 +811,21 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                 <div className="bg-neutral-950 border border-neutral-800 p-1 sm:p-2 md:p-3 flex justify-center items-center shadow-inner rounded-sm">
                   <div className="w-full transition-all duration-300 overflow-hidden border border-neutral-800 shadow-2xl bg-neutral-900 rounded-sm">
                     {/* Sleek minimal showcase bar */}
-                    <div className="h-8 bg-neutral-900 border-b border-neutral-800 flex items-center justify-between px-4 gap-2 select-none font-mono text-[11px]">
-                      <div className="flex items-center gap-2 truncate text-neutral-300">
+                    <div className="h-8 bg-neutral-900 border-b border-neutral-800 flex items-center justify-between px-2 sm:px-4 gap-1.5 sm:gap-2 select-none font-mono text-[11px] min-w-0 shrink-0">
+                      <div className="flex items-center gap-2 truncate text-neutral-300 min-w-0 flex-1">
                         <span className="w-2 h-2 rounded-full bg-cyan-400 shrink-0" />
-                        <span className="uppercase tracking-wider font-medium truncate max-w-[200px] sm:max-w-none">
+                        <span className="uppercase tracking-wider font-medium truncate">
                           {resolvedProjectTitle}
                         </span>
                         <span className="text-neutral-600 hidden sm:inline">//</span>
-                        <span className="text-neutral-500 uppercase tracking-widest text-[10px] hidden sm:inline">
+                        <span className="text-neutral-500 uppercase tracking-widest text-[10px] hidden sm:inline shrink-0">
                           {getLocalizedText(project.categoryLabel, language, { ua: 'Візуальний макет', en: 'Visual Asset' })}
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                         {allImages.length > 1 && (
-                          <div className="flex items-center gap-1 font-mono text-[10px] text-neutral-400 bg-neutral-950 px-2 py-0.5 rounded border border-neutral-800">
+                          <div className="flex items-center gap-1 font-mono text-[10px] text-neutral-400 bg-neutral-950 px-1.5 sm:px-2 py-0.5 rounded border border-neutral-800">
                             <button
                               onClick={handlePrevImage}
                               className="p-0.5 hover:text-white transition-colors cursor-pointer"
@@ -829,7 +918,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                   <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar max-w-full pb-1 sm:pb-0">
                     {allImages.map((imgUrl, i) => (
                       <button
-                        key={i}
+                        key={`thumb-quick-${i}`}
                         onClick={() => setActiveImageIndex(i)}
                         className={`group flex items-center gap-2 p-1 border transition-all cursor-pointer shrink-0 ${
                           activeImageIndex === i
@@ -939,7 +1028,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {allImages.map((imgUrl, idx) => (
                     <div
-                      key={idx}
+                      key={`deep-dive-screen-${idx}`}
                       onClick={() => {
                         setActiveImageIndex(idx);
                         setIsFullscreen(true);
@@ -1040,7 +1129,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                         )}
 
                         {fontList.map((f, i) => (
-                          <div key={i} className="border-b border-neutral-800/80 last:border-0 pb-3 last:pb-0">
+                          <div key={`font-${f}-${i}`} className="border-b border-neutral-800/80 last:border-0 pb-3 last:pb-0">
                             <div className="text-2xl font-semibold tracking-tight">{f}</div>
                             <div className="text-xs font-mono text-neutral-500 mt-1">
                               ABCDEFGHIJKLMOPQRSTUVWXYZ 0123456789
@@ -1069,7 +1158,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             {colorList.map((c, i) => (
                               <button
-                                key={i}
+                                key={`color-${c.hex}-${i}`}
                                 onClick={() => handleCopyHex(c.hex)}
                                 className="group flex flex-col p-2.5 bg-neutral-950 border border-neutral-800 hover:border-neutral-600 text-left transition-all cursor-pointer"
                               >
@@ -1119,17 +1208,17 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
             )}
 
             {/* Footer actions inside modal */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-neutral-800 pt-8">
-              <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-t border-neutral-800 pt-8 w-full max-w-full">
+              <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                 {hasFigmaDirect && (
                   <a
                     href={figmaDirectUrl!}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-6 py-3 bg-[#1e1e1e] hover:bg-[#282828] text-white font-medium text-sm uppercase tracking-wider border border-[#a259ff]/70 hover:border-[#a259ff] transition-all cursor-pointer shadow-lg"
+                    className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 sm:px-6 py-3 bg-[#1e1e1e] hover:bg-[#282828] text-white font-medium text-xs sm:text-sm uppercase tracking-wider border border-[#a259ff]/70 hover:border-[#a259ff] transition-all cursor-pointer shadow-lg"
                   >
                     <Figma className="w-4 h-4 text-[#0acf83]" />
-                    <span>{language === 'ua' ? 'Перейти в макет Figma' : 'Open in Figma'}</span>
+                    <span>{language === 'ua' ? 'Figma Макет' : 'Open in Figma'}</span>
                     <ExternalLink className="w-4 h-4 text-[#a259ff]" />
                   </a>
                 )}
@@ -1139,7 +1228,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                     href={liveUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-6 py-3 bg-[#f4f4f0] text-[#0a0a0a] font-medium text-sm uppercase tracking-wider hover:bg-white transition-colors cursor-pointer"
+                    className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 sm:px-6 py-3 bg-[#f4f4f0] text-[#0a0a0a] font-medium text-xs sm:text-sm uppercase tracking-wider hover:bg-white transition-colors cursor-pointer"
                   >
                     <span>{t.visitLive}</span>
                     <ExternalLink className="w-4 h-4" />
@@ -1147,19 +1236,23 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                 )}
               </div>
 
-              <div className="flex items-center gap-4 font-mono text-xs text-neutral-400 ml-auto">
+              <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-4 font-mono text-xs text-neutral-400 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-neutral-900 min-w-0">
                 <button
                   onClick={() => onSelectProject(prevProject)}
-                  className="hover:text-white transition-colors cursor-pointer"
+                  className="hover:text-white transition-colors cursor-pointer flex items-center gap-1 max-w-[45%] truncate min-w-0"
+                  title={prevProjectTitle}
                 >
-                  ← {prevProjectTitle}
+                  <span className="shrink-0">←</span>
+                  <span className="truncate">{prevProjectTitle}</span>
                 </button>
-                <span>/</span>
+                <span className="text-neutral-700 shrink-0">/</span>
                 <button
                   onClick={() => onSelectProject(nextProject)}
-                  className="hover:text-white transition-colors cursor-pointer"
+                  className="hover:text-white transition-colors cursor-pointer flex items-center gap-1 max-w-[45%] truncate min-w-0 text-right justify-end"
+                  title={nextProjectTitle}
                 >
-                  {nextProjectTitle} →
+                  <span className="truncate">{nextProjectTitle}</span>
+                  <span className="shrink-0">→</span>
                 </button>
               </div>
             </div>
@@ -1168,31 +1261,33 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
       </div>
 
       {/* Fullscreen Lightbox Modal */}
-      {isFullscreen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[70] bg-black/95 backdrop-blur-xl flex flex-col p-3 sm:p-6"
-          onClick={() => setIsFullscreen(false)}
-        >
+      <AnimatePresence>
+        {isFullscreen && (
+          <motion.div
+            key="case-study-fullscreen-lightbox"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[70] bg-black/95 backdrop-blur-xl flex flex-col p-3 sm:p-6"
+            onClick={() => setIsFullscreen(false)}
+          >
           {/* Lightbox Header Bar */}
           <div
-            className="flex items-center justify-between text-neutral-300 mb-3 px-2 select-none"
+            className="flex items-center justify-between text-neutral-300 mb-3 px-1 sm:px-2 select-none gap-2 min-w-0 w-full"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="font-mono text-xs uppercase tracking-widest text-neutral-400 flex items-center gap-2">
-              <span className="text-white font-medium truncate max-w-[200px] sm:max-w-none">{resolvedProjectTitle}</span>
-              <span className="text-neutral-600">//</span>
-              <span className="text-neutral-400">{t.fullscreen}</span>
+            <div className="font-mono text-xs uppercase tracking-widest text-neutral-400 flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
+              <span className="text-white font-medium truncate max-w-[120px] xs:max-w-[180px] sm:max-w-[260px] md:max-w-none">{resolvedProjectTitle}</span>
+              <span className="text-neutral-600 hidden xs:inline">//</span>
+              <span className="text-neutral-400 hidden xs:inline">{t.fullscreen}</span>
               {allImages.length > 1 && (
-                <span className="text-cyan-400 font-medium ml-1">
-                  [{activeImageIndex + 1} / {allImages.length}]
+                <span className="text-cyan-400 font-medium ml-1 shrink-0">
+                  [{activeImageIndex + 1}/{allImages.length}]
                 </span>
               )}
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
               {/* Zoom 100% / Fit Toggle */}
               <button
                 type="button"
@@ -1213,33 +1308,33 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                   <button
                     type="button"
                     onClick={handlePrevImage}
-                    className="p-1.5 hover:text-white text-neutral-400 hover:bg-neutral-800 transition-colors cursor-pointer"
+                    className="p-1 sm:p-1.5 hover:text-white text-neutral-400 hover:bg-neutral-800 transition-colors cursor-pointer"
                     aria-label="Previous screen"
                     title={language === 'ua' ? 'Попередній (←)' : 'Previous (←)'}
                   >
-                    <ChevronLeft className="w-4 h-4" />
+                    <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </button>
-                  <span className="px-2 text-[11px] text-neutral-300 font-medium">
-                    {activeImageIndex + 1} / {allImages.length}
+                  <span className="px-1.5 text-[10px] sm:text-[11px] text-neutral-300 font-medium">
+                    {activeImageIndex + 1}/{allImages.length}
                   </span>
                   <button
                     type="button"
                     onClick={handleNextImage}
-                    className="p-1.5 hover:text-white text-neutral-400 hover:bg-neutral-800 transition-colors cursor-pointer"
+                    className="p-1 sm:p-1.5 hover:text-white text-neutral-400 hover:bg-neutral-800 transition-colors cursor-pointer"
                     aria-label="Next screen"
                     title={language === 'ua' ? 'Наступний (→)' : 'Next (→)'}
                   >
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </button>
                 </div>
               )}
 
               <button
                 onClick={() => setIsFullscreen(false)}
-                className="p-2 rounded-full border border-neutral-700 hover:bg-neutral-800 text-white transition-colors cursor-pointer"
+                className="p-1.5 sm:p-2 rounded-full border border-neutral-700 hover:bg-neutral-800 text-white transition-colors cursor-pointer"
                 aria-label="Close fullscreen"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
           </div>
@@ -1273,7 +1368,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
             )}
 
             <img
-              key={currentImage}
+              key={`${currentImage}-${activeImageIndex}`}
               src={currentImage}
               alt={`${getLocalizedText(project.title, language, { ua: 'Проєкт', en: 'Project' })} - screen ${activeImageIndex + 1}`}
               loading="eager"
@@ -1299,7 +1394,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
             >
               {allImages.map((url, i) => (
                 <button
-                  key={i}
+                  key={`fullscreen-thumb-${i}`}
                   type="button"
                   onClick={() => setActiveImageIndex(i)}
                   className={`w-14 h-10 border transition-all overflow-hidden cursor-pointer shrink-0 ${
@@ -1315,6 +1410,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
           )}
         </motion.div>
       )}
-    </AnimatePresence>
+      </AnimatePresence>
+    </>
   );
 };
