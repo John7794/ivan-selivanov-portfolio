@@ -127,10 +127,23 @@ body::-webkit-scrollbar-thumb:hover {
 }
 
 /* Razor-sharp, baseline-aligned outline text for monumental typography */
+.hero-monument-title {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+}
+
+.hero-monument-title,
+.hero-monument-title * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  pointer-events: none !important;
+}
+
 .text-stroke-outline {
-  color: transparent !important;
-  -webkit-text-fill-color: transparent !important;
-  -webkit-text-stroke: 1.5px #f4f4f0;
+  color: #0a0a0a !important;
+  -webkit-text-fill-color: #0a0a0a !important;
+  -webkit-text-stroke: 2.5px #f4f4f0;
   paint-order: stroke fill;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -139,19 +152,12 @@ body::-webkit-scrollbar-thumb:hover {
 
 @media (min-width: 640px) {
   .text-stroke-outline {
-    -webkit-text-stroke: 2px #f4f4f0;
+    -webkit-text-stroke: 3.5px #f4f4f0;
   }
 }
 
 @media (min-width: 1024px) {
   .text-stroke-outline {
-    -webkit-text-stroke: 2.75px #f4f4f0;
+    -webkit-text-stroke: 4.5px #f4f4f0;
   }
-}
-
-.hero-monument-title,
-.hero-monument-title * {
-  user-select: none !important;
-  -webkit-user-select: none !important;
-  pointer-events: none !important;
 }

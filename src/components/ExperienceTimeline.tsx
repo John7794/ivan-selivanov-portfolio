@@ -103,7 +103,7 @@ export const ExperienceTimeline: React.FC<ExperienceTimelineProps> = ({ experien
         {/* Timeline List: Desktop has centered vertical rail from first to last node; Mobile has full-width cards connected by unbroken vertical axis */}
         <div className="space-y-0 md:space-y-8 relative before:hidden md:before:block md:before:absolute md:before:top-[34px] md:before:bottom-[34px] md:before:left-1/2 md:before:w-[1px] md:before:bg-neutral-800">
           {experience.map((item, idx) => {
-            const isLeft = idx % 2 === 0;
+            const isCardOnRight = idx % 2 === 0;
 
             return (
               <React.Fragment key={`${item.id || 'exp'}-${idx}`}>
@@ -113,7 +113,7 @@ export const ExperienceTimeline: React.FC<ExperienceTimelineProps> = ({ experien
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: idx * 0.1 }}
                   className={`relative flex flex-col md:flex-row items-start ${
-                    isLeft ? 'md:flex-row-reverse' : ''
+                    isCardOnRight ? 'md:flex-row-reverse' : ''
                   } gap-0 md:gap-16 w-full`}
                 >
                   {/* Desktop Center Node Marker & Seamless Axis Connector */}
@@ -125,9 +125,9 @@ export const ExperienceTimeline: React.FC<ExperienceTimelineProps> = ({ experien
                   <div 
                     aria-hidden="true"
                     className={`hidden md:block absolute top-[34px] h-[1px] bg-neutral-700 z-10 ${
-                      isLeft 
-                        ? 'right-1/2 w-8' 
-                        : 'left-1/2 w-8'
+                      isCardOnRight 
+                        ? 'left-1/2 w-8' 
+                        : 'right-1/2 w-8'
                     }`} 
                   />
 

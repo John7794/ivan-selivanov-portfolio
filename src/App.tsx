@@ -372,7 +372,7 @@ export default function App() {
           </div>
 
           <div className="relative">
-            {/* Main Monumental Heading: SEL & OV crisp architectural outline, IVAN solid fill */}
+            {/* Main Monumental Heading: SEL & OV crisp architectural outline, IVAN solid fill with bespoke optical kerning */}
             <h1 
               aria-label="SELIVANOV"
               className="hero-monument-title text-[18vw] xs:text-[17vw] sm:text-[14.5vw] md:text-[12.5vw] lg:text-[11vw] xl:text-[12vw] leading-[0.84] font-black tracking-tighter uppercase select-none pointer-events-none flex flex-col items-start shrink-0 mb-6 lg:mb-12"
@@ -381,8 +381,16 @@ export default function App() {
                 SEL
               </span>
               <span className="inline-flex items-baseline">
-                <span className="text-[#f4f4f0]">IVAN</span>
-                <span className="text-stroke-outline">OV</span>
+                <span className="text-[#f4f4f0] inline-flex items-baseline">
+                  <span>I</span>
+                  <span>V</span>
+                  <span className="-ml-[0.048em]">A</span>
+                  <span className="-ml-[0.015em]">N</span>
+                </span>
+                <span className="text-stroke-outline inline-flex items-baseline">
+                  <span>O</span>
+                  <span className="-ml-[0.02em]">V</span>
+                </span>
               </span>
             </h1>
 
@@ -604,24 +612,6 @@ export default function App() {
 
       {/* Expertise & Architecture (Bento Grid) */}
       <BentoExpertise language={language} expertise={data.settings.expertise} ui={data.settings.ui} />
-
-      {/* Philosophy Quote */}
-      <section className="py-32 px-6 lg:px-12 flex items-center justify-center bg-[#070707] border-t border-neutral-900">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-3xl md:text-5xl lg:text-6xl font-medium leading-[1.1] tracking-tight text-[#f4f4f0]">
-            {getLocalizedText(data.settings.ui?.quoteText, language, {
-              ua: '"Good design is as little design as possible. It concentrates on the essential aspects, and the products are not burdened with non-essentials."',
-              en: '"Good design is as little design as possible. It concentrates on the essential aspects, and the products are not burdened with non-essentials."'
-            })}
-          </p>
-          <p className="mt-8 text-neutral-500 font-mono uppercase tracking-widest text-xs sm:text-sm">
-            {getLocalizedText(data.settings.ui?.quoteAuthor, language, {
-              ua: '— Dieter Rams (Ten Principles for Good Design)',
-              en: '— Dieter Rams (Ten Principles for Good Design)'
-            })}
-          </p>
-        </div>
-      </section>
 
       {/* Experience Timeline */}
       <ExperienceTimeline experience={data.experience} language={language} ui={data.settings.ui} />

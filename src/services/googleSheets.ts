@@ -2142,8 +2142,6 @@ export function getGeneralSheetTsvTemplate(): string {
     ['filter_status_label', 'Статус:', 'Status:'],
     ['filter_status_all', 'Всі статуси', 'All'],
     ['expertise_index', '02 // METHODOLOGY & CAPABILITIES', '02 // METHODOLOGY & CAPABILITIES'],
-    ['quote_text', 'Good design is as little design as possible. It concentrates on the essential aspects, and the products are not burdened with non-essentials.', 'Good design is as little design as possible. It concentrates on the essential aspects, and the products are not burdened with non-essentials.'],
-    ['quote_author', '— Dieter Rams (Ten Principles for Good Design)', '— Dieter Rams (Ten Principles for Good Design)'],
     ['experience_index', '03 // TRACK RECORD', '03 // TRACK RECORD'],
     ['experience_title', 'Кар’єрний Шлях & Досвід', 'Career Track & Background'],
     ['experience_subtitle', 'Хронологія комерційних проєктів, артдирекції та фундаментальної академічної школи', 'Timeline of design leadership, commercial execution, and academic honors'],
