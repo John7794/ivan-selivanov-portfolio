@@ -15,7 +15,8 @@ import {
   Mail,
   Briefcase,
   Compass,
-  HelpCircle
+  HelpCircle,
+  Tag
 } from 'lucide-react';
 import { Language, LegalAndBannersData } from '../types';
 import { DEFAULT_WORKFLOW, DEFAULT_FAQ } from '../data/defaultData';
@@ -24,6 +25,7 @@ import {
   getLegalSheetTsvTemplate, 
   getGeneralSheetTsvTemplate,
   getContactsSheetTsvTemplate,
+  getStatusesSheetTsvTemplate,
   generateProjectsTSV,
   syncWithGoogleSheets, 
   PortfolioData 
@@ -44,9 +46,11 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
   portfolioData,
   onDataUpdated
 }) => {
-  const [activeTab, setActiveTab] = useState<'projects' | 'contacts' | 'general' | 'workflow' | 'faq' | 'legal' | 'sync' | 'script'>('projects');
+  const [activeTab, setActiveTab] = useState<'projects' | 'statuses' | 'contacts' | 'general' | 'workflow' | 'faq' | 'legal' | 'sync' | 'script'>('projects');
   const [copiedProjectsHeaders, setCopiedProjectsHeaders] = useState(false);
   const [copiedProjectsTsv, setCopiedProjectsTsv] = useState(false);
+  const [copiedStatusesHeaders, setCopiedStatusesHeaders] = useState(false);
+  const [copiedStatusesTsv, setCopiedStatusesTsv] = useState(false);
   const [copiedTsv, setCopiedTsv] = useState(false);
   const [copiedGeneralTsv, setCopiedGeneralTsv] = useState(false);
   const [copiedContactsTsv, setCopiedContactsTsv] = useState(false);
@@ -91,7 +95,7 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
 
   if (!isOpen) return null;
 
-  const projectsHeadersRow = 'id\ttitle_ua\ttitle_en\tyear\trole_ua\trole_en\tclient_ua\tclient_en\tcategory\tstatus\tfeatured\tthumbnailUrl\tmobileThumbnailUrl\theroImage\tliveLink\ttagline_ua\ttagline_en\toverview_ua\toverview_en\ttools\tchallenge_ua\tchallenge_en\tsolution_ua\tsolution_en\timpact_ua\timpact_en\tfonts\tfonts_ua\tfonts_en\tpalette\tcolors_ua\tcolors_en\tfigmaUrl\tfigmaEmbedUrl';
+  const projectsHeadersRow = 'id\ttitle_ua\ttitle_en\tyear\trole_ua\trole_en\tclient_ua\tclient_en\tcategory\tstatus\tstatus_ua\tstatus_en\tfeatured\tthumbnailUrl\tmobileThumbnailUrl\theroImage\tliveLink\ttagline_ua\ttagline_en\toverview_ua\toverview_en\ttools\tchallenge_ua\tchallenge_en\tsolution_ua\tsolution_en\timpact_ua\timpact_en\tfonts\tfonts_ua\tfonts_en\tpalette\tcolors_ua\tcolors_en\tfigmaUrl\tfigmaEmbedUrl';
 
   const handleCopyProjectsHeaders = () => {
     navigator.clipboard.writeText(projectsHeadersRow);
@@ -104,6 +108,21 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
     navigator.clipboard.writeText(tsv);
     setCopiedProjectsTsv(true);
     setTimeout(() => setCopiedProjectsTsv(false), 2200);
+  };
+
+  const statusesHeadersRow = 'id\tua\ten\tbadge_ua\tbadge_en';
+
+  const handleCopyStatusesHeaders = () => {
+    navigator.clipboard.writeText(statusesHeadersRow);
+    setCopiedStatusesHeaders(true);
+    setTimeout(() => setCopiedStatusesHeaders(false), 2200);
+  };
+
+  const handleCopyStatusesTsv = () => {
+    const tsv = getStatusesSheetTsvTemplate();
+    navigator.clipboard.writeText(tsv);
+    setCopiedStatusesTsv(true);
+    setTimeout(() => setCopiedStatusesTsv(false), 2200);
   };
 
   const handleCopyContactsTsv = () => {
@@ -223,13 +242,22 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
     { key: 'heroTagline', label: language === 'ua' ? 'Опис Hero' : 'Hero Tagline', valUa: portfolioData.settings.heroTagline?.ua || portfolioData.settings.bioShort.ua, valEn: portfolioData.settings.heroTagline?.en || portfolioData.settings.bioShort.en },
     { key: 'location', label: language === 'ua' ? 'Локація' : 'Location', valUa: portfolioData.settings.location.ua, valEn: portfolioData.settings.location.en },
     { key: 'email', label: 'Email', valUa: portfolioData.settings.email, valEn: portfolioData.settings.email },
+    { key: 'telegram', label: 'Telegram', valUa: portfolioData.contacts?.telegram || portfolioData.settings.telegram || 'https://t.me/ivanselivanov', valEn: portfolioData.contacts?.telegram || portfolioData.settings.telegram || 'https://t.me/ivanselivanov' },
     { key: 'linkedin', label: 'LinkedIn', valUa: portfolioData.settings.linkedin, valEn: portfolioData.settings.linkedin },
+    { key: 'behance', label: 'Behance', valUa: portfolioData.contacts?.behance || portfolioData.settings.behance || 'https://behance.net/ivanselivanov', valEn: portfolioData.contacts?.behance || portfolioData.settings.behance || 'https://behance.net/ivanselivanov' },
+    { key: 'github', label: 'GitHub', valUa: portfolioData.contacts?.github || portfolioData.settings.github || 'https://github.com/ivanselivanov', valEn: portfolioData.contacts?.github || portfolioData.settings.github || 'https://github.com/ivanselivanov' },
+    { key: 'phone', label: language === 'ua' ? 'Телефон' : 'Phone', valUa: portfolioData.contacts?.phone || '', valEn: portfolioData.contacts?.phone || '' },
+    { key: 'address', label: language === 'ua' ? 'Адреса' : 'Address', valUa: portfolioData.contacts?.address?.ua || portfolioData.settings.location.ua, valEn: portfolioData.contacts?.address?.en || portfolioData.settings.location.en },
     { key: 'expertise_card1_title', label: language === 'ua' ? 'Експертиза 1' : 'Expertise 1', valUa: portfolioData.settings.expertise?.card1Title.ua, valEn: portfolioData.settings.expertise?.card1Title.en },
     { key: 'expertise_card4_title', label: language === 'ua' ? 'Експертиза 4' : 'Expertise 4', valUa: portfolioData.settings.expertise?.card4Title.ua, valEn: portfolioData.settings.expertise?.card4Title.en },
     { key: 'expertise_tech_items', label: language === 'ua' ? 'Стек інструментів' : 'Tech Stack', valUa: 'Figma, HTML, CSS, JavaScript, Vercel...', valEn: 'Figma, HTML, CSS, JavaScript, Vercel...' },
     { key: 'menu_system_title', label: language === 'ua' ? 'Меню: Шапка' : 'Menu: System Title', valUa: portfolioData.settings.menu?.systemTitle?.ua || 'IS // СИСТЕМА НАВІГАЦІЇ', valEn: portfolioData.settings.menu?.systemTitle?.en || 'IS // NAVIGATION SYSTEM' },
     { key: 'menu_item1_title', label: language === 'ua' ? 'Меню: Пункт 1' : 'Menu: Item 1', valUa: portfolioData.settings.menu?.item1Title?.ua || 'Проєкти', valEn: portfolioData.settings.menu?.item1Title?.en || 'Selected Work' },
     { key: 'menu_item1_desc', label: language === 'ua' ? 'Меню: Опис 1' : 'Menu: Desc 1', valUa: portfolioData.settings.menu?.item1Desc?.ua || 'Вибрані кейси & інтерфейси', valEn: portfolioData.settings.menu?.item1Desc?.en || 'Featured cases & digital products' },
+    { key: 'menu_workflow_title', label: language === 'ua' ? 'Меню: Процес' : 'Menu: Workflow', valUa: portfolioData.settings.menu?.itemWorkflowTitle?.ua || 'Процес', valEn: portfolioData.settings.menu?.itemWorkflowTitle?.en || 'Workflow' },
+    { key: 'menu_workflow_desc', label: language === 'ua' ? 'Меню: Опис процесу' : 'Menu: Workflow Desc', valUa: portfolioData.settings.menu?.itemWorkflowDesc?.ua || '4 етапи від брифу до передачі в розробку', valEn: portfolioData.settings.menu?.itemWorkflowDesc?.en || '4-phase delivery from brief to dev handoff' },
+    { key: 'menu_faq_title', label: language === 'ua' ? 'Меню: FAQ' : 'Menu: FAQ', valUa: portfolioData.settings.menu?.itemFaqTitle?.ua || 'FAQ', valEn: portfolioData.settings.menu?.itemFaqTitle?.en || 'FAQ' },
+    { key: 'menu_faq_desc', label: language === 'ua' ? 'Меню: Опис FAQ' : 'Menu: FAQ Desc', valUa: portfolioData.settings.menu?.itemFaqDesc?.ua || 'Формати співпраці, NDA та умови', valEn: portfolioData.settings.menu?.itemFaqDesc?.en || 'Collaboration models, NDA & turnaround' },
     { key: 'menu_contacts_title', label: language === 'ua' ? 'Меню: Заголовок контактів' : 'Menu: Contacts Heading', valUa: portfolioData.settings.menu?.contactsTitle?.ua || 'Прямі контакти:', valEn: portfolioData.settings.menu?.contactsTitle?.en || 'Direct Channels:' },
     { key: 'hero_cta_btn', label: language === 'ua' ? 'Кнопка "Дослідити кейси"' : 'Hero CTA Button', valUa: portfolioData.settings.ui?.heroCta?.ua || 'Дослідити кейси', valEn: portfolioData.settings.ui?.heroCta?.en || 'Explore Portfolio' },
     { key: 'work_index', label: language === 'ua' ? 'Індекс розділу робіт' : 'Work Section Index', valUa: portfolioData.settings.ui?.workIndex?.ua || '01 // INDEXED CASE STUDIES', valEn: portfolioData.settings.ui?.workIndex?.en || '01 // INDEXED CASE STUDIES' },
@@ -237,9 +265,16 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
     { key: 'layout_cascade', label: language === 'ua' ? 'Кнопка "Каскад"' : 'Layout Masonry', valUa: portfolioData.settings.ui?.layoutCascade?.ua || 'Каскад', valEn: portfolioData.settings.ui?.layoutCascade?.en || 'Masonry' },
     { key: 'layout_grid', label: language === 'ua' ? 'Кнопка "Сітка"' : 'Layout Grid', valUa: portfolioData.settings.ui?.layoutGrid?.ua || 'Сітка', valEn: portfolioData.settings.ui?.layoutGrid?.en || 'Grid' },
     { key: 'filter_category_label', label: language === 'ua' ? 'Мітка "Напрямок:"' : 'Filter Category Label', valUa: portfolioData.settings.ui?.filterCategoryLabel?.ua || 'Напрямок:', valEn: portfolioData.settings.ui?.filterCategoryLabel?.en || 'Discipline:' },
-    { key: 'filter_category_all', label: language === 'ua' ? 'Фільтр "Всі напрямки"' : 'Filter Category All', valUa: portfolioData.settings.ui?.filterCategoryAll?.ua || 'Всі напрямки', valEn: portfolioData.settings.ui?.filterCategoryAll?.en || 'All Disciplines' },
+    { key: 'filter_category_all', label: language === 'ua' ? 'Фільтр "Всі напрямки"' : 'Filter Category All', valUa: portfolioData.settings.ui?.filterCategoryAll?.ua || 'Всі напрямки', valEn: portfolioData.settings.ui?.filterCategoryAll?.en || 'All disciplines' },
+    { key: 'filter_category_identity', label: language === 'ua' ? 'Фільтр "Айдентика & Постери"' : 'Filter "Identity & Posters"', valUa: portfolioData.settings.ui?.filterCategoryIdentity?.ua || 'Айдентика & Постери', valEn: portfolioData.settings.ui?.filterCategoryIdentity?.en || 'Identity & Posters' },
+    { key: 'filter_category_uiux', label: language === 'ua' ? 'Фільтр "UI/UX / Web Design"' : 'Filter "UI/UX / Web Design"', valUa: portfolioData.settings.ui?.filterCategoryUiux?.ua || 'UI/UX / Web Design', valEn: portfolioData.settings.ui?.filterCategoryUiux?.en || 'UI/UX / Web Design' },
+    { key: 'filter_category_print', label: language === 'ua' ? 'Фільтр "Editorial / Print Design"' : 'Filter "Editorial / Print Design"', valUa: portfolioData.settings.ui?.filterCategoryPrint?.ua || 'Editorial / Print Design', valEn: portfolioData.settings.ui?.filterCategoryPrint?.en || 'Editorial / Print Design' },
+    { key: 'filter_category_ads', label: language === 'ua' ? 'Фільтр "Advertising / Social Media"' : 'Filter "Advertising / Social Media"', valUa: portfolioData.settings.ui?.filterCategoryAds?.ua || 'Advertising / Social Media', valEn: portfolioData.settings.ui?.filterCategoryAds?.en || 'Advertising / Social Media' },
+    { key: 'filter_category_3d', label: language === 'ua' ? 'Фільтр "3D Modeling"' : 'Filter "3D Modeling"', valUa: portfolioData.settings.ui?.filterCategory3d?.ua || '3D Modeling', valEn: portfolioData.settings.ui?.filterCategory3d?.en || '3D Modeling' },
     { key: 'filter_status_label', label: language === 'ua' ? 'Мітка "Статус:"' : 'Filter Status Label', valUa: portfolioData.settings.ui?.filterStatusLabel?.ua || 'Статус:', valEn: portfolioData.settings.ui?.filterStatusLabel?.en || 'Status:' },
-    { key: 'filter_status_all', label: language === 'ua' ? 'Фільтр "Всі статуси"' : 'Filter Status All', valUa: portfolioData.settings.ui?.filterStatusAll?.ua || 'Всі статуси', valEn: portfolioData.settings.ui?.filterStatusAll?.en || 'All' },
+    { key: 'filter_status_all', label: language === 'ua' ? 'Фільтр "Всі статуси"' : 'Filter Status All', valUa: portfolioData.settings.ui?.filterStatusAll?.ua || 'Всі статуси', valEn: portfolioData.settings.ui?.filterStatusAll?.en || 'All statuses' },
+    { key: 'filter_status_production', label: language === 'ua' ? 'Фільтр "Реалізовані"' : 'Filter "Live (Production)"', valUa: portfolioData.settings.ui?.filterStatusProduction?.ua || 'Реалізовані', valEn: portfolioData.settings.ui?.filterStatusProduction?.en || 'Live (Production)' },
+    { key: 'filter_status_conceptual', label: language === 'ua' ? 'Фільтр "Концепти"' : 'Filter "Concepts"', valUa: portfolioData.settings.ui?.filterStatusConceptual?.ua || 'Концепти', valEn: portfolioData.settings.ui?.filterStatusConceptual?.en || 'Concepts' },
     { key: 'expertise_index', label: language === 'ua' ? 'Індекс розділу експертизи' : 'Expertise Section Index', valUa: portfolioData.settings.ui?.expertiseIndex?.ua || '02 // METHODOLOGY & CAPABILITIES', valEn: portfolioData.settings.ui?.expertiseIndex?.en || '02 // METHODOLOGY & CAPABILITIES' },
     { key: 'experience_index', label: language === 'ua' ? 'Індекс розділу досвіду' : 'Experience Section Index', valUa: portfolioData.settings.ui?.experienceIndex?.ua || '03 // TRACK RECORD', valEn: portfolioData.settings.ui?.experienceIndex?.en || '03 // TRACK RECORD' },
     { key: 'experience_title', label: language === 'ua' ? 'Заголовок "Кар’єрний Шлях"' : 'Experience Title', valUa: portfolioData.settings.ui?.experienceTitle?.ua || 'Кар’єрний Шлях & Досвід', valEn: portfolioData.settings.ui?.experienceTitle?.en || 'Career Track & Background' },
@@ -258,10 +293,13 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
     { key: 'modal_max_space', label: language === 'ua' ? 'Модалка: "Максимум місця"' : 'Modal: Max Space', valUa: portfolioData.settings.ui?.modalMaxSpace?.ua || 'Максимум місця', valEn: portfolioData.settings.ui?.modalMaxSpace?.en || 'Max space' },
     { key: 'modal_fit_frame', label: language === 'ua' ? 'Модалка: "Вписати в екран"' : 'Modal: Fit Frame', valUa: portfolioData.settings.ui?.modalFitFrame?.ua || 'Вписати в екран', valEn: portfolioData.settings.ui?.modalFitFrame?.en || 'Fit frame' },
     { key: 'modal_visit_live', label: language === 'ua' ? 'Модалка: "Відвідати живий сайт"' : 'Modal: Visit Live', valUa: portfolioData.settings.ui?.modalVisitLive?.ua || 'Переглянути Live Проєкт', valEn: portfolioData.settings.ui?.modalVisitLive?.en || 'Explore Live Interface' },
-    { key: 'badge_featured', label: language === 'ua' ? 'Бейдж картки "★ Флагман"' : 'Card Badge "★ Featured"', valUa: portfolioData.settings.ui?.badgeFeatured?.ua || 'Флагман', valEn: portfolioData.settings.ui?.badgeFeatured?.en || 'Featured' },
-    { key: 'badge_concept', label: language === 'ua' ? 'Бейдж картки "Концепт"' : 'Card Badge "Concept"', valUa: portfolioData.settings.ui?.badgeConcept?.ua || 'Концепт', valEn: portfolioData.settings.ui?.badgeConcept?.en || 'Concept' },
-    { key: 'badge_production', label: language === 'ua' ? 'Бейдж картки "Продакшн"' : 'Card Badge "Production"', valUa: portfolioData.settings.ui?.badgeProduction?.ua || 'Продакшн', valEn: portfolioData.settings.ui?.badgeProduction?.en || 'Production' },
-    { key: 'card_view_case', label: language === 'ua' ? 'Кнопка на картці "Відкрити кейс"' : 'Card Hover Button "View Case"', valUa: portfolioData.settings.ui?.cardViewCase?.ua || 'Відкрити кейс', valEn: portfolioData.settings.ui?.cardViewCase?.en || 'View Case' }
+    { key: 'modal_artifacts', label: language === 'ua' ? 'Модалка: "Екрани та Артефакти"' : 'Modal: Artifacts Heading', valUa: portfolioData.settings.ui?.modalArtifacts?.ua || 'Екрани та Артефакти', valEn: portfolioData.settings.ui?.modalArtifacts?.en || 'Screens & Artifacts' },
+    { key: 'modal_tab_screens', label: language === 'ua' ? 'Модалка: Вкладка "Макети"' : 'Modal: Screens Tab', valUa: portfolioData.settings.ui?.modalTabScreens?.ua || 'Макети', valEn: portfolioData.settings.ui?.modalTabScreens?.en || 'Screens' },
+    { key: 'modal_tab_figma', label: language === 'ua' ? 'Модалка: Вкладка "Інтерактивна Figma"' : 'Modal: Figma Tab', valUa: portfolioData.settings.ui?.modalTabFigma?.ua || 'Інтерактивна Figma', valEn: portfolioData.settings.ui?.modalTabFigma?.en || 'Interactive Figma' },
+    { key: 'modal_open_figma', label: language === 'ua' ? 'Модалка: Кнопка "Перейти в макет Figma"' : 'Modal: Open Figma Button', valUa: portfolioData.settings.ui?.modalOpenFigma?.ua || 'Перейти в макет Figma', valEn: portfolioData.settings.ui?.modalOpenFigma?.en || 'Open in Figma' },
+    { key: 'modal_open_live', label: language === 'ua' ? 'Модалка: Кнопка "Відкрити live проєкт"' : 'Modal: Open Live Button', valUa: portfolioData.settings.ui?.modalOpenLive?.ua || 'Відкрити live проєкт', valEn: portfolioData.settings.ui?.modalOpenLive?.en || 'Open live project' },
+    { key: 'badge_featured', label: language === 'ua' ? 'Бейдж картки "★ Обрані"' : 'Card Badge "★ Selected"', valUa: portfolioData.settings.ui?.badgeFeatured?.ua || 'Обрані', valEn: portfolioData.settings.ui?.badgeFeatured?.en || 'Selected' },
+    { key: 'card_view_case', label: language === 'ua' ? 'Кнопка на картці "Відкрити кейс"' : 'Card Hover Button "Open Case Study"', valUa: portfolioData.settings.ui?.cardViewCase?.ua || 'Відкрити кейс', valEn: portfolioData.settings.ui?.cardViewCase?.en || 'Open case study' }
   ];
 
   const legalPreviewRows = [
@@ -295,7 +333,7 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
 
   return (
     <AnimatePresence>
-      <div key="sheets-sync-modal-backdrop" className="fixed inset-0 z-[70] flex items-center justify-center p-3 sm:p-6 pt-[75px] sm:pt-[86px] bg-black/85 backdrop-blur-md overflow-y-auto">
+      <div key="sheets-sync-modal-backdrop" className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md overflow-y-auto">
         <div className="fixed inset-0" onClick={onClose} />
 
         <motion.div
@@ -340,6 +378,19 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
             >
               <Briefcase className="w-3.5 h-3.5" />
               <span>{language === 'ua' ? 'Вкладка Projects' : 'Projects Tab'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('statuses')}
+              className={`px-4 py-3 flex items-center gap-2 border-b-2 font-medium cursor-pointer transition-colors shrink-0 ${
+                activeTab === 'statuses'
+                  ? 'border-emerald-400 text-white bg-neutral-900/60'
+                  : 'border-transparent text-neutral-400 hover:text-neutral-200'
+              }`}
+            >
+              <Tag className="w-3.5 h-3.5" />
+              <span>{language === 'ua' ? 'Вкладка Statuses' : 'Statuses Tab'}</span>
             </button>
 
             <button
@@ -509,6 +560,124 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
                       </p>
                     </div>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'statuses' && (
+              <div className="space-y-6">
+                <div className="bg-neutral-900/80 border border-neutral-800 p-5 space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                      <h4 className="font-mono text-xs uppercase tracking-widest text-emerald-400 font-semibold">
+                        {language === 'ua' ? 'Окрема вкладка "Statuses" (або "Статуси"):' : 'Dedicated "Statuses" tab (id | ua | en | badge_ua | badge_en):'}
+                      </h4>
+                      <p className="text-neutral-300 text-xs sm:text-sm mt-1 leading-relaxed">
+                        {language === 'ua'
+                          ? '1. Створіть у вашій Google-таблиці нову вкладку з назвою '
+                          : '1. Create a new tab in your Google Sheet named '}
+                        <strong className="text-white font-mono bg-black px-2 py-0.5 border border-neutral-700">Statuses</strong>
+                        {language === 'ua' ? ' (або Статуси).' : ' (or Statuses).'}
+                      </p>
+                      <p className="text-neutral-300 text-xs sm:text-sm mt-1">
+                        {language === 'ua'
+                          ? '2. Натисніть кнопку "Скопіювати шаблон Statuses", виберіть клітинку A1 і вставте (Ctrl+V / Cmd+V).'
+                          : '2. Click "Copy Statuses Template", select cell A1, and paste (Ctrl+V / Cmd+V).'}
+                      </p>
+                      <p className="text-neutral-400 text-xs mt-1">
+                        {language === 'ua'
+                          ? '3. Дозволяє налаштувати тексти статусів для верхнього фільтра та бейджів карток окремо українською та англійською мовами.'
+                          : '3. Controls filter labels and project card badges for all statuses in both Ukrainian and English.'}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleCopyStatusesHeaders}
+                        className="px-3.5 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 transition-all font-mono text-xs uppercase tracking-wider font-semibold flex items-center gap-2 cursor-pointer shadow"
+                      >
+                        {copiedStatusesHeaders ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{language === 'ua' ? 'Скопіювати заголовки' : 'Copy Headers'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleCopyStatusesTsv}
+                        className="px-4 py-2.5 bg-[#f4f4f0] text-black hover:bg-white transition-all font-mono text-xs uppercase tracking-wider font-semibold flex items-center gap-2 cursor-pointer shadow"
+                      >
+                        {copiedStatusesTsv ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                        <span>{language === 'ua' ? 'Скопіювати шаблон Statuses' : 'Copy Statuses TSV'}</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Statuses Preview Table */}
+                <div className="border border-neutral-800 bg-neutral-950 overflow-hidden">
+                  <div className="bg-neutral-900/60 px-4 py-2.5 border-b border-neutral-800 flex items-center justify-between">
+                    <span className="font-mono text-[11px] text-neutral-400 uppercase tracking-wider">
+                      {language === 'ua' ? 'Зразок колонок та даних вкладки "Statuses":' : 'Statuses Tab Columns & Rows Preview:'}
+                    </span>
+                    <span className="text-[10px] font-mono text-emerald-400">5 COLUMNS (TSV)</span>
+                  </div>
+                  <div className="overflow-x-auto max-h-[340px]">
+                    <table className="w-full text-left font-mono text-xs border-collapse">
+                      <thead className="bg-neutral-900 text-neutral-400 sticky top-0 border-b border-neutral-800">
+                        <tr>
+                          <th className="p-3 font-semibold text-emerald-400">id</th>
+                          <th className="p-3 font-semibold text-white">ua (Фільтр)</th>
+                          <th className="p-3 font-semibold text-white">en (Filter)</th>
+                          <th className="p-3 font-semibold text-amber-300">badge_ua (Бейдж)</th>
+                          <th className="p-3 font-semibold text-amber-300">badge_en (Badge)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-neutral-800/60 text-neutral-300">
+                        <tr className="hover:bg-neutral-900/40">
+                          <td className="p-3 font-semibold text-emerald-400">all</td>
+                          <td className="p-3">Всі статуси</td>
+                          <td className="p-3 text-neutral-400">All statuses</td>
+                          <td className="p-3 text-amber-300/80">Всі</td>
+                          <td className="p-3 text-neutral-400">All</td>
+                        </tr>
+                        <tr className="hover:bg-neutral-900/40">
+                          <td className="p-3 font-semibold text-emerald-400">concept</td>
+                          <td className="p-3">Концепт</td>
+                          <td className="p-3 text-neutral-400">Concept</td>
+                          <td className="p-3 text-amber-300/80">Концепт</td>
+                          <td className="p-3 text-neutral-400">Concept</td>
+                        </tr>
+                        <tr className="hover:bg-neutral-900/40">
+                          <td className="p-3 font-semibold text-emerald-400">realized</td>
+                          <td className="p-3">Реалізовані (Продакшн)</td>
+                          <td className="p-3 text-neutral-400">Live (Production)</td>
+                          <td className="p-3 text-amber-300/80">Продакшн</td>
+                          <td className="p-3 text-neutral-400">Production</td>
+                        </tr>
+                        <tr className="hover:bg-neutral-900/40">
+                          <td className="p-3 font-semibold text-emerald-400">wip</td>
+                          <td className="p-3">В роботі</td>
+                          <td className="p-3 text-neutral-400">In Progress</td>
+                          <td className="p-3 text-amber-300/80">В процесі</td>
+                          <td className="p-3 text-neutral-400">WIP</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div className="bg-neutral-900/50 border border-neutral-800/80 p-4 space-y-2 text-xs text-neutral-300">
+                  <h5 className="font-mono text-emerald-400 uppercase tracking-wider font-medium">
+                    {language === 'ua' ? 'Альтернативні способи перекладу статусів:' : 'Alternative ways to localize statuses:'}
+                  </h5>
+                  <ul className="list-disc list-inside space-y-1 text-neutral-400">
+                    <li>
+                      <strong className="text-white">{language === 'ua' ? 'У вкладці Projects:' : 'In Projects tab:'}</strong> {language === 'ua' ? 'можна додати колонки status_ua та status_en безпосередньо у рядок кожного проєкту (наприклад: status_ua: "Концепт", status_en: "Concept").' : 'add status_ua and status_en columns directly to each project row.'}
+                    </li>
+                    <li>
+                      <strong className="text-white">{language === 'ua' ? 'У вкладці General_Data:' : 'In General_Data tab:'}</strong> {language === 'ua' ? 'можна змінити ключі filter_status_conceptual, filter_status_production, badge_concept, badge_production, filter_status_all.' : 'configure keys filter_status_conceptual, filter_status_production, badge_concept, badge_production, filter_status_all.'}
+                    </li>
+                  </ul>
                 </div>
               </div>
             )}

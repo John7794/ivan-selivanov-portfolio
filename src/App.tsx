@@ -9,7 +9,7 @@ import { ArrowDown, SlidersHorizontal, Sparkles, Filter, Columns3, LayoutGrid } 
 import { Project, ProjectCategory, ProjectStatus, Language, FilterOption } from './types';
 import { getStoredData, PortfolioData, syncWithGoogleSheets } from './services/googleSheets';
 import { DEFAULT_SETTINGS } from './data/defaultData';
-import { getLocalizedText } from './utils/i18n';
+import { getLocalizedText, getBilingualStatus } from './utils/i18n';
 import { Navbar } from './components/Navbar';
 import { ProjectCard } from './components/ProjectCard';
 import { CaseStudyModal } from './components/CaseStudyModal';
@@ -124,44 +124,85 @@ export default function App() {
 
   // Dynamic Categories derived directly from Google Sheets Projects & custom tabs
   const categoryLabels = useMemo(() => {
-    const allCatUa = data.settings.ui?.filterCategoryAll?.ua || 'Всі напрямки';
-    const allCatEn = data.settings.ui?.filterCategoryAll?.en || 'All Disciplines';
+    const ui = data.settings.ui;
+    const allCatUa = ui?.filterCategoryAll?.ua || 'Всі напрямки';
+    const allCatEn = ui?.filterCategoryAll?.en || 'All disciplines';
     const list: FilterOption[] = [
       { id: 'all', ua: allCatUa, en: allCatEn }
     ];
 
-    // 1. If explicit categories sheet was provided
+    const getCanonicalId = (idOrName: string): string => {
+      const lower = idOrName.toLowerCase().replace(/[\s\-_/\\&()]+/g, '');
+      if (lower.includes('brand') || lower.includes('ident') || lower.includes('айдент') || lower.includes('постер')) return 'branding';
+      if (lower.includes('ui') || lower.includes('webdesign') || lower.includes('інтерфейс') || lower.includes('продукт')) return 'ui-ux';
+      if (lower.includes('book') || lower.includes('editorial') || lower.includes('print') || lower.includes('книг') || lower.includes('друк')) return 'book-design';
+      if (lower.includes('advertis') || lower.includes('social') || lower.includes('реклам') || lower.includes('соціал')) return 'advertising';
+      if (lower.includes('3d') || lower.includes('render') || lower.includes('моделюван')) return '3d-render';
+      return idOrName.toLowerCase().trim().replace(/[^\w\dа-яіїєґ]+/gi, '-').replace(/^-+|-+$/g, '') || 'custom';
+    };
+
+    const normalizeLabel = (str: string | undefined) => (str || '').toLowerCase().trim().replace(/[\s\-_/\\&()]+/g, '');
+
+    // Canonical default names from UI settings or defaults
+    const canonicalDefs: Record<string, { ua: string; en: string }> = {
+      'branding': ui?.filterCategoryIdentity || { ua: 'Айдентика & Постери', en: 'Identity & Posters' },
+      'ui-ux': ui?.filterCategoryUiux || { ua: 'UI/UX / Web Design', en: 'UI/UX / Web Design' },
+      'book-design': ui?.filterCategoryPrint || { ua: 'Editorial / Print Design', en: 'Editorial / Print Design' },
+      'advertising': ui?.filterCategoryAds || { ua: 'Advertising / Social Media', en: 'Advertising / Social Media' },
+      '3d-render': ui?.filterCategory3d || { ua: '3D Modeling', en: '3D Modeling' },
+    };
+
+    const addOrUpdateOption = (rawId: string, ua: string, en: string) => {
+      const canonId = getCanonicalId(rawId);
+      const def = canonicalDefs[canonId];
+      const finalUa = def?.ua || ua;
+      const finalEn = def?.en || en;
+
+      const normUa = normalizeLabel(finalUa);
+      const normEn = normalizeLabel(finalEn);
+
+      // Check if already in list by canonical id OR by matching label
+      const existingIdx = list.findIndex(item => 
+        item.id === canonId || 
+        normalizeLabel(item.ua) === normUa || 
+        normalizeLabel(item.en) === normEn
+      );
+
+      if (existingIdx >= 0) {
+        // Keep canonical id and update labels if this is a standard category
+        if (def) {
+          list[existingIdx].id = canonId;
+          list[existingIdx].ua = def.ua;
+          list[existingIdx].en = def.en;
+        }
+      } else {
+        list.push({
+          id: canonId,
+          ua: finalUa,
+          en: finalEn
+        });
+      }
+    };
+
+    // 1. Explicit categories sheet if provided
     if (data.categories && data.categories.length > 0) {
       data.categories.forEach(cat => {
-        if (!list.some(item => item.id === cat.id)) {
-          list.push(cat);
-        }
+        addOrUpdateOption(cat.id, cat.ua, cat.en);
       });
     }
 
-    // 2. Scan every project from table to guarantee all existing disciplines are present
-    const seenCatIds = new Set(list.map(c => c.id));
+    // 2. Scan every project from table
     data.projects.forEach(p => {
-      const catId = p.category;
-      if (catId && !seenCatIds.has(catId)) {
-        seenCatIds.add(catId);
-        list.push({
-          id: catId,
-          ua: p.categoryLabel?.ua || catId,
-          en: p.categoryLabel?.en || catId
-        });
+      if (p.category) {
+        addOrUpdateOption(p.category, p.categoryLabel?.ua || p.category, p.categoryLabel?.en || p.category);
       }
     });
 
-    // 3. Fallback defaults if no projects loaded yet
-    if (list.length === 1) {
-      list.push(
-        { id: 'ui-ux', ua: 'UI/UX Продукт', en: 'UI/UX Product' },
-        { id: '3d-render', ua: '3D Рендери', en: '3D Renders' },
-        { id: 'book-design', ua: 'Книжковий дизайн', en: 'Book Design' },
-        { id: 'branding', ua: 'Айдентика & Постери', en: 'Identity & Posters' }
-      );
-    }
+    // 3. Guarantee standard 5 categories are present once
+    Object.keys(canonicalDefs).forEach(canonId => {
+      const def = canonicalDefs[canonId];
+      addOrUpdateOption(canonId, def.ua, def.en);
+    });
 
     return list;
   }, [data.projects, data.categories, data.settings.ui]);
@@ -169,7 +210,7 @@ export default function App() {
   // Dynamic Statuses derived directly from Google Sheets Projects & custom tabs
   const statusLabels = useMemo(() => {
     const allStatUa = data.settings.ui?.filterStatusAll?.ua || 'Всі статуси';
-    const allStatEn = data.settings.ui?.filterStatusAll?.en || 'All';
+    const allStatEn = data.settings.ui?.filterStatusAll?.en || 'All statuses';
     const list: FilterOption[] = [
       { id: 'all', ua: allStatUa, en: allStatEn }
     ];
@@ -177,8 +218,18 @@ export default function App() {
     // 1. If explicit statuses sheet was provided
     if (data.statuses && data.statuses.length > 0) {
       data.statuses.forEach(st => {
-        if (!list.some(item => item.id === st.id)) {
-          list.push(st);
+        const cleanId = String(st.id || '').toLowerCase().trim();
+        if (cleanId === 'all' || cleanId === 'всі') {
+          list[0].ua = st.ua;
+          list[0].en = st.en;
+        } else {
+          const existingIdx = list.findIndex(item => item.id === st.id);
+          const bilingual = getBilingualStatus(st.ua, st.en);
+          if (existingIdx !== -1) {
+            list[existingIdx] = { id: st.id, ua: bilingual.ua, en: bilingual.en };
+          } else {
+            list.push({ id: st.id, ua: bilingual.ua, en: bilingual.en });
+          }
         }
       });
     }
@@ -186,25 +237,71 @@ export default function App() {
     // 2. Scan every project from table to guarantee all existing statuses are present
     const seenStatusIds = new Set(list.map(s => s.id));
     data.projects.forEach(p => {
-      const stId = p.status;
+      const rawLower = String(p.status || '').toLowerCase().trim();
+      const isConcept = rawLower === 'concept' || rawLower.includes('concept') || rawLower.includes('концепт') || rawLower.includes('r&d') || rawLower.includes('rnd');
+      const isRealized = rawLower === 'realized' || rawLower.includes('realiz') || rawLower.includes('prod') || rawLower.includes('live') || rawLower.includes('продакшн') || rawLower.includes('реліз');
+
+      const stId = isConcept ? 'concept' : isRealized ? 'realized' : (p.status || 'status');
+
       if (stId && !seenStatusIds.has(stId)) {
         seenStatusIds.add(stId);
-        const uaDefault = stId === 'realized' ? 'Реалізовані (Продакшн)' : stId === 'concept' ? 'Концепти & R&D' : stId;
-        const enDefault = stId === 'realized' ? 'Production' : stId === 'concept' ? 'Concept & R&D' : stId;
+        const hasCustomLabel = p.statusLabel && typeof p.statusLabel === 'object' && (p.statusLabel.ua || p.statusLabel.en);
+        const uaDefault = hasCustomLabel
+          ? (p.statusLabel.ua || p.statusLabel.en)
+          : isRealized 
+          ? (data.settings.ui?.filterStatusProduction?.ua || 'Реалізовані (Продакшн)') 
+          : isConcept 
+          ? (data.settings.ui?.filterStatusConceptual?.ua || 'Концепт') 
+          : stId;
+        const enDefault = hasCustomLabel
+          ? (p.statusLabel.en || p.statusLabel.ua)
+          : isRealized 
+          ? (data.settings.ui?.filterStatusProduction?.en || 'Live (Production)') 
+          : isConcept 
+          ? (data.settings.ui?.filterStatusConceptual?.en || 'Concept') 
+          : stId;
+        const bilingual = getBilingualStatus(uaDefault, enDefault);
         list.push({
           id: stId,
-          ua: p.statusLabel?.ua || uaDefault,
-          en: p.statusLabel?.en || enDefault
+          ua: bilingual.ua,
+          en: bilingual.en
         });
       }
     });
 
-    // 3. Fallback defaults
+    // 3. Fallback defaults if empty
     if (list.length === 1) {
       list.push(
-        { id: 'realized', ua: 'Реалізовані (Продакшн)', en: 'Production' },
-        { id: 'concept', ua: 'Концепти & R&D', en: 'Concept & R&D' }
+        { 
+          id: 'concept', 
+          ua: data.settings.ui?.filterStatusConceptual?.ua || 'Концепт', 
+          en: data.settings.ui?.filterStatusConceptual?.en || 'Concept' 
+        },
+        { 
+          id: 'realized', 
+          ua: data.settings.ui?.filterStatusProduction?.ua || 'Реалізовані (Продакшн)', 
+          en: data.settings.ui?.filterStatusProduction?.en || 'Live (Production)' 
+        }
       );
+    } else {
+      // Sync UI settings translations to default concept/realized options if not overridden by explicit statuses tab
+      const hasExplicitConcept = data.statuses?.some(s => s.id === 'concept');
+      const hasExplicitRealized = data.statuses?.some(s => s.id === 'realized');
+
+      if (!hasExplicitConcept && data.settings.ui?.filterStatusConceptual) {
+        const cIdx = list.findIndex(s => s.id === 'concept');
+        if (cIdx !== -1) {
+          list[cIdx].ua = data.settings.ui.filterStatusConceptual.ua;
+          list[cIdx].en = data.settings.ui.filterStatusConceptual.en;
+        }
+      }
+      if (!hasExplicitRealized && data.settings.ui?.filterStatusProduction) {
+        const rIdx = list.findIndex(s => s.id === 'realized');
+        if (rIdx !== -1) {
+          list[rIdx].ua = data.settings.ui.filterStatusProduction.ua;
+          list[rIdx].en = data.settings.ui.filterStatusProduction.en;
+        }
+      }
     }
 
     return list;
@@ -241,10 +338,11 @@ export default function App() {
         matchesCategory = normCat === normSelected || 
                           normUa === normSelected || 
                           normEn === normSelected ||
-                          (normSelected.includes('ui') && normCat.includes('ui')) ||
-                          (normSelected.includes('3d') && normCat.includes('3d')) ||
-                          (normSelected.includes('book') && (normCat.includes('book') || normUa.includes('книг'))) ||
-                          (normSelected.includes('brand') && (normCat.includes('brand') || normUa.includes('айдент')));
+                          (normSelected.includes('ui') && (normCat.includes('ui') || normUa.includes('ui') || normEn.includes('ui'))) ||
+                          (normSelected.includes('3d') && (normCat.includes('3d') || normUa.includes('3d') || normEn.includes('3d'))) ||
+                          (normSelected.includes('book') && (normCat.includes('book') || normCat.includes('editorial') || normCat.includes('print') || normUa.includes('книг') || normUa.includes('друк'))) ||
+                          ((normSelected.includes('advertis') || normSelected.includes('social') || normSelected.includes('ads')) && (normCat.includes('advertis') || normCat.includes('social') || normCat.includes('ads') || normUa.includes('реклам') || normUa.includes('соціал'))) ||
+                          (normSelected.includes('brand') && (normCat.includes('brand') || normCat.includes('ident') || normUa.includes('айдент') || normUa.includes('постер')));
       }
 
       // Status match
@@ -254,11 +352,17 @@ export default function App() {
         const normStatus = normalize(p.status);
         const normUa = normalize(p.statusLabel?.ua);
         const normEn = normalize(p.statusLabel?.en);
+        const normBadgeUa = normalize(typeof p.statusBadgeLabel === 'object' ? p.statusBadgeLabel?.ua : p.statusBadgeLabel);
+        const normBadgeEn = normalize(typeof p.statusBadgeLabel === 'object' ? p.statusBadgeLabel?.en : p.statusBadgeLabel);
         matchesStatus = normStatus === normSelected || 
                         normUa === normSelected || 
                         normEn === normSelected ||
-                        (normSelected.includes('realiz') && (normStatus.includes('realiz') || normStatus.includes('prod') || normUa.includes('продакшн'))) ||
-                        (normSelected.includes('concept') && (normStatus.includes('concept') || normUa.includes('концепт')));
+                        normBadgeUa === normSelected ||
+                        normBadgeEn === normSelected ||
+                        ((normSelected.includes('realiz') || normSelected.includes('prod') || normSelected.includes('live') || normSelected.includes('продакшн')) && 
+                         (normStatus.includes('realiz') || normStatus.includes('prod') || normStatus.includes('live') || normUa.includes('продакшн') || normEn.includes('production') || normEn.includes('live') || normBadgeUa.includes('продакшн') || normBadgeEn.includes('prod'))) ||
+                        ((normSelected.includes('concept') || normSelected.includes('концепт')) && 
+                         (normStatus.includes('concept') || normUa.includes('концепт') || normEn.includes('concept') || normBadgeUa.includes('концепт') || normBadgeEn.includes('concept')));
       }
 
       return matchesCategory && matchesStatus;
@@ -306,7 +410,7 @@ export default function App() {
         onMouseMove={handleHeroMouseMove}
         onMouseEnter={() => setIsHeroHovered(true)}
         onMouseLeave={handleHeroMouseLeave}
-        className="relative w-full flex flex-col px-4 sm:px-6 lg:p-12 pt-20 sm:pt-24 lg:pt-32 pb-8 sm:pb-12 lg:pb-24"
+        className="relative w-full flex flex-col px-4 sm:px-6 lg:px-12 pt-[76px] sm:pt-[82px] lg:pt-[88px] pb-8 sm:pb-12 lg:pb-20"
       >
         {/* Subtle background ambient line structure - hidden on mobile to eliminate harsh background grid frames */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden hidden sm:block">
@@ -345,7 +449,7 @@ export default function App() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="z-10 w-full max-w-[1600px] mx-auto relative pt-1 sm:pt-4 lg:pt-14"
+          className="z-10 w-full max-w-[1600px] mx-auto relative pt-1 sm:pt-2 lg:pt-3"
         >
           {/* Status badge */}
           <div className="mb-4 sm:mb-6 flex flex-wrap items-center gap-2 sm:gap-3 text-[11px] sm:text-xs font-mono uppercase tracking-widest text-neutral-400">

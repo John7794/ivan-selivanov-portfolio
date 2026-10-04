@@ -305,14 +305,26 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
     clientReview: getLocalizedText(ui?.modalClientReview, language, { ua: 'Відгук замовника', en: 'Client Endorsement' }),
     visitLive: getLocalizedText(ui?.modalVisitLive, language, { ua: 'Переглянути Live Проєкт', en: 'Explore Live Interface' }),
     copied: getLocalizedText(ui?.modalCopied, language, { ua: 'Скопійовано', en: 'Copied' }),
-    artifacts: getLocalizedText(ui?.modalArtifacts, language, { ua: 'Екрани та Артефакти', en: 'Screens & Artifacts' })
+    artifacts: getLocalizedText(ui?.modalArtifacts, language, { ua: 'Екрани та Артефакти', en: 'Screens & Artifacts' }),
+    tabScreens: getLocalizedText(ui?.modalTabScreens, language, { ua: 'Макети', en: 'Screens' }),
+    tabFigma: getLocalizedText(ui?.modalTabFigma, language, { ua: 'Інтерактивна Figma', en: 'Interactive Figma' }),
+    figmaTitle: getLocalizedText(ui?.modalFigmaTitle, language, { ua: 'ІНТЕРАКТИВНИЙ ПРОТОТИП FIGMA', en: 'INTERACTIVE FIGMA PROTOTYPE' }),
+    figmaSubtitle: getLocalizedText(ui?.modalFigmaSubtitle, language, { ua: 'Клікабельний прототип у реальному часі', en: 'Live clickable prototype' }),
+    allScreens: getLocalizedText(ui?.modalAllScreens, language, { ua: 'Всі макети та екрани', en: 'All Screens & Visual Assets' }),
+    activeViewer: getLocalizedText(ui?.modalActiveViewer, language, { ua: 'АКТИВНИЙ В СИМУЛЯТОРІ', en: 'ACTIVE IN VIEWER' }),
+    openFigma: getLocalizedText(ui?.modalOpenFigma, language, { ua: 'Перейти в макет Figma', en: 'Open in Figma' }),
+    openLive: getLocalizedText(ui?.modalOpenLive, language, { ua: 'Відкрити live проєкт', en: 'Open live project' }),
+    tipFigma: getLocalizedText(ui?.modalTipFigma, language, { 
+      ua: 'Порада: ви можете клікати по елементах всередині фрейму або масштабувати макет коліщатком миші.', 
+      en: 'Tip: interact with prototype hot-spots directly inside the frame or zoom with mouse scroll.' 
+    })
   };
 
   return (
     <>
       <div 
         key={`case-study-modal-${project.id}`}
-        className="fixed inset-0 z-[70] flex items-center justify-center overflow-y-auto overflow-x-hidden overscroll-contain custom-scrollbar bg-black/90 backdrop-blur-md pt-[65px] sm:pt-[76px] p-0 sm:p-4 md:p-8"
+        className="fixed inset-0 z-[200] flex items-center justify-center overflow-y-auto overflow-x-hidden overscroll-contain custom-scrollbar bg-black/90 backdrop-blur-md p-2 sm:p-6 md:p-8"
         style={{ overscrollBehavior: 'contain' }}
       >
         {/* Modal Backdrop click */}
@@ -325,32 +337,73 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.98 }}
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full max-w-6xl h-full sm:h-auto sm:max-h-[calc(100vh-100px)] bg-[#0e0e0e] text-[#f4f4f0] border-0 sm:border sm:border-neutral-800 shadow-2xl z-10 flex flex-col overflow-hidden"
+          className="relative w-full max-w-6xl h-full sm:h-auto sm:max-h-[92vh] bg-[#0e0e0e] text-[#f4f4f0] border-0 sm:border sm:border-neutral-800 shadow-2xl z-10 flex flex-col overflow-hidden"
         >
           {/* Top Bar / Navigation - Always pinned at top directly under the site header */}
           <div className="sticky top-0 z-40 bg-[#0e0e0e]/98 backdrop-blur-md border-b border-neutral-800 px-3 sm:px-6 py-2.5 sm:py-3.5 flex items-center justify-between gap-2 sm:gap-4 w-full max-w-full min-w-0 shadow-md">
             <div className="flex items-center gap-2 sm:gap-3.5 min-w-0 flex-1">
               <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                <span className="relative flex h-2 w-2 shrink-0">
-                  {project.status === 'realized' && (
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  )}
-                  <span className={`relative inline-flex rounded-full h-2 w-2 shrink-0 ${
-                    project.status === 'realized' ? 'bg-emerald-500' : 'bg-amber-500'
-                  }`}></span>
-                </span>
-                <span className="font-mono text-xs uppercase tracking-widest text-neutral-300 font-medium truncate max-w-[90px] xs:max-w-[140px] sm:max-w-[240px] md:max-w-none">
-                  {t.caseStudy} {project.slug.toUpperCase()}
-                </span>
+                {(() => {
+                  const rawStatus = String(project.status || '').toLowerCase().trim();
+                  const rawBadge = String(typeof project.statusBadgeLabel === 'object' ? (project.statusBadgeLabel?.ua || project.statusBadgeLabel?.en || '') : (project.statusBadgeLabel || '')).toLowerCase().trim();
+                  const isConcept = rawStatus === 'concept' || rawStatus.includes('concept') || rawStatus.includes('концепт') || rawStatus.includes('r&d') || rawStatus.includes('rnd') || rawBadge.includes('concept') || rawBadge.includes('концепт');
+                  const isRealized = rawStatus === 'realized' || rawStatus.includes('realiz') || rawStatus.includes('prod') || rawStatus.includes('live') || rawStatus.includes('продакшн') || rawStatus.includes('реліз') || rawBadge.includes('prod') || rawBadge.includes('realiz') || rawBadge.includes('live') || rawBadge.includes('продакшн');
+
+                  return (
+                    <>
+                      <span className="relative flex h-2 w-2 shrink-0">
+                        {isRealized && (
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        )}
+                        <span className={`relative inline-flex rounded-full h-2 w-2 shrink-0 ${
+                          isRealized ? 'bg-emerald-500' : 'bg-amber-500'
+                        }`}></span>
+                      </span>
+                      <span className="font-mono text-xs uppercase tracking-widest text-neutral-300 font-medium truncate max-w-[90px] xs:max-w-[140px] sm:max-w-[240px] md:max-w-none">
+                        {t.caseStudy} {project.slug.toUpperCase()}
+                      </span>
+                    </>
+                  );
+                })()}
               </div>
 
-              <span className={`hidden sm:inline-flex px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider shrink-0 ${
-                project.status === 'realized'
-                  ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/80'
-                  : 'bg-neutral-900 text-neutral-400 border border-neutral-800'
-              }`}>
-                {project.status === 'realized' ? (language === 'ua' ? 'Реалізовано' : 'Production') : (language === 'ua' ? 'Концепт' : 'Concept')}
-              </span>
+              {(() => {
+                const rawStatus = String(project.status || '').toLowerCase().trim();
+                const rawBadge = String(typeof project.statusBadgeLabel === 'object' ? (project.statusBadgeLabel?.ua || project.statusBadgeLabel?.en || '') : (project.statusBadgeLabel || '')).toLowerCase().trim();
+                const isConcept = rawStatus === 'concept' || rawStatus.includes('concept') || rawStatus.includes('концепт') || rawStatus.includes('r&d') || rawStatus.includes('rnd') || rawBadge.includes('concept') || rawBadge.includes('концепт');
+                const isRealized = rawStatus === 'realized' || rawStatus.includes('realiz') || rawStatus.includes('prod') || rawStatus.includes('live') || rawStatus.includes('продакшн') || rawStatus.includes('реліз') || rawBadge.includes('prod') || rawBadge.includes('realiz') || rawBadge.includes('live') || rawBadge.includes('продакшн');
+
+                const statusText = (() => {
+                  // 1. Prioritize explicit project statusBadgeLabel from Google Sheets or project definitions
+                  if (project.statusBadgeLabel) {
+                    const text = getLocalizedText(project.statusBadgeLabel, language);
+                    if (text && text.trim()) return text;
+                  }
+                  // 2. Prioritize project statusLabel
+                  if (project.statusLabel) {
+                    const text = getLocalizedText(project.statusLabel, language);
+                    if (text && text.trim()) return text;
+                  }
+                  // 3. Fallback to concept badge / production badge from UI settings
+                  if (isConcept) {
+                    return getLocalizedText(ui?.badgeConcept || ui?.filterStatusConceptual, language, { ua: 'Концепт', en: 'Concept' });
+                  }
+                  if (isRealized) {
+                    return getLocalizedText(ui?.badgeProduction || ui?.filterStatusProduction, language, { ua: 'Продакшн', en: 'Production' });
+                  }
+                  return getLocalizedText(ui?.badgeProduction || ui?.filterStatusProduction, language, { ua: 'Продакшн', en: 'Production' });
+                })();
+
+                return (
+                  <span className={`hidden sm:inline-flex px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider shrink-0 ${
+                    isRealized
+                      ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/80'
+                      : 'bg-neutral-900 text-neutral-400 border border-neutral-800'
+                  }`}>
+                    {statusText}
+                  </span>
+                );
+              })()}
 
               {allProjects.length > 0 && (
                 <span className="hidden md:inline-block font-mono text-[11px] text-neutral-500 border-l border-neutral-800 pl-3 shrink-0">
@@ -366,7 +419,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1.5 bg-[#1e1e1e] hover:bg-[#282828] text-neutral-200 hover:text-white border border-[#a259ff]/40 hover:border-[#a259ff] font-mono text-xs transition-colors shadow-sm shrink-0"
-                  title={language === 'ua' ? 'Перейти в макет Figma' : 'Open in Figma'}
+                  title={t.openFigma}
                 >
                   <Figma className="w-3.5 h-3.5 text-[#0acf83]" />
                   <span className="hidden sm:inline">Figma</span>
@@ -380,7 +433,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 bg-neutral-900 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-neutral-800 hover:border-neutral-700 font-mono text-xs transition-colors shrink-0"
-                  title={language === 'ua' ? 'Відкрити live проєкт' : 'Open live project'}
+                  title={t.openLive}
                 >
                   <span>{t.live}</span>
                   <ExternalLink className="w-3 h-3 text-cyan-400" />
@@ -516,7 +569,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                         }`}
                       >
                         <Images className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                        <span className="hidden xs:inline">{language === 'ua' ? 'Макети' : 'Screens'}</span>
+                        <span className="hidden xs:inline">{t.tabScreens}</span>
                       </button>
                       <button
                         type="button"
@@ -526,7 +579,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                         }`}
                       >
                         <Figma className="w-3.5 h-3.5 text-[#a259ff] shrink-0" />
-                        <span className="hidden sm:inline">{language === 'ua' ? 'Інтерактивна Figma' : 'Interactive Figma'}</span>
+                        <span className="hidden sm:inline">{t.tabFigma}</span>
                         <span className="sm:hidden text-xs">Figma</span>
                       </button>
                     </div>
@@ -643,9 +696,9 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                   <div className="w-full bg-neutral-900 border border-neutral-800 px-4 py-2.5 flex items-center justify-between gap-3 font-mono text-xs">
                     <div className="flex items-center gap-2 text-neutral-300">
                       <span className="w-2.5 h-2.5 rounded-full bg-[#0acf83] animate-pulse" />
-                      <span className="font-medium text-white">{language === 'ua' ? 'ІНТЕРАКТИВНИЙ ПРОТОТИП FIGMA' : 'INTERACTIVE FIGMA PROTOTYPE'}</span>
+                      <span className="font-medium text-white">{t.figmaTitle}</span>
                       <span className="text-neutral-600">//</span>
-                      <span className="text-neutral-400 hidden sm:inline">{language === 'ua' ? 'Клікабельний прототип у реальному часі' : 'Live clickable prototype'}</span>
+                      <span className="text-neutral-400 hidden sm:inline">{t.figmaSubtitle}</span>
                     </div>
 
                     <span className="text-neutral-500 text-[11px] hidden sm:inline font-mono">
@@ -663,9 +716,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                   </div>
 
                   <div className="w-full px-1 text-[11px] font-mono text-neutral-500">
-                    {language === 'ua' 
-                      ? 'Порада: ви можете клікати по елементах всередині фрейму або масштабувати макет коліщатком миші.' 
-                      : 'Tip: interact with prototype hot-spots directly inside the frame or zoom with mouse scroll.'}
+                    {t.tipFigma}
                   </div>
                 </div>
               ) : (
@@ -769,7 +820,8 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                             type="button"
                             onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
                             title={language === 'ua' ? 'Попередній макет' : 'Previous screen'}
-                            className="sticky top-1/2 -translate-y-1/2 float-left ml-3 z-30 p-2 bg-black/80 hover:bg-black text-white border border-neutral-700 backdrop-blur-md opacity-0 group-hover/viewer:opacity-100 transition-opacity cursor-pointer shadow-lg rounded-full"
+                            aria-label="Previous screen"
+                            className="absolute left-3 top-1/2 -translate-y-1/2 z-30 p-2 sm:p-2.5 bg-black/80 hover:bg-black text-white border border-neutral-700 backdrop-blur-md opacity-90 sm:opacity-0 sm:group-hover/viewer:opacity-100 hover:scale-110 transition-all cursor-pointer shadow-xl rounded-full flex items-center justify-center"
                           >
                             <ChevronLeft className="w-5 h-5" />
                           </button>
@@ -777,7 +829,8 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                             type="button"
                             onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
                             title={language === 'ua' ? 'Наступний макет' : 'Next screen'}
-                            className="sticky top-1/2 -translate-y-1/2 float-right mr-3 z-30 p-2 bg-black/80 hover:bg-black text-white border border-neutral-700 backdrop-blur-md opacity-0 group-hover/viewer:opacity-100 transition-opacity cursor-pointer shadow-lg rounded-full"
+                            aria-label="Next screen"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 z-30 p-2 sm:p-2.5 bg-black/80 hover:bg-black text-white border border-neutral-700 backdrop-blur-md opacity-90 sm:opacity-0 sm:group-hover/viewer:opacity-100 hover:scale-110 transition-all cursor-pointer shadow-xl rounded-full flex items-center justify-center"
                           >
                             <ChevronRight className="w-5 h-5" />
                           </button>
@@ -870,7 +923,8 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                             type="button"
                             onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
                             title={language === 'ua' ? 'Попередній макет' : 'Previous image'}
-                            className="sticky top-1/2 -translate-y-1/2 float-left ml-3 z-30 p-2 sm:p-2.5 bg-black/80 hover:bg-black text-white border border-neutral-700 backdrop-blur-md opacity-0 group-hover/viewer:opacity-100 transition-opacity cursor-pointer shadow-xl rounded-full"
+                            aria-label="Previous image"
+                            className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 z-30 p-2 sm:p-2.5 bg-black/80 hover:bg-black text-white border border-neutral-700 backdrop-blur-md opacity-90 sm:opacity-0 sm:group-hover/viewer:opacity-100 hover:scale-110 transition-all cursor-pointer shadow-xl rounded-full flex items-center justify-center"
                           >
                             <ChevronLeft className="w-5 h-5" />
                           </button>
@@ -878,7 +932,8 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                             type="button"
                             onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
                             title={language === 'ua' ? 'Наступний макет' : 'Next image'}
-                            className="sticky top-1/2 -translate-y-1/2 float-right mr-3 z-30 p-2 sm:p-2.5 bg-black/80 hover:bg-black text-white border border-neutral-700 backdrop-blur-md opacity-0 group-hover/viewer:opacity-100 transition-opacity cursor-pointer shadow-xl rounded-full"
+                            aria-label="Next image"
+                            className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 z-30 p-2 sm:p-2.5 bg-black/80 hover:bg-black text-white border border-neutral-700 backdrop-blur-md opacity-90 sm:opacity-0 sm:group-hover/viewer:opacity-100 hover:scale-110 transition-all cursor-pointer shadow-xl rounded-full flex items-center justify-center"
                           >
                             <ChevronRight className="w-5 h-5" />
                           </button>
@@ -1010,7 +1065,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                     <div className="flex items-center gap-2">
                       <Images className="w-4 h-4 text-cyan-400" />
                       <h3 className="text-2xl font-medium uppercase tracking-tight">
-                        {language === 'ua' ? 'Всі макети та екрани' : 'All Screens & Visual Assets'}
+                        {t.allScreens}
                       </h3>
                     </div>
                     <p className="text-sm text-neutral-400 font-light mt-1">
@@ -1056,7 +1111,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                           <span className="text-neutral-400">SCREEN // 0{idx + 1}</span>
                           {activeImageIndex === idx && (
                             <span className="px-1.5 py-0.5 text-[9px] bg-cyan-950 text-cyan-300 border border-cyan-800">
-                              {language === 'ua' ? 'АКТИВНИЙ В СИМУЛЯТОРІ' : 'ACTIVE IN VIEWER'}
+                              {t.activeViewer}
                             </span>
                           )}
                         </div>
@@ -1268,7 +1323,7 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[70] bg-black/95 backdrop-blur-xl flex flex-col p-3 sm:p-6"
+            className="fixed inset-0 z-[250] bg-black/95 backdrop-blur-xl flex flex-col p-3 sm:p-6"
             onClick={() => setIsFullscreen(false)}
           >
           {/* Lightbox Header Bar */}

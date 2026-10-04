@@ -100,20 +100,31 @@ export const DEFAULT_SETTINGS: GeneralSettings = {
     item3Desc: { ua: 'Кар’єрний шлях та ролі', en: 'Professional trajectory & milestones' },
     item4Title: { ua: 'Контакти', en: 'Get In Touch' },
     item4Desc: { ua: 'Зв’язок для нових викликів', en: 'Direct collaboration inquiries' },
+    itemWorkflowTitle: { ua: 'Процес', en: 'Workflow' },
+    itemWorkflowDesc: { ua: '4 етапи від брифу до передачі в розробку', en: '4-phase delivery from brief to dev handoff' },
+    itemFaqTitle: { ua: 'FAQ', en: 'FAQ' },
+    itemFaqDesc: { ua: 'Формати співпраці, NDA та умови', en: 'Collaboration models, NDA & turnaround' },
     contactsTitle: { ua: 'Прямі контакти:', en: 'Direct Channels:' },
     copyBtn: { ua: 'Копія', en: 'Copy' },
     copiedBtn: { ua: 'Копія!', en: 'Copied!' }
   },
   ui: {
-    heroCta: { ua: 'Дослідити кейси', en: 'Explore Portfolio' },
+    heroCta: { ua: 'Дослідити кейси', en: 'Explore case studies' },
     workIndex: { ua: '01 // INDEXED CASE STUDIES', en: '01 // INDEXED CASE STUDIES' },
     workTitle: { ua: 'Вибрані Роботи', en: 'Selected Works' },
     layoutCascade: { ua: 'Каскад', en: 'Masonry' },
     layoutGrid: { ua: 'Сітка', en: 'Grid' },
     filterCategoryLabel: { ua: 'Напрямок:', en: 'Discipline:' },
-    filterCategoryAll: { ua: 'Всі напрямки', en: 'All Disciplines' },
+    filterCategoryAll: { ua: 'Всі напрямки', en: 'All disciplines' },
+    filterCategoryIdentity: { ua: 'Айдентика & Постери', en: 'Identity & Posters' },
+    filterCategoryUiux: { ua: 'UI/UX / Web Design', en: 'UI/UX / Web Design' },
+    filterCategoryPrint: { ua: 'Дизайн книжок / Друк', en: 'Editorial / Print Design' },
+    filterCategoryAds: { ua: 'Реклама / Соціальні мережі', en: 'Advertising / Social Media' },
+    filterCategory3d: { ua: '3D Моделювання', en: '3D Modeling' },
     filterStatusLabel: { ua: 'Статус:', en: 'Status:' },
-    filterStatusAll: { ua: 'Всі статуси', en: 'All' },
+    filterStatusAll: { ua: 'Всі статуси', en: 'All statuses' },
+    filterStatusConceptual: { ua: 'Концепт', en: 'Concept' },
+    filterStatusProduction: { ua: 'Реалізовані (Продакшн)', en: 'Live (Production)' },
     expertiseIndex: { ua: '02 // METHODOLOGY & CAPABILITIES', en: '02 // METHODOLOGY & CAPABILITIES' },
     quoteText: { 
       ua: '"Good design is as little design as possible. It concentrates on the essential aspects, and the products are not burdened with non-essentials."', 
@@ -161,10 +172,22 @@ export const DEFAULT_SETTINGS: GeneralSettings = {
     modalVisitLive: { ua: 'Переглянути Live Проєкт', en: 'Explore Live Interface' },
     modalCopied: { ua: 'Скопійовано', en: 'Copied' },
     modalArtifacts: { ua: 'Екрани та Артефакти', en: 'Screens & Artifacts' },
-    badgeFeatured: { ua: 'Флагман', en: 'Featured' },
+    modalTabScreens: { ua: 'Макети', en: 'Screens' },
+    modalTabFigma: { ua: 'Інтерактивна Figma', en: 'Interactive Figma' },
+    modalFigmaTitle: { ua: 'ІНТЕРАКТИВНИЙ ПРОТОТИП FIGMA', en: 'INTERACTIVE FIGMA PROTOTYPE' },
+    modalFigmaSubtitle: { ua: 'Клікабельний прототип у реальному часі', en: 'Live clickable prototype' },
+    modalAllScreens: { ua: 'Всі макети та екрани', en: 'All Screens & Visual Assets' },
+    modalActiveViewer: { ua: 'АКТИВНИЙ В СИМУЛЯТОРІ', en: 'ACTIVE IN VIEWER' },
+    modalOpenFigma: { ua: 'Перейти в макет Figma', en: 'Open in Figma' },
+    modalOpenLive: { ua: 'Відкрити live проєкт', en: 'Open live project' },
+    modalTipFigma: { 
+      ua: 'Порада: ви можете клікати по елементах всередині фрейму або масштабувати макет коліщатком миші.', 
+      en: 'Tip: interact with prototype hot-spots directly inside the frame or zoom with mouse scroll.' 
+    },
+    badgeFeatured: { ua: 'Обрані', en: 'Selected' },
     badgeConcept: { ua: 'Концепт', en: 'Concept' },
     badgeProduction: { ua: 'Продакшн', en: 'Production' },
-    cardViewCase: { ua: 'Відкрити кейс', en: 'View Case' },
+    cardViewCase: { ua: 'Відкрити кейс', en: 'Open case study' },
     // Workflow Section UI
     workflowIndex: { ua: '04 // WORKFLOW & PIPELINE', en: '04 // WORKFLOW & PIPELINE' },
     workflowTitle: { ua: 'Як Побудовано Робочий Процес', en: 'Design Execution & Delivery Pipeline' },
@@ -230,6 +253,14 @@ export const DEFAULT_PROJECTS: Project[] = [
       en: 'UI/UX Product'
     },
     status: 'realized',
+    statusLabel: {
+      ua: 'Реалізовані (Продакшн)',
+      en: 'Live (Production)'
+    },
+    statusBadgeLabel: {
+      ua: 'Продакшн',
+      en: 'Production'
+    },
     client: {
       ua: 'Aura Global Capital Inc.',
       en: 'Aura Global Capital Inc.'
@@ -295,6 +326,14 @@ export const DEFAULT_PROJECTS: Project[] = [
       en: '3D Render & Art Direction'
     },
     status: 'concept',
+    statusLabel: {
+      ua: 'Концепт',
+      en: 'Concept'
+    },
+    statusBadgeLabel: {
+      ua: 'Концепт',
+      en: 'Concept'
+    },
     role: {
       ua: '3D Concept Artist & Visual Director',
       en: '3D Concept Artist & Visual Director'
@@ -349,6 +388,14 @@ export const DEFAULT_PROJECTS: Project[] = [
       en: 'Editorial & Book Design'
     },
     status: 'realized',
+    statusLabel: {
+      ua: 'Реалізовані (Продакшн)',
+      en: 'Live (Production)'
+    },
+    statusBadgeLabel: {
+      ua: 'Продакшн',
+      en: 'Production'
+    },
     role: {
       ua: 'Editorial Designer & Pre-press Specialist',
       en: 'Editorial Designer & Pre-press Specialist'
@@ -404,6 +451,14 @@ export const DEFAULT_PROJECTS: Project[] = [
       en: 'UI/UX SaaS Product'
     },
     status: 'concept',
+    statusLabel: {
+      ua: 'Концепт',
+      en: 'Concept'
+    },
+    statusBadgeLabel: {
+      ua: 'Концепт',
+      en: 'Concept'
+    },
     role: {
       ua: 'Product Architect & Creative Director',
       en: 'Product Architect & Creative Director'
@@ -460,6 +515,14 @@ export const DEFAULT_PROJECTS: Project[] = [
       en: 'Visual Identity & Posters'
     },
     status: 'realized',
+    statusLabel: {
+      ua: 'Реалізовані (Продакшн)',
+      en: 'Live (Production)'
+    },
+    statusBadgeLabel: {
+      ua: 'Продакшн',
+      en: 'Production'
+    },
     role: {
       ua: 'Art Director & Graphic System Designer',
       en: 'Art Director & Graphic System Designer'

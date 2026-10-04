@@ -136,18 +136,18 @@ export const Navbar: React.FC<NavbarProps> = ({
     { 
       id: 'workflow', 
       num: '04', 
-      titleUa: 'Процес', 
-      titleEn: 'Workflow', 
-      descUa: '4 етапи від брифу до передачі в розробку', 
-      descEn: '4-phase delivery from brief to dev handoff' 
+      titleUa: getLocalizedText(menuTexts?.itemWorkflowTitle, 'ua', { ua: 'Процес', en: 'Workflow' }), 
+      titleEn: getLocalizedText(menuTexts?.itemWorkflowTitle, 'en', { ua: 'Процес', en: 'Workflow' }), 
+      descUa: getLocalizedText(menuTexts?.itemWorkflowDesc, 'ua', { ua: '4 етапи від брифу до передачі в розробку', en: '4-phase delivery from brief to dev handoff' }), 
+      descEn: getLocalizedText(menuTexts?.itemWorkflowDesc, 'en', { ua: '4 етапи від брифу до передачі в розробку', en: '4-phase delivery from brief to dev handoff' }) 
     },
     { 
       id: 'faq', 
       num: '05', 
-      titleUa: 'FAQ', 
-      titleEn: 'FAQ', 
-      descUa: 'Формати співпраці, NDA та умови', 
-      descEn: 'Collaboration models, NDA & turnaround' 
+      titleUa: getLocalizedText(menuTexts?.itemFaqTitle, 'ua', { ua: 'FAQ', en: 'FAQ' }), 
+      titleEn: getLocalizedText(menuTexts?.itemFaqTitle, 'en', { ua: 'FAQ', en: 'FAQ' }), 
+      descUa: getLocalizedText(menuTexts?.itemFaqDesc, 'ua', { ua: 'Формати співпраці, NDA та умови', en: 'Collaboration models, NDA & turnaround' }), 
+      descEn: getLocalizedText(menuTexts?.itemFaqDesc, 'en', { ua: 'Формати співпраці, NDA та умови', en: 'Collaboration models, NDA & turnaround' }) 
     },
     { 
       id: 'contact', 
@@ -177,6 +177,8 @@ export const Navbar: React.FC<NavbarProps> = ({
     { ua: 'Іван Селіванов', en: 'Ivan Selivanov' }
   );
 
+  const contactNavItem = navItems.find(i => i.id === 'contact') || navItems[navItems.length - 1];
+
   return (
     <>
       <header className="fixed top-0 left-0 w-full p-4 sm:p-6 flex justify-between items-center z-[100] bg-[#0a0a0a]/95 backdrop-blur-md border-b border-neutral-900/90 transition-all">
@@ -192,19 +194,17 @@ export const Navbar: React.FC<NavbarProps> = ({
         </a>
 
         {/* Desktop Quick Nav Links */}
-        <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-xs font-mono tracking-widest uppercase text-neutral-400">
-          <a href="#work" onClick={(e) => handleNavClick(e, 'work')} className="hover:text-white transition-colors cursor-pointer">
-            {language === 'ua' ? navItems[0].titleUa : (navItems[0].titleEn || 'Selected Work')}
-          </a>
-          <a href="#expertise" onClick={(e) => handleNavClick(e, 'expertise')} className="hover:text-white transition-colors cursor-pointer">
-            {language === 'ua' ? navItems[1].titleUa : (navItems[1].titleEn || 'Core Expertise')}
-          </a>
-          <a href="#experience" onClick={(e) => handleNavClick(e, 'experience')} className="hover:text-white transition-colors cursor-pointer">
-            {language === 'ua' ? navItems[2].titleUa : (navItems[2].titleEn || 'Career Timeline')}
-          </a>
-          <a href="#contact" onClick={(e) => handleNavClick(e, 'contact')} className="hover:text-white transition-colors cursor-pointer">
-            {language === 'ua' ? navItems[3].titleUa : (navItems[3].titleEn || 'Get In Touch')}
-          </a>
+        <nav className="hidden md:flex items-center gap-4 lg:gap-6 xl:gap-8 text-xs font-mono tracking-widest uppercase text-neutral-400">
+          {navItems.map((item) => (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              onClick={(e) => handleNavClick(e, item.id)}
+              className="hover:text-white transition-colors cursor-pointer shrink-0"
+            >
+              {language === 'ua' ? item.titleUa : (item.titleEn || item.titleUa)}
+            </a>
+          ))}
         </nav>
 
         {/* Right Action Bar: Language Switcher + Designer Popup Menu Trigger */}

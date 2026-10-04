@@ -220,6 +220,10 @@ export interface GeneralSettings {
     item3Desc?: { ua: string; en: string };
     item4Title?: { ua: string; en: string };
     item4Desc?: { ua: string; en: string };
+    itemWorkflowTitle?: { ua: string; en: string };
+    itemWorkflowDesc?: { ua: string; en: string };
+    itemFaqTitle?: { ua: string; en: string };
+    itemFaqDesc?: { ua: string; en: string };
     contactsTitle?: { ua: string; en: string };
     copyBtn?: { ua: string; en: string };
     copiedBtn?: { ua: string; en: string };
@@ -232,8 +236,15 @@ export interface GeneralSettings {
     layoutGrid?: { ua: string; en: string };
     filterCategoryLabel?: { ua: string; en: string };
     filterCategoryAll?: { ua: string; en: string };
+    filterCategoryIdentity?: { ua: string; en: string };
+    filterCategoryUiux?: { ua: string; en: string };
+    filterCategoryPrint?: { ua: string; en: string };
+    filterCategoryAds?: { ua: string; en: string };
+    filterCategory3d?: { ua: string; en: string };
     filterStatusLabel?: { ua: string; en: string };
     filterStatusAll?: { ua: string; en: string };
+    filterStatusConceptual?: { ua: string; en: string };
+    filterStatusProduction?: { ua: string; en: string };
     expertiseIndex?: { ua: string; en: string };
     quoteText?: { ua: string; en: string };
     quoteAuthor?: { ua: string; en: string };
@@ -272,6 +283,15 @@ export interface GeneralSettings {
     modalVisitLive?: { ua: string; en: string };
     modalCopied?: { ua: string; en: string };
     modalArtifacts?: { ua: string; en: string };
+    modalTabScreens?: { ua: string; en: string };
+    modalTabFigma?: { ua: string; en: string };
+    modalFigmaTitle?: { ua: string; en: string };
+    modalFigmaSubtitle?: { ua: string; en: string };
+    modalAllScreens?: { ua: string; en: string };
+    modalActiveViewer?: { ua: string; en: string };
+    modalOpenFigma?: { ua: string; en: string };
+    modalOpenLive?: { ua: string; en: string };
+    modalTipFigma?: { ua: string; en: string };
     // Card & Badge UI strings
     badgeFeatured?: { ua: string; en: string };
     badgeConcept?: { ua: string; en: string };

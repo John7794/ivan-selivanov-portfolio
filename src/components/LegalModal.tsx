@@ -88,7 +88,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div key="legal-modal-backdrop" className="fixed inset-0 z-[70] flex items-center justify-center p-3 sm:p-6 md:p-10 pt-[75px] sm:pt-[86px] bg-black/85 backdrop-blur-md overflow-y-auto">
+        <div key="legal-modal-backdrop" className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-6 md:p-10 bg-black/85 backdrop-blur-md overflow-y-auto">
           {/* Backdrop click */}
           <div className="fixed inset-0" onClick={onClose} />
 

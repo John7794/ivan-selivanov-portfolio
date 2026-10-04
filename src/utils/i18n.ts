@@ -59,17 +59,46 @@ export const COMMON_TRANSLATIONS: Record<string, string> = {
 
   // Sections & filters
   'вибрані роботи': 'Selected Works',
-  'дослідити кейси': 'Explore Portfolio',
+  'дослідити кейси': 'Explore case studies',
   'каскад': 'Masonry',
   'сітка': 'Grid',
-  'всі напрямки': 'All Disciplines',
+  'всі напрямки': 'All disciplines',
   'ui/ux продукт': 'UI/UX Product',
+  'ui/ux / web design': 'UI/UX / Web Design',
   '3d рендери': '3D Renders',
+  '3d моделювання': '3D Modeling',
   'книжковий дизайн': 'Book Design',
+  'дизайн книжок / друк': 'Book Design / Print',
   'айдентика & постери': 'Identity & Posters',
-  'всі статуси': 'All',
-  'реалізовані (продакшн)': 'Production',
-  'концепти & r&d': 'Concept',
+  'реклама / соціальні мережі': 'Advertising / Social Media',
+
+  // Statuses (Filter & Card Badges)
+  'всі статуси': 'All statuses',
+  'статус': 'Status',
+  'статуси': 'Statuses',
+  'реалізовані (продакшн)': 'Live (Production)',
+  'реалізовані': 'Live',
+  'реалізовано': 'Live',
+  'продакшн': 'Production',
+  'продакшен': 'Production',
+  'концепт': 'Concept',
+  'концепти': 'Concepts',
+  'концепти & r&d': 'Concept & R&D',
+  'концепт & r&d': 'Concept & R&D',
+  'обрані': 'Selected',
+  'флагман': 'Selected',
+  'відкрити кейс': 'Open case study',
+  'переглянути кейс': 'View case study',
+  'в роботі': 'In Progress',
+  'в процесі': 'In Progress',
+  'в розробці': 'In Development',
+  'архів': 'Archive',
+  'бета': 'Beta',
+  'mvp': 'MVP',
+  'тестування': 'Testing',
+  'завершено': 'Completed',
+  'реліз': 'Released',
+  'дизайн-система': 'Design System',
 
   // Expertise cards
   'ui/ux дизайн': 'UI/UX Design',
@@ -92,6 +121,222 @@ export const COMMON_TRANSLATIONS: Record<string, string> = {
   'системність компонентів': 'Design System Scalability',
   'орієнтація на бізнес-метрики': 'Measurable Business Impact'
 };
+
+export const STATUS_TRANSLATIONS_EN_TO_UA: Record<string, string> = {
+  'all statuses': 'Всі статуси',
+  'all': 'Всі статуси',
+  'status': 'Статус',
+  'statuses': 'Статуси',
+  'live (production)': 'Реалізовані (Продакшн)',
+  'production': 'Продакшн',
+  'live': 'Реалізовані',
+  'concept': 'Концепт',
+  'conceptual': 'Концепт',
+  'concepts': 'Концепти',
+  'concept & r&d': 'Концепт & R&D',
+  'concepts & r&d': 'Концепти & R&D',
+  'selected': 'Обрані',
+  'featured': 'Обрані',
+  'in progress': 'В роботі',
+  'in development': 'В розробці',
+  'archive': 'Архів',
+  'archived': 'Архів',
+  'beta': 'Бета',
+  'mvp': 'MVP',
+  'testing': 'Тестування',
+  'completed': 'Завершено',
+  'released': 'Реліз',
+  'release': 'Реліз',
+  'open case study': 'Відкрити кейс',
+  'view case': 'Відкрити кейс'
+};
+
+export const CATEGORY_TRANSLATIONS_EN_TO_UA: Record<string, string> = {
+  'editorial / print design': 'Дизайн книжок / Друк',
+  'editorial': 'Дизайн книжок / Друк',
+  'print design': 'Дизайн книжок / Друк',
+  'book design': 'Дизайн книжок / Друк',
+  'book design / print': 'Дизайн книжок / Друк',
+  'editorial & book design': 'Дизайн книжок / Друк',
+  'advertising / social media': 'Реклама / Соціальні мережі',
+  'advertising': 'Реклама / Соціальні мережі',
+  'social media': 'Реклама / Соціальні мережі',
+  'advertising and social media': 'Реклама / Соціальні мережі',
+  '3d modeling': '3D Моделювання',
+  '3d-render': '3D Моделювання',
+  '3d renders': '3D Моделювання',
+  '3d render': '3D Моделювання',
+  '3d': '3D Моделювання',
+  'identity & posters': 'Айдентика & Постери',
+  'branding': 'Айдентика & Постери',
+  'visual identity': 'Айдентика & Постери',
+  'visual identity & posters': 'Айдентика & Постери',
+  'identity': 'Айдентика & Постери',
+  'posters': 'Айдентика & Постери',
+  'ui/ux / web design': 'UI/UX / Web Design',
+  'ui/ux product': 'UI/UX / Web Design',
+  'ui/ux': 'UI/UX / Web Design',
+  'web design': 'UI/UX / Web Design',
+  'ui/ux design': 'UI/UX / Web Design',
+  'all disciplines': 'Всі напрямки',
+  'all': 'Всі напрямки'
+};
+
+/**
+ * Resolves a category string into a normalized ID and guaranteed bilingual { ua, en } labels
+ */
+export function getBilingualCategory(rawUa?: string | null, rawEn?: string | null): { id: string; ua: string; en: string } {
+  const uaCandidate = String(rawUa || '').trim();
+  const enCandidate = String(rawEn || '').trim();
+  const primary = uaCandidate || enCandidate;
+  if (!primary) {
+    return { id: 'all', ua: 'Всі напрямки', en: 'All disciplines' };
+  }
+  const lower = primary.toLowerCase().trim();
+
+  // 1. UI/UX
+  if (lower.includes('ui/ux') || lower.includes('ui-ux') || lower.includes('web design') || lower.includes('продукт') || lower.includes('product') || lower.includes('інтерфейс')) {
+    return {
+      id: 'ui-ux',
+      ua: 'UI/UX / Web Design',
+      en: 'UI/UX / Web Design'
+    };
+  }
+
+  // 2. Identity & Posters / Branding
+  if (lower.includes('айдентик') || lower.includes('постер') || lower.includes('brand') || lower.includes('identity') || lower.includes('poster')) {
+    return {
+      id: 'branding',
+      ua: 'Айдентика & Постери',
+      en: 'Identity & Posters'
+    };
+  }
+
+  // 3. Editorial & Book Design / Print
+  if (lower.includes('книг') || lower.includes('book') || lower.includes('верстк') || lower.includes('editorial') || lower.includes('print')) {
+    return {
+      id: 'book-design',
+      ua: 'Дизайн книжок / Друк',
+      en: 'Book Design / Print'
+    };
+  }
+
+  // 4. Advertising & Social Media
+  if (lower.includes('реклам') || lower.includes('соціал') || lower.includes('advertis') || lower.includes('social')) {
+    return {
+      id: 'advertising',
+      ua: 'Реклама / Соціальні мережі',
+      en: 'Advertising / Social Media'
+    };
+  }
+
+  // 5. 3D Modeling / Render
+  if (lower.includes('3d') || lower.includes('моделюван') || lower.includes('рендер') || lower.includes('render')) {
+    return {
+      id: '3d-render',
+      ua: '3D Моделювання',
+      en: '3D Modeling'
+    };
+  }
+
+  // Reverse translation if in English
+  if (!hasCyrillic(primary)) {
+    const uaMapped = CATEGORY_TRANSLATIONS_EN_TO_UA[lower];
+    if (uaMapped) {
+      return {
+        id: lower.replace(/[^\w\dа-яіїєґ]+/gi, '-').replace(/^-+|-+$/g, '') || 'custom',
+        ua: uaMapped,
+        en: enCandidate || primary
+      };
+    }
+  }
+
+  // Forward translation if in Ukrainian
+  if (hasCyrillic(primary)) {
+    return {
+      id: lower.replace(/[^\w\dа-яіїєґ]+/gi, '-').replace(/^-+|-+$/g, '') || 'custom',
+      ua: primary,
+      en: enCandidate && !hasCyrillic(enCandidate) ? enCandidate : translateToEnglishIfNeeded(primary)
+    };
+  }
+
+  return {
+    id: lower.replace(/[^\w\dа-яіїєґ]+/gi, '-').replace(/^-+|-+$/g, '') || 'custom',
+    ua: primary,
+    en: enCandidate || primary
+  };
+}
+
+/**
+ * Given raw status input in either Ukrainian or English (or both),
+ * returns guaranteed bilingual status object { ua, en } with accurate translations.
+ */
+export function getBilingualStatus(rawUa?: string | null, rawEn?: string | null): { ua: string; en: string } {
+  const uaCandidate = String(rawUa || '').trim();
+  const enCandidate = String(rawEn || '').trim();
+
+  // If both provided and valid
+  if (uaCandidate && enCandidate && hasCyrillic(uaCandidate) && !hasCyrillic(enCandidate)) {
+    return { ua: uaCandidate, en: enCandidate };
+  }
+
+  const primary = uaCandidate || enCandidate;
+  if (!primary) {
+    return { ua: 'Реалізовані (Продакшн)', en: 'Live (Production)' };
+  }
+
+  const lower = primary.toLowerCase();
+
+  // 1. Concept checks
+  if (
+    lower.includes('concept') ||
+    lower.includes('концепт') ||
+    lower.includes('r&d') ||
+    lower.includes('rnd')
+  ) {
+    return { ua: 'Концепт', en: 'Concept' };
+  }
+
+  // 2. Realized / Production checks
+  if (
+    lower.includes('realiz') ||
+    lower.includes('prod') ||
+    lower.includes('live') ||
+    lower.includes('продакшн') ||
+    lower.includes('реаліз') ||
+    lower.includes('реліз') ||
+    lower.includes('release')
+  ) {
+    return { ua: 'Реалізовані (Продакшн)', en: 'Live (Production)' };
+  }
+
+  // 3. Reverse lookup if input is in English
+  if (!hasCyrillic(primary)) {
+    const uaMapped = STATUS_TRANSLATIONS_EN_TO_UA[lower];
+    if (uaMapped) {
+      return { ua: uaMapped, en: enCandidate || primary };
+    }
+  }
+
+  // 4. Forward lookup from COMMON_TRANSLATIONS if input is in Ukrainian
+  const enMapped = COMMON_TRANSLATIONS[lower];
+  if (enMapped) {
+    return { ua: uaCandidate || primary, en: enMapped };
+  }
+
+  // 5. Fallback heuristics
+  if (hasCyrillic(primary)) {
+    return {
+      ua: primary,
+      en: enCandidate && !hasCyrillic(enCandidate) ? enCandidate : translateToEnglishIfNeeded(primary)
+    };
+  }
+
+  return {
+    ua: STATUS_TRANSLATIONS_EN_TO_UA[lower] || primary,
+    en: primary
+  };
+}
 
 /**
  * Normalizes text and attempts dictionary translation if English string is missing or corrupted with Cyrillic

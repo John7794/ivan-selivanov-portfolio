@@ -1,6 +1,6 @@
 import { Project, ExperienceItem, Testimonial, GeneralSettings, LegalAndBannersData, ContactsData, FilterOption, WorkflowStep, FAQItem } from '../types';
 import { DEFAULT_PROJECTS, DEFAULT_EXPERIENCE, DEFAULT_TESTIMONIALS, DEFAULT_SETTINGS, DEFAULT_LEGAL_AND_BANNERS, DEFAULT_CONTACTS, DEFAULT_WORKFLOW, DEFAULT_FAQ } from '../data/defaultData';
-import { translateToEnglishIfNeeded, hasCyrillic } from '../utils/i18n';
+import { translateToEnglishIfNeeded, hasCyrillic, getBilingualStatus } from '../utils/i18n';
 
 const CACHE_KEY = 'ivan_portfolio_sheets_data';
 const SETTINGS_KEY = 'ivan_portfolio_settings';
@@ -611,8 +611,18 @@ export function parseProjectCategory(
     // Check by exact key/slug or lowercase
     const matched = categoriesMap.get(rawStr) || categoriesMap.get(rawLower);
     if (matched) {
+      const explicitId = (matched as any).id;
+      let id = explicitId;
+      if (!id) {
+        if (rawLower.includes('ui') || rawLower.includes('web')) id = 'ui-ux';
+        else if (rawLower.includes('brand') || rawLower.includes('айдент') || rawLower.includes('постер') || rawLower.includes('ident')) id = 'branding';
+        else if (rawLower.includes('книг') || rawLower.includes('editorial') || rawLower.includes('print') || rawLower.includes('друк')) id = 'book-design';
+        else if (rawLower.includes('реклам') || rawLower.includes('соціал') || rawLower.includes('advertis') || rawLower.includes('social')) id = 'advertising';
+        else if (rawLower.includes('3d') || rawLower.includes('модел') || rawLower.includes('рендер')) id = '3d-render';
+        else id = rawLower.replace(/[^\w\dа-яіїєґ]+/gi, '-').replace(/^-+|-+$/g, '') || 'cat';
+      }
       return {
-        id: rawLower.replace(/[^\w\dа-яіїєґ]+/gi, '-').replace(/^-+|-+$/g, '') || 'cat',
+        id,
         label: {
           ua: matched.ua || rawStr,
           en: matched.en || matched.ua || rawStr
@@ -694,7 +704,24 @@ export function parseProjectCategory(
     };
   }
 
-  // 5. Custom Category from user's table (e.g. Mobile, Motion, Illustrations)
+  // 5. Advertising & Social Media patterns
+  if (
+    rawLower === 'advertising' ||
+    rawLower.includes('реклам') ||
+    rawLower.includes('соціал') ||
+    rawLower.includes('advertis') ||
+    rawLower.includes('social')
+  ) {
+    return {
+      id: 'advertising',
+      label: {
+        ua: rawStr && !rawLower.includes('advertising') ? rawStr : 'Реклама / Соціальні мережі',
+        en: String(rawEn || '').trim() || 'Advertising / Social Media'
+      }
+    };
+  }
+
+  // 6. Custom Category from user's table (e.g. Mobile, Motion, Illustrations)
   if (rawStr) {
     const slug = rawLower
       .replace(/[^\w\dа-яіїєґ]+/gi, '-')
@@ -718,49 +745,99 @@ export function parseProjectCategory(
   };
 }
 
+export function getRowField(row: any, candidates: string[]): string {
+  if (!row || typeof row !== 'object') return '';
+  for (const c of candidates) {
+    if (row[c] !== undefined && row[c] !== null && String(row[c]).trim() !== '') {
+      return String(row[c]).trim();
+    }
+  }
+  const keys = Object.keys(row);
+  for (const c of candidates) {
+    const cleanC = c.toLowerCase().replace(/[\s\-_()]+/g, '');
+    const matched = keys.find(k => k.toLowerCase().replace(/[\s\-_()]+/g, '') === cleanC);
+    if (matched && row[matched] !== undefined && row[matched] !== null && String(row[matched]).trim() !== '') {
+      return String(row[matched]).trim();
+    }
+  }
+  return '';
+}
+
 export function parseProjectStatus(
   p: any,
-  statusesMap?: Map<string, { filterLabel: { ua: string; en: string }; badgeLabel: { ua: string; en: string } }>
+  statusesMap?: Map<string, { id?: string; filterLabel: { ua: string; en: string }; badgeLabel: { ua: string; en: string } }>,
+  customUi?: {
+    filterStatusConceptual?: { ua: string; en: string };
+    filterStatusProduction?: { ua: string; en: string };
+    badgeConcept?: { ua: string; en: string };
+    badgeProduction?: { ua: string; en: string };
+  }
 ): { id: string; filterLabel: { ua: string; en: string }; badgeLabel: { ua: string; en: string } } {
-  const raw = p.status || p.status_ua || p.project_status || '';
-  const rawEn = p.status_en || '';
+  const explicitUa = getRowField(p, ['status_ua', 'status_UA', 'Status_UA', 'Status_ua', 'status (ua)', 'статус_ua', 'статус']);
+  const explicitEn = getRowField(p, ['status_en', 'status_EN', 'Status_EN', 'Status_en', 'status (en)', 'status_english']);
+  const rawStatus = getRowField(p, ['status', 'Status', 'STATUS', 'project_status', 'projectStatus']);
+  const raw = rawStatus || explicitUa || '';
+  const rawEn = explicitEn;
 
   let rawStr = '';
-  if (typeof raw === 'object' && raw !== null) {
-    rawStr = String(raw.ua || raw.en || '').trim();
+  if (typeof p.status === 'object' && p.status !== null) {
+    rawStr = String(p.status.ua || p.status.en || '').trim();
   } else {
-    rawStr = String(raw ?? '').trim();
+    rawStr = String(raw).trim();
   }
 
   const rawLower = rawStr.toLowerCase();
 
-  // 0. Explicit bilingual status columns on project row
-  if (p.status_ua || p.status_en) {
-    const ua = String(p.status_ua || rawStr || 'Продакшн').trim();
-    const en = String(p.status_en || rawEn || ua).trim();
-    const slug = rawLower.replace(/[^\w\dа-яіїєґ]+/gi, '-').replace(/^-+|-+$/g, '') || 'status';
+  const defaultConceptFilter = customUi?.filterStatusConceptual || { ua: 'Концепт', en: 'Concept' };
+  const defaultConceptBadge = customUi?.badgeConcept || customUi?.filterStatusConceptual || { ua: 'Концепт', en: 'Concept' };
+  const defaultProdFilter = customUi?.filterStatusProduction || { ua: 'Реалізовані (Продакшн)', en: 'Live (Production)' };
+  const defaultProdBadge = customUi?.badgeProduction || { ua: 'Продакшн', en: 'Production' };
+
+  // 0. If project already carries explicit bilingual statusLabel object, preserve it!
+  if (p.statusLabel && typeof p.statusLabel === 'object' && (p.statusLabel.ua || p.statusLabel.en)) {
+    const bilingual = getBilingualStatus(p.statusLabel.ua, p.statusLabel.en);
+    const badge = (p.statusBadgeLabel && typeof p.statusBadgeLabel === 'object' && (p.statusBadgeLabel.ua || p.statusBadgeLabel.en))
+      ? getBilingualStatus(p.statusBadgeLabel.ua, p.statusBadgeLabel.en)
+      : bilingual;
+    return {
+      id: String(p.status || rawLower.replace(/[^\w\dа-яіїєґ]+/gi, '-').replace(/^-+|-+$/g, '') || 'status'),
+      filterLabel: bilingual,
+      badgeLabel: badge
+    };
+  }
+
+  // 0.1 Explicit bilingual status columns on project row (status_ua, status_en)
+  if (explicitUa || explicitEn) {
+    const bilingual = getBilingualStatus(explicitUa, explicitEn);
+    const slug = (rawStatus || explicitUa || explicitEn).toLowerCase().replace(/[^\w\dа-яіїєґ]+/gi, '-').replace(/^-+|-+$/g, '') || 'status';
     return {
       id: slug,
-      filterLabel: { ua, en },
-      badgeLabel: { ua, en }
+      filterLabel: bilingual,
+      badgeLabel: bilingual
     };
   }
 
   // 1. Look up in custom Statuses tab mapping if provided
   if (statusesMap && statusesMap.size > 0) {
-    const matched = statusesMap.get(rawStr) || statusesMap.get(rawLower);
+    const rawVal = String(rawStr || '').trim();
+    const cleanSlug = rawLower.replace(/[^\w\dа-яіїєґ]+/gi, '-').replace(/^-+|-+$/g, '');
+    const matched = statusesMap.get(rawStr) || 
+                    statusesMap.get(rawLower) || 
+                    statusesMap.get(rawVal) || 
+                    statusesMap.get(rawVal.toLowerCase()) ||
+                    statusesMap.get(cleanSlug);
     if (matched) {
       return {
-        id: rawLower.replace(/[^\w\dа-яіїєґ]+/gi, '-').replace(/^-+|-+$/g, '') || 'status',
+        id: matched.id || cleanSlug || 'status',
         filterLabel: matched.filterLabel,
         badgeLabel: matched.badgeLabel
       };
     }
   }
 
-  // 2. Concept / R&D
+  // 2. Concept / R&D (resilient matching for 'conceptual', 'concept', 'концепт', 'концептуальний', etc.)
   if (
-    rawLower === 'concept' ||
+    rawLower.includes('concept') ||
     rawLower.includes('концепт') ||
     rawLower.includes('r&d') ||
     rawLower.includes('rnd') ||
@@ -769,14 +846,14 @@ export function parseProjectStatus(
   ) {
     return {
       id: 'concept',
-      filterLabel: { ua: 'Концепти & R&D', en: 'Concept & R&D' },
-      badgeLabel: { ua: 'Концепт', en: 'Concept' }
+      filterLabel: defaultConceptFilter,
+      badgeLabel: defaultConceptBadge
     };
   }
 
-  // Realized / Production
+  // Realized / Production (resilient matching for 'realized', 'production', 'live', 'продакшн', 'реліз')
   if (
-    rawLower === 'realized' ||
+    rawLower.includes('realiz') ||
     rawLower.includes('продакшн') ||
     rawLower.includes('продакшен') ||
     rawLower.includes('реалізован') ||
@@ -787,8 +864,8 @@ export function parseProjectStatus(
   ) {
     return {
       id: 'realized',
-      filterLabel: { ua: 'Реалізовані (Продакшн)', en: 'Production' },
-      badgeLabel: { ua: 'Продакшн', en: 'Production' }
+      filterLabel: defaultProdFilter,
+      badgeLabel: defaultProdBadge
     };
   }
 
@@ -798,20 +875,20 @@ export function parseProjectStatus(
       .replace(/[^\w\dа-яіїєґ]+/gi, '-')
       .replace(/^-+|-+$/g, '') || 'custom';
 
-    const enLabel = String(rawEn || '').trim() || translateToEnglishIfNeeded(rawStr);
+    const bilingual = getBilingualStatus(rawStr, rawEn);
 
     return {
       id: slug,
-      filterLabel: { ua: rawStr, en: enLabel },
-      badgeLabel: { ua: rawStr, en: enLabel }
+      filterLabel: bilingual,
+      badgeLabel: bilingual
     };
   }
 
   // Default to realized
   return {
     id: 'realized',
-    filterLabel: { ua: 'Реалізовані (Продакшн)', en: 'Production' },
-    badgeLabel: { ua: 'Продакшн', en: 'Production' }
+    filterLabel: defaultProdFilter,
+    badgeLabel: defaultProdBadge
   };
 }
 
@@ -843,12 +920,14 @@ export function mapStatusesFromSheet(raw: any): FilterOption[] {
 
   list.forEach((row: any, idx: number) => {
     if (!row) return;
-    const id = String(row.id || row.key || row.slug || row.code || `status-${idx + 1}`).trim().toLowerCase();
-    const ua = String(row.ua || row.name_ua || row.title_ua || row.title || row.name || row.label || id).trim();
-    const en = String(row.en || row.name_en || row.title_en || row.title || row.name || row.label || ua).trim();
-    if (id && id !== 'all' && !seen.has(id)) {
-      seen.add(id);
-      result.push({ id, ua, en: translateToEnglishIfNeeded(ua, en) });
+    const id = getRowField(row, ['id', 'ID', 'slug', 'key', 'code', 'status', 'status_id', 'статус']) || `status-${idx + 1}`;
+    const cleanId = id.trim().toLowerCase();
+    const rawUa = getRowField(row, ['ua', 'UA', 'name_ua', 'title_ua', 'status_ua', 'name', 'title', 'label', 'badge_ua', 'українською', 'українська']);
+    const rawEn = getRowField(row, ['en', 'EN', 'name_en', 'title_en', 'status_en', 'name', 'title', 'label', 'english', 'badge_en', 'англійською', 'англійська']);
+    const bilingual = getBilingualStatus(rawUa || cleanId, rawEn);
+    if (cleanId && !seen.has(cleanId)) {
+      seen.add(cleanId);
+      result.push({ id: cleanId, ua: bilingual.ua, en: bilingual.en });
     }
   });
 
@@ -867,14 +946,15 @@ function parseTools(val: any): string[] {
   return ['Figma', 'TypeScript', 'Design Systems'];
 }
 
-function mapProjectFromSheet(
+export function mapProjectFromSheet(
   p: any, 
   idx: number, 
   categoriesMap?: Map<string, { ua: string; en: string }>,
-  statusesMap?: Map<string, { filterLabel: { ua: string; en: string }; badgeLabel: { ua: string; en: string } }>
+  statusesMap?: Map<string, { filterLabel: { ua: string; en: string }; badgeLabel: { ua: string; en: string } }>,
+  customUi?: any
 ): Project {
   const { id: catId, label: catLabel } = parseProjectCategory(p, categoriesMap);
-  const { id: statusId, filterLabel, badgeLabel } = parseProjectStatus(p, statusesMap);
+  const { id: statusId, filterLabel, badgeLabel } = parseProjectStatus(p, statusesMap, customUi);
 
   const parsedFonts = parseFonts(p);
   const parsedFontsDescription = parseFontsDescription(p);
@@ -1148,8 +1228,21 @@ export function mapSettingsFromSheet(raw: any): GeneralSettings {
     s = { ...raw };
   }
 
-  const getLoc = (key: string, fallback: { ua: string; en: string }): { ua: string; en: string } => {
-    const val = s[key];
+  const normKey = (k: string) => k.toLowerCase().replace(/[\s\-_()]+/g, '');
+  const normalizedS = new Map<string, any>();
+  Object.keys(s).forEach(k => {
+    normalizedS.set(normKey(k), s[k]);
+  });
+
+  const getLoc = (key: string, fallback: { ua: string; en: string }, aliases: string[] = []): { ua: string; en: string } => {
+    const candidateKeys = [key, ...aliases];
+    let val: any = undefined;
+    for (const ck of candidateKeys) {
+      if (s[ck] !== undefined) { val = s[ck]; break; }
+      const fromNorm = normalizedS.get(normKey(ck));
+      if (fromNorm !== undefined) { val = fromNorm; break; }
+    }
+
     let candidateUa = '';
     let candidateEn = '';
 
@@ -1160,10 +1253,12 @@ export function mapSettingsFromSheet(raw: any): GeneralSettings {
       candidateUa = val.trim();
     }
 
-    const valUa = s[`${key}_ua`] || s[`${key}_UA`];
-    const valEn = s[`${key}_en`] || s[`${key}_EN`];
-    if (valUa !== undefined && String(valUa).trim() !== '') candidateUa = String(valUa).trim();
-    if (valEn !== undefined && String(valEn).trim() !== '') candidateEn = String(valEn).trim();
+    for (const ck of candidateKeys) {
+      const valUa = s[`${ck}_ua`] || s[`${ck}_UA`] || normalizedS.get(normKey(`${ck}_ua`));
+      const valEn = s[`${ck}_en`] || s[`${ck}_EN`] || normalizedS.get(normKey(`${ck}_en`));
+      if (!candidateUa && valUa !== undefined && String(valUa).trim() !== '') candidateUa = String(valUa).trim();
+      if (!candidateEn && valEn !== undefined && String(valEn).trim() !== '') candidateEn = String(valEn).trim();
+    }
 
     const finalUa = candidateUa || fallback.ua;
     const finalEn = translateToEnglishIfNeeded(finalUa, candidateEn, fallback.en);
@@ -1250,6 +1345,10 @@ export function mapSettingsFromSheet(raw: any): GeneralSettings {
   const menuItem3Desc = getLoc('menu_item3_desc', DEFAULT_SETTINGS.menu?.item3Desc || { ua: 'Кар’єрний шлях та ролі', en: 'Professional trajectory & milestones' });
   const menuItem4Title = getLoc('menu_item4_title', DEFAULT_SETTINGS.menu?.item4Title || { ua: 'Контакти', en: 'Get In Touch' });
   const menuItem4Desc = getLoc('menu_item4_desc', DEFAULT_SETTINGS.menu?.item4Desc || { ua: 'Зв’язок для нових викликів', en: 'Direct collaboration inquiries' });
+  const menuItemWorkflowTitle = getLoc('menu_item_workflow_title', getLoc('menu_workflow_title', DEFAULT_SETTINGS.menu?.itemWorkflowTitle || { ua: 'Процес', en: 'Workflow' }));
+  const menuItemWorkflowDesc = getLoc('menu_item_workflow_desc', getLoc('menu_workflow_desc', DEFAULT_SETTINGS.menu?.itemWorkflowDesc || { ua: '4 етапи від брифу до передачі в розробку', en: '4-phase delivery from brief to dev handoff' }));
+  const menuItemFaqTitle = getLoc('menu_item_faq_title', getLoc('menu_faq_title', DEFAULT_SETTINGS.menu?.itemFaqTitle || { ua: 'FAQ', en: 'FAQ' }));
+  const menuItemFaqDesc = getLoc('menu_item_faq_desc', getLoc('menu_faq_desc', DEFAULT_SETTINGS.menu?.itemFaqDesc || { ua: 'Формати співпраці, NDA та умови', en: 'Collaboration models, NDA & turnaround' }));
   const menuContactsTitle = getLoc('menu_contacts_title', DEFAULT_SETTINGS.menu?.contactsTitle || { ua: 'Прямі контакти:', en: 'Direct Channels:' });
   const menuCopyBtn = getLoc('menu_copy_btn', DEFAULT_SETTINGS.menu?.copyBtn || { ua: 'Копія', en: 'Copy' });
   const menuCopiedBtn = getLoc('menu_copied_btn', DEFAULT_SETTINGS.menu?.copiedBtn || { ua: 'Скопійовано!', en: 'Copied!' });
@@ -1263,8 +1362,15 @@ export function mapSettingsFromSheet(raw: any): GeneralSettings {
   const layoutGrid = getLoc('layout_grid', defUi.layoutGrid!);
   const filterCategoryLabel = getLoc('filter_category_label', defUi.filterCategoryLabel!);
   const filterCategoryAll = getLoc('filter_category_all', defUi.filterCategoryAll!);
-  const filterStatusLabel = getLoc('filter_status_label', defUi.filterStatusLabel!);
-  const filterStatusAll = getLoc('filter_status_all', defUi.filterStatusAll!);
+  const filterCategoryIdentity = getLoc('filter_category_identity', defUi.filterCategoryIdentity || { ua: 'Айдентика & Постери', en: 'Identity & Posters' }, ['category_branding', 'category_identity', 'filter_category_branding', 'branding', 'identity', 'айдентика', 'постери']);
+  const filterCategoryUiux = getLoc('filter_category_uiux', defUi.filterCategoryUiux || { ua: 'UI/UX / Web Design', en: 'UI/UX / Web Design' }, ['category_uiux', 'filter_category_ui_ux', 'category_ui_ux', 'uiux', 'ui_ux', 'ui-ux', 'web_design']);
+  const filterCategoryPrint = getLoc('filter_category_print', defUi.filterCategoryPrint || { ua: 'Editorial / Print Design', en: 'Editorial / Print Design' }, ['category_editorial', 'category_print', 'category_book_design', 'editorial', 'print_design', 'book_design', 'дизайн_книжок']);
+  const filterCategoryAds = getLoc('filter_category_ads', defUi.filterCategoryAds || { ua: 'Advertising / Social Media', en: 'Advertising / Social Media' }, ['category_advertising', 'category_social_media', 'category_ads', 'advertising', 'ads', 'social_media', 'реклама']);
+  const filterCategory3d = getLoc('filter_category_3d', defUi.filterCategory3d || { ua: '3D Modeling', en: '3D Modeling' }, ['category_3d', 'category_3d_render', '3d_modeling', '3d_render', '3d', '3d_моделювання']);
+  const filterStatusLabel = getLoc('filter_status_label', defUi.filterStatusLabel!, ['filter_status', 'status_label', 'filter_statuses']);
+  const filterStatusAll = getLoc('filter_status_all', defUi.filterStatusAll || { ua: 'Всі статуси', en: 'All statuses' }, ['status_all', 'statuses_all', 'all_statuses', 'filter_all', 'all_status', 'всі_статуси', 'всі']);
+  const filterStatusConceptual = getLoc('filter_status_conceptual', defUi.filterStatusConceptual || { ua: 'Концепт', en: 'Concept' }, ['filter_status_concept', 'status_concept', 'status_conceptual', 'concept', 'conceptual', 'концепт', 'концептуальний']);
+  const filterStatusProduction = getLoc('filter_status_production', defUi.filterStatusProduction || { ua: 'Реалізовані (Продакшн)', en: 'Live (Production)' }, ['filter_status_realized', 'status_production', 'status_realized', 'status_live', 'production', 'realized', 'live', 'продакшн', 'реалізовані', 'реалізовано']);
   const expertiseIndex = getLoc('expertise_index', defUi.expertiseIndex!);
   const quoteText = getLoc('quote_text', defUi.quoteText!);
   const quoteAuthor = getLoc('quote_author', defUi.quoteAuthor!);
@@ -1304,12 +1410,21 @@ export function mapSettingsFromSheet(raw: any): GeneralSettings {
   const modalVisitLive = getLoc('modal_visit_live', defUi.modalVisitLive || { ua: 'Переглянути Live Проєкт', en: 'Explore Live Interface' });
   const modalCopied = getLoc('modal_copied', defUi.modalCopied || { ua: 'Скопійовано', en: 'Copied' });
   const modalArtifacts = getLoc('modal_artifacts', defUi.modalArtifacts || { ua: 'Екрани та Артефакти', en: 'Screens & Artifacts' });
+  const modalTabScreens = getLoc('modal_tab_screens', defUi.modalTabScreens || { ua: 'Макети', en: 'Screens' });
+  const modalTabFigma = getLoc('modal_tab_figma', defUi.modalTabFigma || { ua: 'Інтерактивна Figma', en: 'Interactive Figma' });
+  const modalFigmaTitle = getLoc('modal_figma_title', defUi.modalFigmaTitle || { ua: 'ІНТЕРАКТИВНИЙ ПРОТОТИП FIGMA', en: 'INTERACTIVE FIGMA PROTOTYPE' });
+  const modalFigmaSubtitle = getLoc('modal_figma_subtitle', defUi.modalFigmaSubtitle || { ua: 'Клікабельний прототип у реальному часі', en: 'Live clickable prototype' });
+  const modalAllScreens = getLoc('modal_all_screens', defUi.modalAllScreens || { ua: 'Всі макети та екрани', en: 'All Screens & Visual Assets' });
+  const modalActiveViewer = getLoc('modal_active_viewer', defUi.modalActiveViewer || { ua: 'АКТИВНИЙ В СИМУЛЯТОРІ', en: 'ACTIVE IN VIEWER' });
+  const modalOpenFigma = getLoc('modal_open_figma', defUi.modalOpenFigma || { ua: 'Перейти в макет Figma', en: 'Open in Figma' });
+  const modalOpenLive = getLoc('modal_open_live', defUi.modalOpenLive || { ua: 'Відкрити live проєкт', en: 'Open live project' });
+  const modalTipFigma = getLoc('modal_tip_figma', defUi.modalTipFigma || { ua: 'Порада: ви можете клікати по елементах всередині фрейму або масштабувати макет коліщатком миші.', en: 'Tip: interact with prototype hot-spots directly inside the frame or zoom with mouse scroll.' });
 
   // Card & Badge UI strings
-  const badgeFeatured = getLoc('badge_featured', defUi.badgeFeatured || { ua: 'Флагман', en: 'Featured' });
-  const badgeConcept = getLoc('badge_concept', defUi.badgeConcept || { ua: 'Концепт', en: 'Concept' });
-  const badgeProduction = getLoc('badge_production', getLoc('badge_realized', defUi.badgeProduction || { ua: 'Продакшн', en: 'Production' }));
-  const cardViewCase = getLoc('card_view_case', getLoc('btn_view_case', defUi.cardViewCase || { ua: 'Відкрити кейс', en: 'View Case' }));
+  const badgeFeatured = getLoc('badge_featured', defUi.badgeFeatured || { ua: 'Обрані', en: 'Selected' }, ['badge_selected', 'featured', 'selected', 'обрані']);
+  const badgeConcept = getLoc('badge_concept', defUi.badgeConcept || { ua: 'Концепт', en: 'Concept' }, ['badge_conceptual', 'status_concept', 'concept', 'conceptual', 'концепт']);
+  const badgeProduction = getLoc('badge_production', defUi.badgeProduction || { ua: 'Продакшн', en: 'Production' }, ['badge_realized', 'badge_live', 'status_production', 'production', 'realized', 'live', 'продакшн']);
+  const cardViewCase = getLoc('card_view_case', defUi.cardViewCase || { ua: 'Відкрити кейс', en: 'Open case study' }, ['btn_view_case', 'view_case', 'open_case', 'open_case_study', 'відкрити_кейс']);
 
   return {
     name,
@@ -1355,6 +1470,10 @@ export function mapSettingsFromSheet(raw: any): GeneralSettings {
       item3Desc: menuItem3Desc,
       item4Title: menuItem4Title,
       item4Desc: menuItem4Desc,
+      itemWorkflowTitle: menuItemWorkflowTitle,
+      itemWorkflowDesc: menuItemWorkflowDesc,
+      itemFaqTitle: menuItemFaqTitle,
+      itemFaqDesc: menuItemFaqDesc,
       contactsTitle: menuContactsTitle,
       copyBtn: menuCopyBtn,
       copiedBtn: menuCopiedBtn
@@ -1367,8 +1486,15 @@ export function mapSettingsFromSheet(raw: any): GeneralSettings {
       layoutGrid,
       filterCategoryLabel,
       filterCategoryAll,
+      filterCategoryIdentity,
+      filterCategoryUiux,
+      filterCategoryPrint,
+      filterCategoryAds,
+      filterCategory3d,
       filterStatusLabel,
       filterStatusAll,
+      filterStatusConceptual,
+      filterStatusProduction,
       expertiseIndex,
       quoteText,
       quoteAuthor,
@@ -1406,6 +1532,15 @@ export function mapSettingsFromSheet(raw: any): GeneralSettings {
       modalVisitLive,
       modalCopied,
       modalArtifacts,
+      modalTabScreens,
+      modalTabFigma,
+      modalFigmaTitle,
+      modalFigmaSubtitle,
+      modalAllScreens,
+      modalActiveViewer,
+      modalOpenFigma,
+      modalOpenLive,
+      modalTipFigma,
       badgeFeatured,
       badgeConcept,
       badgeProduction,
@@ -1693,9 +1828,39 @@ export function getStoredData(): PortfolioData {
         });
       }
 
+      // Reconstruct cachedStatusesMap if statuses were cached
+      let cachedStatusesMap: Map<string, any> | undefined = undefined;
+      if (Array.isArray(parsed.statuses) && parsed.statuses.length > 0) {
+        cachedStatusesMap = new Map();
+        for (const s of parsed.statuses) {
+          const id = String(s.id || '').trim();
+          const ua = String(s.ua || '').trim();
+          const en = String(s.en || ua).trim();
+          const entry = {
+            id: id || undefined,
+            filterLabel: { ua, en },
+            badgeLabel: { ua, en }
+          };
+          if (id) {
+            cachedStatusesMap.set(id, entry);
+            cachedStatusesMap.set(id.toLowerCase(), entry);
+          }
+          if (ua) {
+            cachedStatusesMap.set(ua, entry);
+            cachedStatusesMap.set(ua.toLowerCase(), entry);
+          }
+          if (en) {
+            cachedStatusesMap.set(en, entry);
+            cachedStatusesMap.set(en.toLowerCase(), entry);
+          }
+        }
+      }
+
       // Upgrade old cache schemas
       if (Array.isArray(parsed.projects)) {
-        parsed.projects = parsed.projects.map(mapProjectFromSheet);
+        parsed.projects = parsed.projects.map((p: any, idx: number) => 
+          mapProjectFromSheet(p, idx, undefined, cachedStatusesMap, parsed.settings?.ui)
+        );
       }
       if (Array.isArray(parsed.experience)) {
         parsed.experience = parsed.experience.map(mapExperienceFromSheet);
@@ -1807,19 +1972,20 @@ export async function syncWithGoogleSheets(endpointUrl: string = DEFAULT_SHEETS_
     }
   }
 
-  const statusesMap = new Map<string, { filterLabel: { ua: string; en: string }; badgeLabel: { ua: string; en: string } }>();
+  const statusesMap = new Map<string, { id?: string; filterLabel: { ua: string; en: string }; badgeLabel: { ua: string; en: string } }>();
   if (json.statuses && Array.isArray(json.statuses)) {
     for (const s of json.statuses) {
-      const id = String(s.id || s.slug || s.key || '').trim();
-      const ua = String(s.ua || s.name_ua || s.title_ua || s.name || s.label || '').trim();
-      const en = String(s.en || s.name_en || s.title_en || s.name || ua).trim();
-      const badgeUa = String(s.badge_ua || s.badge || ua).trim();
-      const badgeEn = String(s.badge_en || s.badge || en).trim();
+      const id = getRowField(s, ['id', 'ID', 'slug', 'key', 'code', 'status', 'status_id', 'статус']) || '';
+      const ua = getRowField(s, ['ua', 'UA', 'name_ua', 'title_ua', 'status_ua', 'name', 'label', 'title', 'українською', 'українська']) || '';
+      const en = getRowField(s, ['en', 'EN', 'name_en', 'title_en', 'status_en', 'name', 'label', 'title', 'english', 'англійською', 'англійська']) || ua;
+      const badgeUa = getRowField(s, ['badge_ua', 'badge_UA', 'Badge_UA', 'badge', 'Badge']) || ua;
+      const badgeEn = getRowField(s, ['badge_en', 'badge_EN', 'Badge_EN', 'badge', 'Badge']) || en;
       const entry = {
-        filterLabel: { ua, en },
-        badgeLabel: { ua: badgeUa, en: badgeEn }
+        id: id || undefined,
+        filterLabel: { ua: ua || id, en: en || ua || id },
+        badgeLabel: { ua: badgeUa || ua || id, en: badgeEn || en || ua || id }
       };
-      if (id && ua) {
+      if (id) {
         statusesMap.set(id, entry);
         statusesMap.set(id.toLowerCase(), entry);
       }
@@ -1827,11 +1993,55 @@ export async function syncWithGoogleSheets(endpointUrl: string = DEFAULT_SHEETS_
         statusesMap.set(ua, entry);
         statusesMap.set(ua.toLowerCase(), entry);
       }
+      if (en) {
+        statusesMap.set(en, entry);
+        statusesMap.set(en.toLowerCase(), entry);
+      }
     }
   }
 
+  const combinedSettings = {
+    ...(json.legalAndBanners && typeof json.legalAndBanners === 'object' ? json.legalAndBanners : {}),
+    ...(json.settings && typeof json.settings === 'object' ? json.settings : {})
+  };
+
+  const parsedSettings = mapSettingsFromSheet(combinedSettings);
+
+  // Seed categoriesMap from General_Data UI settings if user defined them in General_Data
+  if (parsedSettings.ui?.filterCategoryIdentity) {
+    categoriesMap.set('branding', parsedSettings.ui.filterCategoryIdentity);
+    categoriesMap.set('identity', parsedSettings.ui.filterCategoryIdentity);
+    categoriesMap.set('айдентика', parsedSettings.ui.filterCategoryIdentity);
+    categoriesMap.set('айдентика & постери', parsedSettings.ui.filterCategoryIdentity);
+  }
+  if (parsedSettings.ui?.filterCategoryUiux) {
+    categoriesMap.set('ui-ux', parsedSettings.ui.filterCategoryUiux);
+    categoriesMap.set('ui/ux', parsedSettings.ui.filterCategoryUiux);
+    categoriesMap.set('uiux', parsedSettings.ui.filterCategoryUiux);
+    categoriesMap.set('ui/ux / web design', parsedSettings.ui.filterCategoryUiux);
+  }
+  if (parsedSettings.ui?.filterCategoryPrint) {
+    categoriesMap.set('book-design', parsedSettings.ui.filterCategoryPrint);
+    categoriesMap.set('editorial', parsedSettings.ui.filterCategoryPrint);
+    categoriesMap.set('print', parsedSettings.ui.filterCategoryPrint);
+    categoriesMap.set('editorial / print design', parsedSettings.ui.filterCategoryPrint);
+    categoriesMap.set('дизайн книжок / друк', parsedSettings.ui.filterCategoryPrint);
+  }
+  if (parsedSettings.ui?.filterCategoryAds) {
+    categoriesMap.set('advertising', parsedSettings.ui.filterCategoryAds);
+    categoriesMap.set('ads', parsedSettings.ui.filterCategoryAds);
+    categoriesMap.set('advertising / social media', parsedSettings.ui.filterCategoryAds);
+    categoriesMap.set('реклама / соціальні мережі', parsedSettings.ui.filterCategoryAds);
+  }
+  if (parsedSettings.ui?.filterCategory3d) {
+    categoriesMap.set('3d-render', parsedSettings.ui.filterCategory3d);
+    categoriesMap.set('3d', parsedSettings.ui.filterCategory3d);
+    categoriesMap.set('3d modeling', parsedSettings.ui.filterCategory3d);
+    categoriesMap.set('3d моделювання', parsedSettings.ui.filterCategory3d);
+  }
+
   const parsedProjects = json.projects && Array.isArray(json.projects) && json.projects.length > 0
-    ? json.projects.map((p: any, idx: number) => mapProjectFromSheet(p, idx, categoriesMap, statusesMap))
+    ? json.projects.map((p: any, idx: number) => mapProjectFromSheet(p, idx, categoriesMap, statusesMap, parsedSettings.ui))
     : DEFAULT_PROJECTS;
 
   const parsedExperience = json.experience && Array.isArray(json.experience) && json.experience.length > 0
@@ -1850,15 +2060,8 @@ export async function syncWithGoogleSheets(endpointUrl: string = DEFAULT_SHEETS_
     ? json.faq.map(mapFAQFromSheet)
     : (json.questions && Array.isArray(json.questions) && json.questions.length > 0 ? json.questions.map(mapFAQFromSheet) : DEFAULT_FAQ);
 
-  const combinedSettings = {
-    ...(json.legalAndBanners && typeof json.legalAndBanners === 'object' ? json.legalAndBanners : {}),
-    ...(json.settings && typeof json.settings === 'object' ? json.settings : {})
-  };
-
-  const parsedSettings = mapSettingsFromSheet(combinedSettings);
-
   const parsedContacts = mapContactsFromSheet(
-    json.contacts || json.socials || json.contact,
+    json.contacts || json.socials || json.contact || combinedSettings,
     parsedSettings
   );
 
@@ -1869,7 +2072,7 @@ export async function syncWithGoogleSheets(endpointUrl: string = DEFAULT_SHEETS_
   parsedSettings.github = parsedContacts.github;
 
   const parsedLegalAndBanners = mapLegalAndBannersFromSheet(
-    json.legalAndBanners || json.legal || json.banners,
+    json.legalAndBanners || json.legal || json.banners || combinedSettings,
     combinedSettings
   );
 
@@ -1881,6 +2084,23 @@ export async function syncWithGoogleSheets(endpointUrl: string = DEFAULT_SHEETS_
   );
 
   const parsedCategories = mapCategoriesFromSheet(json.categories || json.disciplines || json.filters);
+  if (parsedCategories.length === 0 && parsedSettings.ui) {
+    if (parsedSettings.ui.filterCategoryIdentity) {
+      parsedCategories.push({ id: 'branding', ua: parsedSettings.ui.filterCategoryIdentity.ua, en: parsedSettings.ui.filterCategoryIdentity.en });
+    }
+    if (parsedSettings.ui.filterCategoryUiux) {
+      parsedCategories.push({ id: 'ui-ux', ua: parsedSettings.ui.filterCategoryUiux.ua, en: parsedSettings.ui.filterCategoryUiux.en });
+    }
+    if (parsedSettings.ui.filterCategoryPrint) {
+      parsedCategories.push({ id: 'book-design', ua: parsedSettings.ui.filterCategoryPrint.ua, en: parsedSettings.ui.filterCategoryPrint.en });
+    }
+    if (parsedSettings.ui.filterCategoryAds) {
+      parsedCategories.push({ id: 'advertising', ua: parsedSettings.ui.filterCategoryAds.ua, en: parsedSettings.ui.filterCategoryAds.en });
+    }
+    if (parsedSettings.ui.filterCategory3d) {
+      parsedCategories.push({ id: '3d-render', ua: parsedSettings.ui.filterCategory3d.ua, en: parsedSettings.ui.filterCategory3d.en });
+    }
+  }
   const parsedStatuses = mapStatusesFromSheet(json.statuses || json.status);
 
   const freshData: PortfolioData = {
@@ -1935,9 +2155,9 @@ function doGet(e) {
     }
     var allSheets = ss.getSheets();
     for (var j = 0; j < allSheets.length; j++) {
-      var curClean = allSheets[j].getName().toLowerCase().replace(/[^a-z0-9]/g, '');
+      var curClean = allSheets[j].getName().toLowerCase().replace(/[\s\-_]/g, '');
       for (var k = 0; k < names.length; k++) {
-        if (curClean === names[k].toLowerCase().replace(/[^a-z0-9]/g, '')) {
+        if (curClean === names[k].toLowerCase().replace(/[\s\-_]/g, '')) {
           return allSheets[j];
         }
       }
@@ -1945,16 +2165,16 @@ function doGet(e) {
     return null;
   }
   
-  var projectsSheet = findSheet(["Projects", "projects"]);
-  var categoriesSheet = findSheet(["Categories", "categories", "Disciplines", "disciplines"]);
-  var statusesSheet = findSheet(["Statuses", "statuses", "Status", "status"]);
-  var generalSheet = findSheet(["General_Data", "general_data", "General", "general"]);
-  var contactsSheet = findSheet(["Contacts", "contacts", "Contact", "contact", "Socials", "socials"]);
-  var expSheet = findSheet(["Experience", "experience"]);
-  var testSheet = findSheet(["Testimonials", "testimonials"]);
-  var workflowSheet = findSheet(["Workflow", "workflow", "Process", "process"]);
-  var faqSheet = findSheet(["FAQ", "faq", "Questions", "questions"]);
-  var legalSheet = findSheet(["Legal_And_Banners", "legal_and_banners", "Legal and Banners", "Legal", "legal", "Banners", "banners", "Cookies", "cookies"]);
+  var projectsSheet = findSheet(["Projects", "projects", "Проєкти", "проєкти", "Проекты", "проекты"]);
+  var categoriesSheet = findSheet(["Categories", "categories", "Disciplines", "disciplines", "Категорії", "категорії", "Напрямки", "напрямки"]);
+  var statusesSheet = findSheet(["Statuses", "statuses", "Status", "status", "Статуси", "статуси", "Статус", "статус"]);
+  var generalSheet = findSheet(["General_Data", "general_data", "General", "general", "Settings", "settings", "Загальне", "загальне", "Налаштування", "налаштування"]);
+  var contactsSheet = findSheet(["Contacts", "contacts", "Contact", "contact", "Socials", "socials", "Контакти", "контакти"]);
+  var expSheet = findSheet(["Experience", "experience", "Досвід", "досвід"]);
+  var testSheet = findSheet(["Testimonials", "testimonials", "Відгуки", "відгуки"]);
+  var workflowSheet = findSheet(["Workflow", "workflow", "Process", "process", "Процес", "процес"]);
+  var faqSheet = findSheet(["FAQ", "faq", "Questions", "questions", "Часті питання", "часті питання"]);
+  var legalSheet = findSheet(["Legal_And_Banners", "legal_and_banners", "Legal and Banners", "Legal", "legal", "Banners", "banners", "Cookies", "cookies", "Банери", "банери"]);
   
   var result = {
     status: "ok",
@@ -2005,10 +2225,11 @@ function parseGeneralSheet(sheet) {
   var headers = data[0].map(function(h) { return String(h).toLowerCase().trim(); });
   
   var keyIdx = headers.indexOf("key");
+  if (keyIdx === -1) keyIdx = headers.indexOf("ключ");
   if (keyIdx === -1) keyIdx = 0;
-  var uaIdx = headers.indexOf("ua") !== -1 ? headers.indexOf("ua") : headers.indexOf("ukrainian");
-  var enIdx = headers.indexOf("en") !== -1 ? headers.indexOf("en") : headers.indexOf("english");
-  var valIdx = headers.indexOf("value") !== -1 ? headers.indexOf("value") : 1;
+  var uaIdx = headers.indexOf("ua") !== -1 ? headers.indexOf("ua") : (headers.indexOf("ukrainian") !== -1 ? headers.indexOf("ukrainian") : (headers.indexOf("українською") !== -1 ? headers.indexOf("українською") : headers.indexOf("українська")));
+  var enIdx = headers.indexOf("en") !== -1 ? headers.indexOf("en") : (headers.indexOf("english") !== -1 ? headers.indexOf("english") : (headers.indexOf("англійською") !== -1 ? headers.indexOf("англійською") : headers.indexOf("англійська")));
+  var valIdx = headers.indexOf("value") !== -1 ? headers.indexOf("value") : (headers.indexOf("значення") !== -1 ? headers.indexOf("значення") : 1);
   
   var settings = {};
   
@@ -2039,9 +2260,10 @@ function parseContactsSheet(sheet) {
   var headers = data[0].map(function(h) { return String(h).toLowerCase().trim(); });
   
   var keyIdx = headers.indexOf("key");
+  if (keyIdx === -1) keyIdx = headers.indexOf("ключ");
   if (keyIdx === -1) keyIdx = 0;
-  var uaIdx = headers.indexOf("ua") !== -1 ? headers.indexOf("ua") : (headers.indexOf("ukrainian") !== -1 ? headers.indexOf("ukrainian") : (headers.length > 1 ? 1 : -1));
-  var enIdx = headers.indexOf("en") !== -1 ? headers.indexOf("en") : (headers.indexOf("english") !== -1 ? headers.indexOf("english") : (headers.length > 2 ? 2 : -1));
+  var uaIdx = headers.indexOf("ua") !== -1 ? headers.indexOf("ua") : (headers.indexOf("ukrainian") !== -1 ? headers.indexOf("ukrainian") : (headers.indexOf("українською") !== -1 ? headers.indexOf("українською") : (headers.indexOf("українська") !== -1 ? headers.indexOf("українська") : (headers.length > 1 ? 1 : -1))));
+  var enIdx = headers.indexOf("en") !== -1 ? headers.indexOf("en") : (headers.indexOf("english") !== -1 ? headers.indexOf("english") : (headers.indexOf("англійською") !== -1 ? headers.indexOf("англійською") : (headers.indexOf("англійська") !== -1 ? headers.indexOf("англійська") : (headers.length > 2 ? 2 : -1))));
   
   var result = {};
   
@@ -2091,19 +2313,75 @@ function parseLegalSheet(sheet) {
 }
 
 /**
- * Generates copy-pasteable TSV data for the "General_Data" tab in Google Sheets with lowercase headers: key, ua, en
+ * Generates copy-pasteable TSV data for the unified "General_Data" tab in Google Sheets with columns: key, ua, en
+ * Contains all settings, contacts, UI texts, menu items, and legal texts in one place.
+ * Statuses are managed exclusively on the "Projects" tab.
  */
 export function getGeneralSheetTsvTemplate(): string {
+  const dContacts = DEFAULT_CONTACTS;
+  const dLegal = DEFAULT_LEGAL_AND_BANNERS;
+
   const rows: [string, string, string][] = [
     ['key', 'ua', 'en'],
+    // 1. Profile & Bio
     ['name', 'Іван Селіванов', 'Ivan Selivanov'],
     ['title', 'Артдиректор & UI/UX Архітектор', 'Art Director & UI/UX Architect'],
     ['heroImage', '', ''],
     ['heroTag', 'Готовий до співпраці', 'Available for work'],
     ['heroTagline', 'Проєктую сучасні вебсайти та цифрові продукти, поєднуючи чисту візуальну естетику з продуманою логікою.', 'I design modern websites and digital products, combining clean visual aesthetics with thoughtful logic.'],
     ['location', 'Львів, Україна (Доступний по всьому світу)', 'Lviv, Ukraine (Available Worldwide)'],
-    ['email', 'ivanselivanov771994@gmail.com', 'ivanselivanov771994@gmail.com'],
-    ['linkedin', 'https://www.linkedin.com/in/ivan-selivanov-4bb884183/', 'https://www.linkedin.com/in/ivan-selivanov-4bb884183/'],
+    
+    // 2. Direct Channels & Contacts
+    ['email', dContacts.email || 'ivanselivanov771994@gmail.com', dContacts.email || 'ivanselivanov771994@gmail.com'],
+    ['telegram', dContacts.telegram || 'https://t.me/ivanselivanov', dContacts.telegram || 'https://t.me/ivanselivanov'],
+    ['linkedin', dContacts.linkedin || 'https://www.linkedin.com/in/ivan-selivanov-4bb884183/', dContacts.linkedin || 'https://www.linkedin.com/in/ivan-selivanov-4bb884183/'],
+    ['behance', dContacts.behance || 'https://behance.net/ivanselivanov', dContacts.behance || 'https://behance.net/ivanselivanov'],
+    ['github', dContacts.github || 'https://github.com/ivanselivanov', dContacts.github || 'https://github.com/ivanselivanov'],
+    ['phone', dContacts.phone || '', dContacts.phone || ''],
+    ['address', dContacts.address?.ua || 'Львів, Україна (Доступний по всьому світу)', dContacts.address?.en || 'Lviv, Ukraine (Available Worldwide)'],
+
+    // 3. Navigation Menu Items
+    ['menu_system_title', 'IS // СИСТЕМА НАВІГАЦІЇ', 'IS // NAVIGATION SYSTEM'],
+    ['menu_item1_title', 'Проєкти', 'Selected Work'],
+    ['menu_item1_desc', 'Вибрані кейси & інтерфейси', 'Featured cases & digital products'],
+    ['menu_item2_title', 'Експертиза', 'Core Expertise'],
+    ['menu_item2_desc', 'UI/UX, графіка та стек', 'UI/UX, visual design & tech'],
+    ['menu_item3_title', 'Досвід', 'Career Timeline'],
+    ['menu_item3_desc', 'Кар’єрний шлях та ролі', 'Professional trajectory & milestones'],
+    ['menu_item_workflow_title', 'Процес', 'Workflow'],
+    ['menu_item_workflow_desc', '4 етапи від брифу до передачі в розробку', '4-phase delivery from brief to dev handoff'],
+    ['menu_item_faq_title', 'FAQ', 'FAQ'],
+    ['menu_item_faq_desc', 'Формати співпраці, NDA та умови', 'Collaboration models, NDA & turnaround'],
+    ['menu_item4_title', 'Контакти', 'Get In Touch'],
+    ['menu_item4_desc', 'Зв’язок для нових викликів', 'Direct collaboration inquiries'],
+    ['menu_contacts_title', 'Прямі контакти:', 'Direct Channels:'],
+    ['menu_copy_btn', 'Копія', 'Copy'],
+    ['menu_copied_btn', 'Скопійовано!', 'Copied!'],
+
+    // 4. Main Page UI & Filter Bar
+    ['hero_cta_btn', 'Дослідити кейси', 'Explore Portfolio'],
+    ['work_index', '01 // INDEXED CASE STUDIES', '01 // INDEXED CASE STUDIES'],
+    ['work_title', 'Вибрані Роботи', 'Selected Works'],
+    ['layout_cascade', 'Каскад', 'Masonry'],
+    ['layout_grid', 'Сітка', 'Grid'],
+    ['filter_category_label', 'Напрямок:', 'Discipline:'],
+    ['filter_category_all', 'Всі напрямки', 'All disciplines'],
+    ['filter_category_identity', 'Айдентика & Постери', 'Identity & Posters'],
+    ['filter_category_uiux', 'UI/UX / Web Design', 'UI/UX / Web Design'],
+    ['filter_category_print', 'Editorial / Print Design', 'Editorial / Print Design'],
+    ['filter_category_ads', 'Advertising / Social Media', 'Advertising / Social Media'],
+    ['filter_category_3d', '3D Modeling', '3D Modeling'],
+    ['filter_status_label', 'Статус:', 'Status:'],
+    ['filter_status_all', 'Всі статуси', 'All statuses'],
+    ['filter_status_production', 'Реалізовані', 'Live (Production)'],
+    ['filter_status_conceptual', 'Концепти', 'Concepts'],
+    ['badge_production', 'Продакшн', 'Production'],
+    ['badge_concept', 'Концепт', 'Concept'],
+    ['badge_featured', 'Обрані', 'Selected'],
+    ['card_view_case', 'Відкрити кейс', 'Open case study'],
+
+    // 5. Expertise Section
+    ['expertise_index', '02 // METHODOLOGY & CAPABILITIES', '02 // METHODOLOGY & CAPABILITIES'],
     ['expertise_heading', 'Експертиза', 'Expertise'],
     ['expertise_subtitle', 'Мої ключові навички та напрямки роботи, в яких я створюю ефективні цифрові рішення.', 'My core skills and areas of focus where I create effective digital solutions.'],
     ['expertise_card1_title', 'UI/UX Дизайн', 'UI/UX Design'],
@@ -2120,28 +2398,8 @@ export function getGeneralSheetTsvTemplate(): string {
     ['expertise_h4', 'Таргетинг', 'Targeting'],
     ['expertise_tech_title', 'Інструменти та Технології', 'Tools & Technologies'],
     ['expertise_tech_items', 'Figma, HTML, CSS, JavaScript, Vercel, Google AI Studio, Google Ads, Meta Ads, Google Tag Manager, Google Sheets, SVG, Adobe Illustrator', 'Figma, HTML, CSS, JavaScript, Vercel, Google AI Studio, Google Ads, Meta Ads, Google Tag Manager, Google Sheets, SVG, Adobe Illustrator'],
-    ['menu_system_title', 'IS // СИСТЕМА НАВІГАЦІЇ', 'IS // NAVIGATION SYSTEM'],
-    ['menu_item1_title', 'Проєкти', 'Selected Work'],
-    ['menu_item1_desc', 'Вибрані кейси & інтерфейси', 'Featured cases & digital products'],
-    ['menu_item2_title', 'Експертиза', 'Core Expertise'],
-    ['menu_item2_desc', 'UI/UX, графіка та стек', 'UI/UX, visual design & tech'],
-    ['menu_item3_title', 'Досвід', 'Career Timeline'],
-    ['menu_item3_desc', 'Кар’єрний шлях та ролі', 'Professional trajectory & milestones'],
-    ['menu_item4_title', 'Контакти', 'Get In Touch'],
-    ['menu_item4_desc', 'Зв’язок для нових викликів', 'Direct collaboration inquiries'],
-    ['menu_contacts_title', 'Прямі контакти:', 'Direct Channels:'],
-    ['menu_copy_btn', 'Копія', 'Copy'],
-    ['menu_copied_btn', 'Скопійовано!', 'Copied!'],
-    ['hero_cta_btn', 'Дослідити кейси', 'Explore Portfolio'],
-    ['work_index', '01 // INDEXED CASE STUDIES', '01 // INDEXED CASE STUDIES'],
-    ['work_title', 'Вибрані Роботи', 'Selected Works'],
-    ['layout_cascade', 'Каскад', 'Masonry'],
-    ['layout_grid', 'Сітка', 'Grid'],
-    ['filter_category_label', 'Напрямок:', 'Discipline:'],
-    ['filter_category_all', 'Всі напрямки', 'All Disciplines'],
-    ['filter_status_label', 'Статус:', 'Status:'],
-    ['filter_status_all', 'Всі статуси', 'All'],
-    ['expertise_index', '02 // METHODOLOGY & CAPABILITIES', '02 // METHODOLOGY & CAPABILITIES'],
+
+    // 6. Experience & Footer
     ['experience_index', '03 // TRACK RECORD', '03 // TRACK RECORD'],
     ['experience_title', 'Кар’єрний Шлях & Досвід', 'Career Track & Background'],
     ['experience_subtitle', 'Хронологія комерційних проєктів, артдирекції та фундаментальної академічної школи', 'Timeline of design leadership, commercial execution, and academic honors'],
@@ -2150,7 +2408,8 @@ export function getGeneralSheetTsvTemplate(): string {
     ['contact_email_label', 'Прямий контакт', 'Direct Inquiries'],
     ['contact_social_label', 'Мережі', 'Networks'],
     ['contact_location_label', 'Локальний час', 'Local Time'],
-    // Modal & Case study viewer UI strings
+
+    // 7. Case Study Modal Viewer
     ['modal_case_study', 'CASE STUDY //', 'CASE STUDY //'],
     ['modal_prev', 'Попередній', 'Previous'],
     ['modal_next', 'Наступний', 'Next'],
@@ -2177,13 +2436,44 @@ export function getGeneralSheetTsvTemplate(): string {
     ['modal_visit_live', 'Переглянути Live Проєкт', 'Explore Live Interface'],
     ['modal_copied', 'Скопійовано', 'Copied'],
     ['modal_artifacts', 'Екрани та Артефакти', 'Screens & Artifacts'],
-    // Card & Badge UI
-    ['badge_featured', 'Флагман', 'Featured'],
-    ['badge_concept', 'Концепт', 'Concept'],
-    ['badge_production', 'Продакшн', 'Production'],
-    ['card_view_case', 'Відкрити кейс', 'View Case']
+    ['modal_tab_screens', 'Макети', 'Screens'],
+    ['modal_tab_figma', 'Інтерактивна Figma', 'Interactive Figma'],
+    ['modal_figma_title', 'ІНТЕРАКТИВНИЙ ПРОТОТИП FIGMA', 'INTERACTIVE FIGMA PROTOTYPE'],
+    ['modal_figma_subtitle', 'Клікабельний прототип у реальному часі', 'Live clickable prototype'],
+    ['modal_all_screens', 'Всі макети та екрани', 'All Screens & Visual Assets'],
+    ['modal_active_viewer', 'АКТИВНИЙ В СИМУЛЯТОРІ', 'ACTIVE IN VIEWER'],
+    ['modal_open_figma', 'Перейти в макет Figma', 'Open in Figma'],
+    ['modal_open_live', 'Відкрити live проєкт', 'Open live project'],
+    ['modal_tip_figma', 'Порада: ви можете клікати по елементах всередині фрейму або масштабувати макет коліщатком миші.', 'Tip: interact with prototype hot-spots directly inside the frame or zoom with mouse scroll.'],
+
+    // 8. Legal & Cookie Banner
+    ['cookie_title', dLegal.cookieBanner.title.ua, dLegal.cookieBanner.title.en],
+    ['cookie_desc', dLegal.cookieBanner.description.ua, dLegal.cookieBanner.description.en],
+    ['cookie_essential_title', dLegal.cookieBanner.essentialTitle?.ua || 'Необхідні технічні дані', dLegal.cookieBanner.essentialTitle?.en || 'Strictly Necessary Data'],
+    ['cookie_functional_title', dLegal.cookieBanner.functionalTitle?.ua || 'Функціональні параметри', dLegal.cookieBanner.functionalTitle?.en || 'Functional Preferences'],
+    ['cookie_analytics_label', dLegal.cookieBanner.analyticsLabel.ua, dLegal.cookieBanner.analyticsLabel.en],
+    ['cookie_personalization_title', dLegal.cookieBanner.personalizationTitle?.ua || 'Персоналізація перегляду', dLegal.cookieBanner.personalizationTitle?.en || 'Experience Personalization'],
+    ['privacy_title', dLegal.privacyPolicy.title.ua, dLegal.privacyPolicy.title.en],
+    ['privacy_subtitle', dLegal.privacyPolicy.subtitle.ua, dLegal.privacyPolicy.subtitle.en],
+    ['terms_title', dLegal.termsOfUse.title.ua, dLegal.termsOfUse.title.en],
+    ['terms_subtitle', dLegal.termsOfUse.subtitle.ua, dLegal.termsOfUse.subtitle.en],
+    ['announcement_text', dLegal.announcementBanner.text.ua, dLegal.announcementBanner.text.en]
   ];
 
+  const escapeCell = (str: any) => String(str || '').replace(/\t/g, ' ').replace(/\n/g, ' ').trim();
+  return ['key\tua\ten', ...rows.slice(1).map(r => `${r[0]}\t${escapeCell(r[1])}\t${escapeCell(r[2])}`)].join('\n');
+}
+
+/**
+ * Generates copy-pasteable TSV data for the dedicated "Statuses" tab in Google Sheets
+ */
+export function getStatusesSheetTsvTemplate(): string {
+  const rows: [string, string, string, string, string][] = [
+    ['id', 'ua', 'en', 'badge_ua', 'badge_en'],
+    ['all', 'Всі статуси', 'All statuses', 'Всі', 'All'],
+    ['realized', 'Реалізовані (Продакшн)', 'Live (Production)', 'Продакшн', 'Production'],
+    ['concept', 'Концепт', 'Concept', 'Концепт', 'Concept']
+  ];
   return rows.map(r => r.join('\t')).join('\n');
 }
 
@@ -2328,6 +2618,8 @@ export function generateProjectsTSV(projects: any[]): string {
     'client_en',
     'category',
     'status',
+    'status_ua',
+    'status_en',
     'featured',
     'thumbnailUrl',
     'mobileThumbnailUrl',
@@ -2418,6 +2710,9 @@ export function generateProjectsTSV(projects: any[]): string {
       colorsEn = String(p.colors_en || p.palette_en || p.colors || p.palette || colorsUa);
     }
 
+    const statusUa = typeof p.statusLabel === 'object' && p.statusLabel !== null ? p.statusLabel.ua : String(p.status_ua || (p.status === 'concept' ? 'Концепт' : 'Реалізовані (Продакшн)'));
+    const statusEn = typeof p.statusLabel === 'object' && p.statusLabel !== null ? p.statusLabel.en : String(p.status_en || (p.status === 'concept' ? 'Concept' : 'Live (Production)'));
+
     return [
       escapeCell(p.id),
       escapeCell(titleUa),
@@ -2429,6 +2724,8 @@ export function generateProjectsTSV(projects: any[]): string {
       escapeCell(clientEn),
       escapeCell(p.category),
       escapeCell(p.status),
+      escapeCell(statusUa),
+      escapeCell(statusEn),
       escapeCell(p.isFeatured || p.featured ? 'TRUE' : 'FALSE'),
       escapeCell(p.thumbnailUrl || ''),
       escapeCell(p.mobileThumbnailUrl || p.mobilePreviewUrl || ''),

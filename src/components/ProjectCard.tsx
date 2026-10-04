@@ -28,23 +28,33 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   const [activePreviewIndex, setActivePreviewIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
-  const featuredText = getLocalizedText(ui?.badgeFeatured, language, { ua: 'Флагман', en: 'Featured' });
-  const viewCaseText = getLocalizedText(ui?.cardViewCase, language, { ua: 'Відкрити кейс', en: 'View Case' });
+  const featuredText = getLocalizedText(ui?.badgeFeatured, language, { ua: 'Обрані', en: 'Selected' });
+  const viewCaseText = getLocalizedText(ui?.cardViewCase, language, { ua: 'Відкрити кейс', en: 'Open case study' });
+
+  const rawStatus = String(project.status || '').toLowerCase().trim();
+  const rawBadge = String(typeof project.statusBadgeLabel === 'object' ? (project.statusBadgeLabel?.ua || project.statusBadgeLabel?.en || '') : (project.statusBadgeLabel || '')).toLowerCase().trim();
+  const isConcept = rawStatus === 'concept' || rawStatus.includes('concept') || rawStatus.includes('концепт') || rawStatus.includes('r&d') || rawStatus.includes('rnd') || rawBadge.includes('concept') || rawBadge.includes('концепт');
+  const isRealized = rawStatus === 'realized' || rawStatus.includes('realiz') || rawStatus.includes('prod') || rawStatus.includes('live') || rawStatus.includes('продакшн') || rawStatus.includes('реліз') || rawBadge.includes('prod') || rawBadge.includes('realiz') || rawBadge.includes('live') || rawBadge.includes('продакшн');
 
   const getStatusText = () => {
+    // 1. Prioritize explicit project statusBadgeLabel from Google Sheets or project definitions
     if (project.statusBadgeLabel) {
-      return getLocalizedText(project.statusBadgeLabel, language, { ua: 'Продакшн', en: 'Production' });
+      const text = getLocalizedText(project.statusBadgeLabel, language);
+      if (text && text.trim()) return text;
     }
-    if (project.status === 'realized') {
-      return getLocalizedText(ui?.badgeProduction, language, { ua: 'Продакшн', en: 'Production' });
-    }
-    if (project.status === 'concept') {
-      return getLocalizedText(ui?.badgeConcept, language, { ua: 'Концепт', en: 'Concept' });
-    }
+    // 2. Prioritize project statusLabel
     if (project.statusLabel) {
-      return getLocalizedText(project.statusLabel, language, { ua: project.status, en: project.status });
+      const text = getLocalizedText(project.statusLabel, language);
+      if (text && text.trim()) return text;
     }
-    return language === 'ua' ? 'Продакшн' : 'Production';
+    // 3. Fallback to UI settings or standard labels
+    if (isConcept) {
+      return getLocalizedText(ui?.badgeConcept || ui?.filterStatusConceptual, language, { ua: 'Концепт', en: 'Concept' });
+    }
+    if (isRealized) {
+      return getLocalizedText(ui?.badgeProduction || ui?.filterStatusProduction, language, { ua: 'Продакшн', en: 'Production' });
+    }
+    return getLocalizedText(ui?.badgeProduction || ui?.filterStatusProduction, language, { ua: 'Продакшн', en: 'Production' });
   };
 
   const getCategoryIcon = () => {
@@ -129,8 +139,9 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         <div className="flex items-center gap-1.5 truncate">
           <span className="text-white font-medium">0{index + 1}</span>
           <span className="text-neutral-600">//</span>
-          <span className="uppercase tracking-wider text-neutral-400 truncate">
-            {getLocalizedText(project.categoryLabel, language, { ua: 'UI/UX Продукт', en: 'UI/UX Product' })}
+          <span className="inline-flex items-center gap-1.5 uppercase tracking-wider text-neutral-400 truncate">
+            {getCategoryIcon()}
+            <span>{getLocalizedText(project.categoryLabel, language, { ua: 'UI/UX Продукт', en: 'UI/UX Product' })}</span>
           </span>
         </div>
 
@@ -145,7 +156,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           </span>
           <span
             className={`w-1.5 h-1.5 rounded-full ${
-              project.status === 'realized' ? 'bg-emerald-400' : 'bg-neutral-600'
+              isRealized ? 'bg-emerald-400' : 'bg-neutral-600'
             }`}
           />
         </div>
@@ -165,14 +176,9 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
               </span>
             )}
 
-            <span className="bg-black/85 backdrop-blur-md text-white px-2 py-0.5 text-[10px] uppercase tracking-wider font-mono border border-neutral-700/80 flex items-center gap-1.5 shadow-md">
-              {getCategoryIcon()}
-              <span>{getLocalizedText(project.categoryLabel, language, { ua: 'UI/UX Продукт', en: 'UI/UX Product' })}</span>
-            </span>
-
             <span
               className={`px-2 py-0.5 text-[9px] uppercase tracking-widest font-mono border shadow-md ${
-                project.status === 'realized'
+                isRealized
                   ? 'bg-emerald-950/90 text-emerald-300 border-emerald-700/80'
                   : 'bg-neutral-900/90 text-neutral-400 border-neutral-700'
               }`}
