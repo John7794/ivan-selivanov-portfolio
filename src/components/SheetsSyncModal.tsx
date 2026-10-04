@@ -146,7 +146,7 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
     setTimeout(() => setCopiedTsv(false), 2200);
   };
 
-  const workflowHeadersRow = 'id\tstepNumber\ttitle_ua\ttitle_en\tdescription_ua\tdescription_en\tdeliverables_ua\tdeliverables_en\ttools\thighlightTool';
+  const workflowHeadersRow = 'id\tstepNumber\ttitle_ua\ttitle_en\tdescription_ua\tdescription_en\tdeliverables_ua\tdeliverables_en\ttools';
 
   const handleCopyWorkflowHeaders = () => {
     navigator.clipboard.writeText(workflowHeadersRow);
@@ -166,8 +166,7 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
         w.description.en,
         (w.deliverables?.ua || []).join('; '),
         (w.deliverables?.en || []).join('; '),
-        (w.tools || []).join(', '),
-        w.highlightTool || ''
+        (w.tools || []).join(', ')
       ].join('\t'))
     ].join('\n');
     navigator.clipboard.writeText(rows);
@@ -899,11 +898,6 @@ export const SheetsSyncModal: React.FC<SheetsSyncModalProps> = ({
                       </tbody>
                     </table>
                   </div>
-                  <p className="text-[11px] font-mono text-neutral-500 mt-2">
-                    {language === 'ua'
-                      ? 'Підказка: колонка highlightTool дозволяє виділити бейджем інструмент (наприклад, Stitch як сучасний AI-інструмент швидкого прототипування).'
-                      : 'Tip: highlightTool column displays an accent badge for the selected tool (e.g. Stitch).'}
-                  </p>
                 </div>
               </div>
             )}

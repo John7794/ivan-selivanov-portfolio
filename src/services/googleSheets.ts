@@ -1160,7 +1160,6 @@ function mapWorkflowFromSheet(w: any, idx: number): WorkflowStep {
   } : undefined;
 
   const tools = parseList(w.tools || w.technologies || w.software);
-  const highlightTool = w.highlightTool || (tools.find((t: string) => t.toLowerCase() === 'stitch') ? 'Stitch' : undefined);
 
   return {
     id: String(w.id || `wf-${idx + 1}`),
@@ -1168,8 +1167,7 @@ function mapWorkflowFromSheet(w: any, idx: number): WorkflowStep {
     title: { ua: titleUa, en: titleEn },
     description: { ua: descUa, en: descEn },
     deliverables,
-    tools: tools.length > 0 ? tools : undefined,
-    highlightTool
+    tools: tools.length > 0 ? tools : undefined
   };
 }
 

@@ -142,7 +142,6 @@ export interface WorkflowStep {
     en: string[];
   };
   tools?: string[];
-  highlightTool?: string;
 }
 
 export interface FAQItem {

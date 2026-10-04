@@ -1038,8 +1038,7 @@ export const DEFAULT_WORKFLOW: WorkflowStep[] = [
         'Responsive Layouts (Desktop & Mobile)'
       ]
     },
-    tools: ['Figma', 'Stitch', 'Tokens Studio'],
-    highlightTool: 'Stitch'
+    tools: ['Figma', 'Stitch', 'Tokens Studio']
   },
   {
     id: 'wf-4',
