@@ -1775,14 +1775,14 @@ export function mapLegalAndBannersFromSheet(raw: any, fallbackRaw?: any): LegalA
       essentialTitle: getI18n('cookie_essential_title', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.essentialTitle || { ua: 'Необхідні технічні дані', en: 'Strictly Necessary Data' }),
       essentialDesc: getI18n('cookie_essential_desc', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.essentialDesc || { ua: 'Збереження обраної мови інтерфейсу (UA/EN), стану згоди та критичних параметрів сесії.', en: 'Preserving chosen language (UA/EN), consent choices, and core session accessibility parameters.' }),
       essentialStorage: getI18n('cookie_essential_storage', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.essentialStorage || { ua: 'LocalStorage', en: 'LocalStorage' }),
-      functionalTitle: getI18n('cookie_functional_title', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.functionalTitle || { ua: 'Функціональні параметри', en: 'Functional Preferences' }),
-      functionalDesc: getI18n('cookie_functional_desc', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.functionalDesc || { ua: 'Тактильний звуковий супровід кліків (Web Audio API), збереження вибраного вигляду проєктів (Каскад / Сітка).', en: 'Tactile sound feedback for micro-interactions, layout view density memory (Masonry / Grid).' }),
-      functionalStorage: getI18n('cookie_functional_storage', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.functionalStorage || { ua: 'LocalStorage / Audio API', en: 'LocalStorage / Audio API' }),
-      analyticsLabel: getI18n('cookie_analytics_label', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.analyticsLabel),
+      functionalTitle: getI18n('cookie_functional_title', dict['cookie_preferences_label'] ? getI18n('cookie_preferences_label', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.functionalTitle) : DEFAULT_LEGAL_AND_BANNERS.cookieBanner.functionalTitle),
+      functionalDesc: getI18n('cookie_functional_desc', dict['cookie_preferences_desc'] ? getI18n('cookie_preferences_desc', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.functionalDesc) : DEFAULT_LEGAL_AND_BANNERS.cookieBanner.functionalDesc),
+      functionalStorage: getI18n('cookie_functional_storage', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.functionalStorage || { ua: 'LocalStorage', en: 'LocalStorage' }),
+      analyticsLabel: getI18n('cookie_analytics_title', dict['cookie_analytics_label'] ? getI18n('cookie_analytics_label', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.analyticsLabel) : DEFAULT_LEGAL_AND_BANNERS.cookieBanner.analyticsLabel),
       analyticsDesc: getI18n('cookie_analytics_desc', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.analyticsDesc),
       analyticsStorage: getI18n('cookie_analytics_storage', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.analyticsStorage || { ua: 'Client Runtime', en: 'Client Runtime' }),
-      preferencesLabel: getI18n('cookie_preferences_label', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.preferencesLabel),
-      preferencesDesc: getI18n('cookie_preferences_desc', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.preferencesDesc),
+      preferencesLabel: getI18n('cookie_functional_title', dict['cookie_preferences_label'] ? getI18n('cookie_preferences_label', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.preferencesLabel) : DEFAULT_LEGAL_AND_BANNERS.cookieBanner.preferencesLabel),
+      preferencesDesc: getI18n('cookie_functional_desc', dict['cookie_preferences_desc'] ? getI18n('cookie_preferences_desc', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.preferencesDesc) : DEFAULT_LEGAL_AND_BANNERS.cookieBanner.preferencesDesc),
       personalizationTitle: getI18n('cookie_personalization_title', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.personalizationTitle || { ua: 'Персоналізація перегляду', en: 'Experience Personalization' }),
       personalizationDesc: getI18n('cookie_personalization_desc', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.personalizationDesc || { ua: 'Запам’ятовування останніх переглянутих кейсів та збереженого масштабу зображень (Fill / Contain).', en: 'Retaining previously viewed project deep-dives and preferred image viewport presentation modes.' }),
       personalizationStorage: getI18n('cookie_personalization_storage', DEFAULT_LEGAL_AND_BANNERS.cookieBanner.personalizationStorage || { ua: 'LocalStorage Cache', en: 'LocalStorage Cache' }),
@@ -2444,20 +2444,7 @@ export function getGeneralSheetTsvTemplate(): string {
     ['modal_active_viewer', 'АКТИВНИЙ В СИМУЛЯТОРІ', 'ACTIVE IN VIEWER'],
     ['modal_open_figma', 'Перейти в макет Figma', 'Open in Figma'],
     ['modal_open_live', 'Відкрити live проєкт', 'Open live project'],
-    ['modal_tip_figma', 'Порада: ви можете клікати по елементах всередині фрейму або масштабувати макет коліщатком миші.', 'Tip: interact with prototype hot-spots directly inside the frame or zoom with mouse scroll.'],
-
-    // 8. Legal & Cookie Banner
-    ['cookie_title', dLegal.cookieBanner.title.ua, dLegal.cookieBanner.title.en],
-    ['cookie_desc', dLegal.cookieBanner.description.ua, dLegal.cookieBanner.description.en],
-    ['cookie_essential_title', dLegal.cookieBanner.essentialTitle?.ua || 'Необхідні технічні дані', dLegal.cookieBanner.essentialTitle?.en || 'Strictly Necessary Data'],
-    ['cookie_functional_title', dLegal.cookieBanner.functionalTitle?.ua || 'Функціональні параметри', dLegal.cookieBanner.functionalTitle?.en || 'Functional Preferences'],
-    ['cookie_analytics_label', dLegal.cookieBanner.analyticsLabel.ua, dLegal.cookieBanner.analyticsLabel.en],
-    ['cookie_personalization_title', dLegal.cookieBanner.personalizationTitle?.ua || 'Персоналізація перегляду', dLegal.cookieBanner.personalizationTitle?.en || 'Experience Personalization'],
-    ['privacy_title', dLegal.privacyPolicy.title.ua, dLegal.privacyPolicy.title.en],
-    ['privacy_subtitle', dLegal.privacyPolicy.subtitle.ua, dLegal.privacyPolicy.subtitle.en],
-    ['terms_title', dLegal.termsOfUse.title.ua, dLegal.termsOfUse.title.en],
-    ['terms_subtitle', dLegal.termsOfUse.subtitle.ua, dLegal.termsOfUse.subtitle.en],
-    ['announcement_text', dLegal.announcementBanner.text.ua, dLegal.announcementBanner.text.en]
+    ['modal_tip_figma', 'Порада: ви можете клікати по елементах всередині фрейму або масштабувати макет коліщатком миші.', 'Tip: interact with prototype hot-spots directly inside the frame or zoom with mouse scroll.']
   ];
 
   const escapeCell = (str: any) => String(str || '').replace(/\t/g, ' ').replace(/\n/g, ' ').trim();
@@ -2515,12 +2502,10 @@ export function getLegalSheetTsvTemplate(): string {
     ['cookie_essential_storage', d.cookieBanner.essentialStorage?.ua || 'LocalStorage', d.cookieBanner.essentialStorage?.en || 'LocalStorage'],
     ['cookie_functional_title', d.cookieBanner.functionalTitle?.ua || '', d.cookieBanner.functionalTitle?.en || ''],
     ['cookie_functional_desc', d.cookieBanner.functionalDesc?.ua || '', d.cookieBanner.functionalDesc?.en || ''],
-    ['cookie_functional_storage', d.cookieBanner.functionalStorage?.ua || 'LocalStorage / Audio API', d.cookieBanner.functionalStorage?.en || 'LocalStorage / Audio API'],
-    ['cookie_analytics_label', d.cookieBanner.analyticsLabel.ua, d.cookieBanner.analyticsLabel.en],
+    ['cookie_functional_storage', d.cookieBanner.functionalStorage?.ua || 'LocalStorage', d.cookieBanner.functionalStorage?.en || 'LocalStorage'],
+    ['cookie_analytics_title', d.cookieBanner.analyticsLabel.ua, d.cookieBanner.analyticsLabel.en],
     ['cookie_analytics_desc', d.cookieBanner.analyticsDesc.ua, d.cookieBanner.analyticsDesc.en],
     ['cookie_analytics_storage', d.cookieBanner.analyticsStorage?.ua || 'Client Runtime', d.cookieBanner.analyticsStorage?.en || 'Client Runtime'],
-    ['cookie_preferences_label', d.cookieBanner.preferencesLabel.ua, d.cookieBanner.preferencesLabel.en],
-    ['cookie_preferences_desc', d.cookieBanner.preferencesDesc.ua, d.cookieBanner.preferencesDesc.en],
     ['cookie_personalization_title', d.cookieBanner.personalizationTitle?.ua || '', d.cookieBanner.personalizationTitle?.en || ''],
     ['cookie_personalization_desc', d.cookieBanner.personalizationDesc?.ua || '', d.cookieBanner.personalizationDesc?.en || ''],
     ['cookie_personalization_storage', d.cookieBanner.personalizationStorage?.ua || 'LocalStorage Cache', d.cookieBanner.personalizationStorage?.en || 'LocalStorage Cache'],
@@ -2577,20 +2562,6 @@ export function getLegalSheetTsvTemplate(): string {
 
     ['terms_s6_title', d.termsOfUse.sections[5].title.ua, d.termsOfUse.sections[5].title.en],
     ['terms_s6_content', d.termsOfUse.sections[5].content.ua, d.termsOfUse.sections[5].content.en],
-
-    // Navigation Menu Texts
-    ['menu_system_title', 'IS // СИСТЕМА НАВІГАЦІЇ', 'IS // NAVIGATION SYSTEM'],
-    ['menu_item1_title', 'Проєкти', 'Selected Work'],
-    ['menu_item1_desc', 'Вибрані кейси & інтерфейси', 'Featured cases & digital products'],
-    ['menu_item2_title', 'Експертиза', 'Core Expertise'],
-    ['menu_item2_desc', 'UI/UX, графіка та стек', 'UI/UX, visual design & tech'],
-    ['menu_item3_title', 'Досвід', 'Career Timeline'],
-    ['menu_item3_desc', 'Кар’єрний шлях та ролі', 'Professional trajectory & milestones'],
-    ['menu_item4_title', 'Контакти', 'Get In Touch'],
-    ['menu_item4_desc', 'Зв’язок для нових викликів', 'Direct collaboration inquiries'],
-    ['menu_contacts_title', 'Прямі контакти:', 'Direct Channels:'],
-    ['menu_copy_btn', 'Копія', 'Copy'],
-    ['menu_copied_btn', 'Скопійовано!', 'Copied!'],
 
     // Announcement Banner
     ['announcement_enabled', String(d.announcementBanner.enabled), String(d.announcementBanner.enabled)],

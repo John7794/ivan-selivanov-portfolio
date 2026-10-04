@@ -707,12 +707,12 @@ export const DEFAULT_LEGAL_AND_BANNERS: LegalAndBannersData = {
       en: 'Functional Preferences'
     },
     functionalDesc: {
-      ua: 'Тактильний звуковий супровід кліків (Web Audio API), збереження вибраного вигляду проєктів (Каскад / Сітка).',
-      en: 'Tactile sound feedback for micro-interactions, layout view density memory (Masonry / Grid).'
+      ua: 'Збереження вибраного вигляду проєктів (Каскад / Сітка).',
+      en: 'Layout view density memory (Masonry / Grid).'
     },
     functionalStorage: {
-      ua: 'LocalStorage / Audio API',
-      en: 'LocalStorage / Audio API'
+      ua: 'LocalStorage',
+      en: 'LocalStorage'
     },
     analyticsLabel: {
       ua: 'Телеметрія швидкодії',
@@ -731,8 +731,8 @@ export const DEFAULT_LEGAL_AND_BANNERS: LegalAndBannersData = {
       en: 'Functional Preferences'
     },
     preferencesDesc: {
-      ua: 'Тактильний звуковий супровід кліків (Web Audio API), збереження вибраного вигляду проєктів (Каскад / Сітка).',
-      en: 'Tactile sound feedback for micro-interactions, layout view density memory (Masonry / Grid).'
+      ua: 'Збереження вибраного вигляду проєктів (Каскад / Сітка).',
+      en: 'Layout view density memory (Masonry / Grid).'
     },
     personalizationTitle: {
       ua: 'Персоналізація перегляду',
@@ -773,10 +773,10 @@ export const DEFAULT_LEGAL_AND_BANNERS: LegalAndBannersData = {
       en: 'Compliant with the EU General Data Protection Regulation (GDPR) and international privacy frameworks.'
     },
     lastUpdated: {
-      ua: 'Останнє оновлення: 2025 // Версія 2.4',
-      en: 'Last Updated: 2025 // Version 2.4'
+      ua: 'Останнє оновлення: 2026 // Версія 1.0',
+      en: 'Last Updated: 2026 // Version 1.0'
     },
-    contactEmail: 'ivan.selivanov.design@gmail.com',
+    contactEmail: 'ivanselivanov771994@gmail.com',
     contactLocation: {
       ua: 'Львів, Україна',
       en: 'Lviv, Ukraine'
@@ -789,7 +789,7 @@ export const DEFAULT_LEGAL_AND_BANNERS: LegalAndBannersData = {
           en: '01 // Introduction & Controller'
         },
         content: {
-          ua: 'Ця Політика конфіденційності регламентує порядок обробки та захисту персональних даних користувачів персонального веб-сайту та цифрового портфоліо артдиректора й UI/UX дизайнера Івана Селіванова. Ми поважаємо вашу приватність і прагнемо забезпечити найвищий рівень безпеки та прозорості під час взаємодії з нашими ресурсами.',
+          ua: 'Ця Політика конфіденційності регламентує порядок обробки та захисту персональних даних користувачів персонального вебсайту та цифрового портфоліо UI/UX дизайнера Івана Селіванова. Ми поважаємо вашу приватність і прагнемо забезпечити найвищий рівень безпеки та прозорості під час взаємодії з нашими ресурсами.',
           en: 'This Privacy Policy governs the processing and safeguarding of personal data collected through the digital portfolio and portfolio website of Art Director & UI/UX Architect Ivan Selivanov. We hold user privacy to the highest standard and implement minimal-footprint data practices across all client-side and server-side components.'
         }
       },
@@ -800,8 +800,8 @@ export const DEFAULT_LEGAL_AND_BANNERS: LegalAndBannersData = {
           en: '02 // Information Collected'
         },
         content: {
-          ua: 'Веб-сайт збирає мінімально необхідний обсяг інформації: прямі контактні дані (ім’я, email, повідомлення, які ви добровільно надсилаєте через форму зв’язку), технічні параметри відвідування (анонімізована роздільна здатність та тип браузера для оптимізації рендерингу) та локальні сховища (збереження мови UA/EN та сітки).',
-          en: 'We process only strictly necessary operational data: direct inquiry data (name, business email, and message contents when you reach out regarding commissions), technical telemetry (anonymized viewport dimensions and performance metrics for WebGL scaling), and local client state (language preference UA/EN and grid density).'
+          ua: 'Вебсайт збирає мінімально необхідний обсяг інформації: прямі контактні дані (email та зміст повідомлення, які ви добровільно надсилаєте під час прямого звернення на електронну пошту або через месенджери), технічні параметри відвідування (анонімізована роздільна здатність та тип браузера для оптимізації рендерингу) та локальні сховища (збереження мови UA/EN та режиму перегляду проєктів).',
+          en: 'We process only strictly necessary operational data: direct inquiry data (email, name, and message contents when you reach out directly via email or messaging platforms), technical telemetry (anonymized viewport dimensions and performance metrics for WebGL scaling), and local client state (language preference UA/EN and grid density).'
         }
       },
       {
@@ -844,7 +844,7 @@ export const DEFAULT_LEGAL_AND_BANNERS: LegalAndBannersData = {
           en: '06 // Data Protection Contact'
         },
         content: {
-          ua: 'Якщо у вас виникли запитання щодо цієї Політики або захисту даних, звертайтесь безпосередньо: ivan.selivanov.design@gmail.com (Львів, Україна).',
+          ua: 'Якщо у вас виникли запитання щодо цієї Політики або захисту даних, звертайтесь безпосередньо: ivanselivanov771994@gmail.com (Львів, Україна).',
           en: 'For any privacy-related inquiries, data erasure requests, or audits, contact: ivan.selivanov.design@gmail.com (Location: Lviv, Ukraine).'
         }
       }
@@ -860,10 +860,10 @@ export const DEFAULT_LEGAL_AND_BANNERS: LegalAndBannersData = {
       en: 'Governing intellectual property rights, attribution requirements, and terms of portfolio access.'
     },
     lastUpdated: {
-      ua: 'Останнє оновлення: 2025 // Версія 2.4',
-      en: 'Last Updated: 2025 // Version 2.4'
+      ua: 'Останнє оновлення: 2026 // Версія 1.0',
+      en: 'Last Updated: 2026 // Version 1.0'
     },
-    contactEmail: 'ivan.selivanov.design@gmail.com',
+    contactEmail: 'ivanselivanov771994@gmail.com',
     sections: [
       {
         id: 't1',
@@ -890,58 +890,58 @@ export const DEFAULT_LEGAL_AND_BANNERS: LegalAndBannersData = {
       {
         id: 't3',
         title: {
-          ua: '03 // Заборонені дії',
-          en: '03 // Prohibited Activities'
+          ua: '03 // Комерційні обмеження',
+          en: '03 // Commercial Restrictions'
         },
         content: {
-          ua: 'Категорично заборонено копіювати або видавати за власні концепції (плагіат), використовувати матеріали сайту в комерційних продуктах або для продажу без письмового дозволу Автора, а також здійснювати автоматизований збір даних (scraping) для навчання AI-моделей.',
-          en: 'You explicitly agree not to reproduce or misrepresent any design concepts as your own work (strict anti-plagiarism), extract or sell graphical assets for commercial distribution without prior written consent, or execute automated scraping targeting AI training sets.'
+          ua: 'Суворо забороняється копіювання, модифікація, декомпіляція або використання графічних та кодових рішень портфоліо з комерційною метою без попередньої письмової згоди правовласника.',
+          en: 'Strictly prohibited are unauthorized copying, code reverse-engineering, component extraction, or commercial repackaging of design assets without express prior written consent.'
         }
       },
       {
         id: 't4',
         title: {
-          ua: '04 // Концептуальні проєкти та торговельні марки',
-          en: '04 // Trademarks & Third-Party Marks'
+          ua: '04 // Зовнішні посилання та сторонні платформи',
+          en: '04 // External Links & 3P Platforms'
         },
         content: {
-          ua: 'Усі логотипи та торговельні марки третіх сторін, згадані в контексті кейсів, належать їхнім законним власникам і використовуються виключно в інформаційних цілях портфоліо (Fair Use).',
-          en: 'All third-party brand names, client emblems, and registered trademarks displayed within case studies are properties of their respective holders and referenced purely for professional retrospective and nominative fair use.'
+          ua: 'Портфоліо містить прямі посилання на сторонні платформи (LinkedIn, Telegram, Behance, GitHub). Ми не несемо відповідальності за зміст або політику конфіденційності зовнішніх сайтів.',
+          en: 'The portfolio provides direct outbound links to third-party services (Behance, GitHub, LinkedIn, Telegram). We assume no liability for the policies, accessibility, or terms of third-party platforms.'
         }
       },
       {
         id: 't5',
         title: {
-          ua: '05 // Відмова від гарантій та обмеження відповідальності',
-          en: '05 // Warranty Disclaimer & Limitation of Liability'
+          ua: '05 // Зміни до Умов',
+          en: '05 // Revisions to Terms'
         },
         content: {
-          ua: 'Сайт надається на умовах «як є» (AS IS). Автор не несе відповідальності за можливі тимчасові перебої в роботі хостингу або несумісність окремих WebGL-функцій із застарілими пристроями користувача.',
-          en: 'This portfolio is provided on an "AS IS" and "AS AVAILABLE" basis without warranties of any kind. The author assumes no liability for device-specific WebGL incompatibilities or external network latency.'
+          ua: 'Ми залишаємо за собою право оновлювати ці Умови в будь-який час. Продовження користування сайтом після внесення змін означає вашу автоматичну згоду з оновленими умовами.',
+          en: 'We reserve the right to revise or update these Terms as the portfolio expands. Continued interaction with the site post-update constitutes acceptance of revised terms.'
         }
       },
       {
         id: 't6',
         title: {
-          ua: '06 // Ліцензування та комерційні запити',
-          en: '06 // Commissioning & Licensing Inquiries'
+          ua: '06 // Контактні дані',
+          en: '06 // Inquiries & Contact'
         },
         content: {
-          ua: 'Для придбання ліцензій на концептуальні розробки, замовлення оригінального дизайну або узгодження публікацій звертайтесь: ivan.selivanov.design@gmail.com.',
-          en: 'To acquire commercial rights, commission tailored design systems, or discuss publication features: ivan.selivanov.design@gmail.com.'
+          ua: 'З усіх питань щодо авторських прав, ліцензування чи комерційної співпраці звертайтесь: ivanselivanov771994@gmail.com.',
+          en: 'For all IP, licensing, or commercial inquiries: ivan.selivanov.design@gmail.com.'
         }
       }
     ]
   },
   announcementBanner: {
-    enabled: false,
+    enabled: true,
     badge: {
-      ua: 'СТАТУС // 2025',
-      en: 'STATUS // 2025'
+      ua: 'NEW // СИНХРОНІЗАЦІЯ',
+      en: 'NEW // CLOUD SYNC'
     },
     text: {
-      ua: 'Доступний для нових викликів, дизайн-систем та артдирекшну',
-      en: 'Available for design systems, senior product architecture & art direction'
+      ua: 'Доступний для нових викликів: UI/UX дизайн, айдентика та складні веб-інтерфейси',
+      en: 'Available for contract engagements: UI/UX architecture, brand identity & full-stack web'
     },
     link: '#contact'
   }

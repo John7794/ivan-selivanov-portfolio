@@ -167,10 +167,10 @@ export const CookieBanner: React.FC<CookieBannerProps> = ({
       id: 'functional' as const,
       num: '02',
       title: cookieData?.functionalTitle?.[language] || cookieData?.preferencesLabel?.[language] || (language === 'ua' ? 'Функціональні параметри' : 'Functional Preferences'),
-      storage: cookieData?.functionalStorage?.[language] || 'LocalStorage / Audio API',
+      storage: cookieData?.functionalStorage?.[language] || 'LocalStorage',
       desc: cookieData?.functionalDesc?.[language] || cookieData?.preferencesDesc?.[language] || (language === 'ua'
-        ? 'Тактильний звуковий супровід кліків (Web Audio API), збереження вибраного вигляду проєктів (Каскад / Сітка).'
-        : 'Tactile sound feedback for micro-interactions, layout view density memory (Masonry / Grid).'),
+        ? 'Збереження вибраного вигляду проєктів (Каскад / Сітка).'
+        : 'Layout view density memory (Masonry / Grid).'),
       isLocked: false,
       value: preferences.functional
     },
