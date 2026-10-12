@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, Suspense, lazy } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
 import { ArrowDown, SlidersHorizontal, Sparkles, Filter, Columns3, LayoutGrid } from 'lucide-react';
 import { Project, ProjectCategory, ProjectStatus, Language, FilterOption } from './types';
@@ -12,17 +12,20 @@ import { DEFAULT_SETTINGS } from './data/defaultData';
 import { getLocalizedText, getBilingualStatus } from './utils/i18n';
 import { Navbar } from './components/Navbar';
 import { ProjectCard } from './components/ProjectCard';
-import { CaseStudyModal } from './components/CaseStudyModal';
 import { BentoExpertise } from './components/BentoExpertise';
 import { ExperienceTimeline } from './components/ExperienceTimeline';
 import { CookieBanner } from './components/CookieBanner';
 import { Footer } from './components/Footer';
 import { BackToTop } from './components/BackToTop';
-import { LegalModal, LegalDocType } from './components/LegalModal';
+import type { LegalDocType } from './components/LegalModal';
 import { AnnouncementBanner } from './components/AnnouncementBanner';
-import { SheetsSyncModal } from './components/SheetsSyncModal';
 import { WorkflowSection } from './components/WorkflowSection';
 import { FAQSection } from './components/FAQSection';
+
+// Lazy loaded modals to keep initial bundle size lean
+const CaseStudyModal = lazy(() => import('./components/CaseStudyModal').then(m => ({ default: m.CaseStudyModal })));
+const LegalModal = lazy(() => import('./components/LegalModal').then(m => ({ default: m.LegalModal })));
+const SheetsSyncModal = lazy(() => import('./components/SheetsSyncModal').then(m => ({ default: m.SheetsSyncModal })));
 
 export default function App() {
   const [data, setData] = useState<PortfolioData>(() => getStoredData());
@@ -69,7 +72,35 @@ export default function App() {
     }
   }, []);
 
-  // Listen for URL hash changes like #privacy, #terms, or #sheets
+  // Dynamic document title & lang attribute synchronization
+  useEffect(() => {
+    document.documentElement.lang = language === 'ua' ? 'uk' : 'en';
+    const siteTitle = language === 'ua'
+      ? 'Іван Селіванов | UI/UX Дизайнер'
+      : 'Ivan Selivanov | UI/UX Designer';
+    if (activeProject) {
+      const projTitle = getLocalizedText(activeProject.title, language, { ua: 'Кейс', en: 'Case Study' });
+      document.title = `${projTitle} // ${siteTitle}`;
+    } else {
+      document.title = siteTitle;
+    }
+  }, [language, activeProject]);
+
+  // Project select & close with URL hash synchronization
+  const handleSelectProject = (project: Project) => {
+    setActiveProject(project);
+    const identifier = project.slug || project.id;
+    history.replaceState(null, '', `#project=${identifier}`);
+  };
+
+  const handleCloseProject = () => {
+    setActiveProject(null);
+    if (window.location.hash.startsWith('#project=') || window.location.hash.startsWith('#p=')) {
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+  };
+
+  // Listen for URL hash changes like #privacy, #terms, #sheets, or #project=<id>
   useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash.toLowerCase();
@@ -81,12 +112,23 @@ export default function App() {
         setIsCookieBannerOpen(true);
       } else if (hash === '#sheets' || hash === '#admin' || hash === '#sync') {
         setIsSheetsModalOpen(true);
+      } else if (hash.startsWith('#project=') || hash.startsWith('#p=')) {
+        const rawId = decodeURIComponent(window.location.hash.split('=')[1] || '').trim().toLowerCase();
+        if (rawId) {
+          const found = data.projects.find(p => 
+            String(p.id).toLowerCase() === rawId || 
+            (p.slug && p.slug.toLowerCase() === rawId)
+          );
+          if (found) {
+            setActiveProject(found);
+          }
+        }
       }
     };
     handleHash();
     window.addEventListener('hashchange', handleHash);
     return () => window.removeEventListener('hashchange', handleHash);
-  }, []);
+  }, [data.projects]);
 
   // Keyboard shortcut (Esc for closing project modal, Ctrl+Shift+S for sheets management)
   useEffect(() => {
@@ -95,7 +137,7 @@ export default function App() {
         return;
       }
       if (e.key === 'Escape') {
-        if (activeProject) setActiveProject(null);
+        if (activeProject) handleCloseProject();
       } else if ((e.key === 'S' || e.key === 's') && (e.metaKey || e.ctrlKey) && e.shiftKey) {
         e.preventDefault();
         setIsSheetsModalOpen(prev => !prev);
@@ -386,6 +428,14 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-[#f4f4f0] font-sans selection:bg-[#f4f4f0] selection:text-[#0a0a0a] relative">
+      {/* Skip to Content for Accessibility / Screen Readers */}
+      <a
+        href="#work"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[250] focus:px-4 focus:py-2.5 focus:bg-white focus:text-black focus:font-mono focus:text-xs focus:uppercase focus:tracking-wider focus:shadow-2xl focus:outline-none focus:ring-2 focus:ring-emerald-400"
+      >
+        {language === 'ua' ? 'Перейти до робіт' : 'Skip to portfolio'}
+      </a>
+
       {/* Top Announcement Banner (synced with Google Sheets Legal_And_Banners tab) */}
       <AnnouncementBanner
         bannerData={data.legalAndBanners?.announcementBanner}
@@ -401,8 +451,11 @@ export default function App() {
         contacts={data.contacts}
         onOpenLegal={(doc) => setLegalDoc(doc)}
         onOpenCookies={() => setIsCookieBannerOpen(true)}
-        onCloseModal={() => setActiveProject(null)}
+        onCloseModal={handleCloseProject}
       />
+
+      {/* Main Semantic Landmark */}
+      <main id="main-content" role="main">
 
       {/* Hero Section with Interactive Ambient Grid */}
       <section 
@@ -668,7 +721,7 @@ export default function App() {
                     index={index}
                     featuredIndex={featuredIndices.get(project.id) ?? 0}
                     language={language}
-                    onSelect={setActiveProject}
+                    onSelect={handleSelectProject}
                     isBentoGrid={false}
                     ui={data.settings.ui}
                   />
@@ -683,7 +736,7 @@ export default function App() {
                     index={index}
                     featuredIndex={featuredIndices.get(project.id) ?? 0}
                     language={language}
-                    onSelect={setActiveProject}
+                    onSelect={handleSelectProject}
                     isBentoGrid={true}
                     ui={data.settings.ui}
                   />
@@ -736,6 +789,9 @@ export default function App() {
         telegram={data.contacts?.telegram || data.settings?.telegram}
       />
 
+      {/* Close Main Semantic Landmark */}
+      </main>
+
       {/* Massive Footer with legal modals trigger */}
       <Footer
         settings={data.settings}
@@ -745,30 +801,47 @@ export default function App() {
         onOpenCookies={() => setIsCookieBannerOpen(true)}
       />
 
-      {/* Case Study Deep Modal */}
-      <CaseStudyModal
-        project={activeProject}
-        allProjects={filteredProjects.length > 0 ? filteredProjects : data.projects}
-        testimonial={activeTestimonial}
-        language={language}
-        ui={data.settings.ui}
-        onClose={() => setActiveProject(null)}
-        onSelectProject={setActiveProject}
-      />
+      {/* Lazy Loaded Case Study Deep Modal */}
+      <Suspense fallback={null}>
+        {activeProject && (
+          <CaseStudyModal
+            project={activeProject}
+            allProjects={filteredProjects.length > 0 ? filteredProjects : data.projects}
+            testimonial={activeTestimonial}
+            language={language}
+            ui={data.settings.ui}
+            onClose={handleCloseProject}
+            onSelectProject={handleSelectProject}
+          />
+        )}
 
-      {/* Legal Documents Modal ("Політика конфіденційності" & "Умови використання") */}
-      <LegalModal
-        isOpen={legalDoc !== null}
-        onClose={() => {
-          setLegalDoc(null);
-          if (window.location.hash === '#privacy' || window.location.hash === '#terms') {
-            history.replaceState(null, '', window.location.pathname + window.location.search);
-          }
-        }}
-        initialDoc={legalDoc || 'privacy'}
-        language={language}
-        legalData={data.legalAndBanners}
-      />
+        {/* Legal Documents Modal ("Політика конфіденційності" & "Умови використання") */}
+        {legalDoc !== null && (
+          <LegalModal
+            isOpen={legalDoc !== null}
+            onClose={() => {
+              setLegalDoc(null);
+              if (window.location.hash === '#privacy' || window.location.hash === '#terms') {
+                history.replaceState(null, '', window.location.pathname + window.location.search);
+              }
+            }}
+            initialDoc={legalDoc || 'privacy'}
+            language={language}
+            legalData={data.legalAndBanners}
+          />
+        )}
+
+        {/* Google Sheets Sync & Legal_And_Banners Management Modal */}
+        {isSheetsModalOpen && (
+          <SheetsSyncModal
+            isOpen={isSheetsModalOpen}
+            onClose={() => setIsSheetsModalOpen(false)}
+            language={language}
+            portfolioData={data}
+            onDataUpdated={(fresh) => setData(fresh)}
+          />
+        )}
+      </Suspense>
 
       {/* Floating Back to Top Button */}
       <BackToTop language={language} />
@@ -781,15 +854,6 @@ export default function App() {
         isOpen={isCookieBannerOpen}
         isSuppressed={legalDoc !== null || activeProject !== null || isSheetsModalOpen}
         onClose={() => setIsCookieBannerOpen(false)}
-      />
-
-      {/* Google Sheets Sync & Legal_And_Banners Management Modal */}
-      <SheetsSyncModal
-        isOpen={isSheetsModalOpen}
-        onClose={() => setIsSheetsModalOpen(false)}
-        language={language}
-        portfolioData={data}
-        onDataUpdated={(fresh) => setData(fresh)}
       />
     </div>
   );

@@ -382,9 +382,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                           {item.num}
                         </span>
                         <div>
-                          <h2 className="text-2xl sm:text-4xl md:text-5xl font-medium uppercase tracking-tight text-[#f4f4f0] group-hover:text-white transition-colors">
+                          <span className="block text-2xl sm:text-4xl md:text-5xl font-medium uppercase tracking-tight text-[#f4f4f0] group-hover:text-white transition-colors">
                             {language === 'ua' ? item.titleUa : item.titleEn}
-                          </h2>
+                          </span>
                           <p className="font-mono text-xs text-neutral-500 group-hover:text-neutral-400 transition-colors mt-1">
                             {language === 'ua' ? item.descUa : item.descEn}
                           </p>

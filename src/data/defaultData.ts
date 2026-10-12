@@ -6,8 +6,8 @@ export const DEFAULT_SETTINGS: GeneralSettings = {
     en: 'Ivan Selivanov'
   },
   title: {
-    ua: 'Артдиректор & UI/UX Архітектор',
-    en: 'Art Director & UI/UX Architect'
+    ua: 'UI/UX Дизайнер',
+    en: 'UI/UX Designer'
   },
   bioShort: {
     ua: 'Проєктую сучасні вебсайти та цифрові продукти, поєднуючи чисту візуальну естетику з продуманою логікою.',
@@ -221,7 +221,7 @@ export const DEFAULT_TESTIMONIALS: Testimonial[] = [
     },
     text: {
       ua: 'Іван трансформував наш перевантажений біржовий термінал у бездоганну дизайн-систему. Час прийняття рішень трейдерами скоротився на 38%. Рідкісне поєднання художнього смаку рівня Awwwards і суворої продуктової інженерії.',
-      en: 'Ivan transformed our cluttered trading terminal into a pristine, high-frequency design system. Trader decision latency dropped by 38%. A rare blend of Awwwards-caliber art direction and rigorous product engineering.'
+      en: 'Ivan transformed our cluttered trading terminal into a pristine, high-frequency design system. Trader decision latency dropped by 38%. A rare blend of world-class design aesthetics and rigorous product engineering.'
     },
     avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'
   },
@@ -244,327 +244,1447 @@ export const DEFAULT_TESTIMONIALS: Testimonial[] = [
 
 export const DEFAULT_PROJECTS: Project[] = [
   {
-    id: 'p-1',
-    slug: 'fintech-liquidity-os',
-    title: 'Aura Capital: Liquidity OS',
-    category: 'ui-ux',
-    categoryLabel: {
-      ua: 'UI/UX Продукт',
-      en: 'UI/UX Product'
+    "id": "1",
+    "slug": "1",
+    "title": {
+      "ua": "Логотип Inspace",
+      "en": "Inspace Logo"
     },
-    status: 'realized',
-    statusLabel: {
-      ua: 'Реалізовані (Продакшн)',
-      en: 'Live (Production)'
+    "title_ua": "Логотип Inspace",
+    "title_en": "Inspace Logo",
+    "client": {
+      "ua": "—",
+      "en": "N/A"
     },
-    statusBadgeLabel: {
-      ua: 'Продакшн',
-      en: 'Production'
+    "client_ua": "—",
+    "client_en": "N/A",
+    "category": "branding",
+    "categoryLabel": {
+      "ua": "Айдентика & Постери",
+      "en": "Identity & Posters"
     },
-    client: {
-      ua: 'Aura Global Capital Inc.',
-      en: 'Aura Global Capital Inc.'
+    "status": "концепт",
+    "statusLabel": {
+      "ua": "Концепт",
+      "en": "Concept"
     },
-    role: {
-      ua: 'Lead Product Designer & Design Architect',
-      en: 'Lead Product Designer & Design Architect'
+    "statusBadgeLabel": {
+      "ua": "Концепт",
+      "en": "Concept"
     },
-    timeline: '2024 (6 місяців)',
-    tagline: {
-      ua: 'Корпоративна трейдингова екосистема для мульти-активних ринків',
-      en: 'Enterprise algorithmic trading ecosystem for multi-asset markets'
+    "role": {
+      "ua": "Графічний дизайнер",
+      "en": "Graphic Designer"
     },
-    description: {
-      ua: 'Повний редизайн та архітектура інституційного фінтех-терміналу з потоковою передачею біржових склянок, інтерактивними матрицями ризику та темною палітрою, оптимізованою для багатогодинних сесій аналітиків.',
-      en: 'Full architecture and redesign of an institutional trading workspace featuring real-time depth order books, dynamic risk matrices, and an OLED-optimized low-fatigue dark interface for professional market makers.'
+    "timeline": "2018",
+    "tagline": {
+      "ua": "Мінімалістичний логотип з акцентом на геометрію та негативний простір.",
+      "en": "Minimalist logo design emphasizing geometry and negative space."
     },
-    problemStatement: {
-      ua: 'Попередній інтерфейс страждав від критичного когнітивного перевантаження: трейдери губилися між 14 плаваючими вікнами, а швидкість реакції на аномалії ліквідності падала через хаотичну типографічну ієрархію.',
-      en: 'The legacy system suffered from severe cognitive friction: operators navigated up to 14 disjointed floating windows with zero typographic hierarchy, resulting in costly reaction delays during market volatility spikes.'
+    "description": {
+      "ua": "Візуальна концепція логотипа Inspace базується на чистому геометричному гротеску. Головним візуальним акцентом є літера «s», обрамлена тонким колом із пурпурово-рожевим градієнтом. Це рішення символізує фокус, динаміку космічної тематики та неперервність інноваційних процесів.",
+      "en": "The visual concept of the Inspace logo is based on a clean geometric sans-serif. The main visual accent is the letter \"s\" framed by a thin circle with a purple-pink gradient. This solution symbolizes focus, the dynamics of the space theme, and the continuity of innovative processes."
     },
-    solution: {
-      ua: 'Спроєктовано модульну 16-колонкову гнучку сітку на основі концепції «Command Central». Впроваджено єдину систему токенів дизайн-системи, клавіатурну навігацію першого класу та мікроанімації статусів замовлень.',
-      en: 'Engineered a unified 16-column adaptive grid anchored around a Command Central layout. Introduced tokenized atomic design, zero-latency keyboard shortcuts, and subtle micro-feedback loops for order confirmation states.'
+    "problemStatement": {
+      "ua": "Розробити сучасний мінімалістичний логотип для космічного проєкту, передавши ідеї динаміки та інновацій без використання банальних візуальних штампів.",
+      "en": "Develop a modern minimalist logo for a space project, conveying the ideas of dynamics and innovation without using cliché visual tropes."
     },
-    businessImpact: {
-      ua: 'Зниження часу виконання ордерів на 38%, підвищення задоволеності користувачів (CSAT) з 54% до 92%, успішне залучення $14M Series-A інвестицій за рахунок демонстрації продуктової зрілості.',
-      en: '38% decrease in order entry latency, user satisfaction (CSAT) surged from 54% to 92%, and enabled a successful $14M Series-A funding round driven by enterprise product maturity.'
+    "solution": {
+      "ua": "Розроблено лаконічний знак, де літера «s» інтегрована у тонке коло з пурпурово-рожевим градієнтом, що візуалізує неперервність інноваційних процесів.",
+      "en": "Developed a concise mark where the letter \"s\" is integrated into a thin circle with a purple-pink gradient, visualizing the continuity of innovative processes."
     },
-    toolsUsed: ['Figma', 'React', 'Tailwind CSS', 'TypeScript', 'Tokens Studio'],
-    designSystem: {
-      fonts: ['PP Neue Montreal', 'JetBrains Mono'],
-      colors: [
-        { name: 'Terminal Void', hex: '#0B0D11' },
-        { name: 'Surface Low', hex: '#161A22' },
-        { name: 'Signal Emerald', hex: '#10B981' },
-        { name: 'Alert Crimson', hex: '#EF4444' },
-        { name: 'Accent Cyber', hex: '#3B82F6' }
-      ],
-      gridType: '16-Column Liquid Flex Grid / 4px Baseline'
+    "businessImpact": {
+      "ua": "Проєкт демонструє вміння працювати з мінімалізмом та абстрактними формами, пропонуючи перспективний візуальний бренд, що легко масштабується для цифрових продуктів.",
+      "en": "The project demonstrates the ability to work with minimalism and abstract forms, offering a promising visual brand that easily scales for digital products."
     },
-    thumbnailUrl: 'https://images.unsplash.com/photo-1618761714954-0b8cd0026356?auto=format&fit=crop&q=80&w=1200',
-    mobileThumbnailUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800',
-    galleryUrls: [
-      'https://images.unsplash.com/photo-1618761714954-0b8cd0026356?auto=format&fit=crop&q=80&w=1400',
-      'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1400',
-      'https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&q=80&w=1400'
+    "toolsUsed": [
+      "Adobe Illustrator",
+      "Figma"
     ],
-    liveLink: 'https://aura-capital.demo',
-    figmaUrl: 'https://www.figma.com/design/sample-aura-liquidity-os',
-    figmaEmbedUrl: 'https://embed.figma.com/proto/aura-capital-liquidity-os?node-id=0-1&scaling=scale-down-store-width&content-scaling=fixed&page-id=0%3A1&embed-host=share',
-    isFeatured: true,
-    sortOrder: 1,
-    testimonialId: 't-1'
+    "designSystem": {
+      "fonts": [
+        "Nonchalance"
+      ],
+      "fontsDescription": {
+        "ua": "Геометрична чистота шрифту ідеально передає технологічність, інноваційність та космічну естетику.",
+        "en": "The geometric clarity perfectly conveys a technological, innovative, and cosmic aesthetic."
+      },
+      "colors": [
+        {
+          "name": "Color 1",
+          "hex": "#312F70"
+        },
+        {
+          "name": "Color 2",
+          "hex": "#AE166B"
+        }
+      ],
+      "colorsDescription": {
+        "ua": "Пурпурово-рожевий градієнт на темно-синьому тлі символізує глибину космосу, енергію відкриттів та неперервність інновацій.",
+        "en": "The purple-pink gradient on a dark blue background symbolizes the depth of space, the energy of discovery, and the continuity of innovation."
+      }
+    },
+    "thumbnailUrl": "/projects/inspace-logo.webp",
+    "galleryUrls": [
+      "/projects/inspace-logo.webp"
+    ],
+    "isFeatured": false,
+    "sortOrder": 1
   },
   {
-    id: 'p-2',
-    slug: 'spatial-monoliths-render',
-    title: 'Spatial Monoliths: 3D Artifacts',
-    category: '3d-render',
-    categoryLabel: {
-      ua: '3D Рендеринг & Візуалізація',
-      en: '3D Render & Art Direction'
+    "id": "2",
+    "slug": "2",
+    "title": {
+      "ua": "Логотип Музею українських салезіян УГКЦ",
+      "en": "Museum of Ukrainian Salesians UGCC Logo"
     },
-    status: 'concept',
-    statusLabel: {
-      ua: 'Концепт',
-      en: 'Concept'
+    "title_ua": "Логотип Музею українських салезіян УГКЦ",
+    "title_en": "Museum of Ukrainian Salesians UGCC Logo",
+    "client": {
+      "ua": "Музей українських салезіян УГКЦ імені Вл. Андрія Сапеляка",
+      "en": "The Bishop Andriy Sapelak Museum of Ukrainian Salesians of the UGCC"
     },
-    statusBadgeLabel: {
-      ua: 'Концепт',
-      en: 'Concept'
+    "client_ua": "Музей українських салезіян УГКЦ імені Вл. Андрія Сапеляка",
+    "client_en": "The Bishop Andriy Sapelak Museum of Ukrainian Salesians of the UGCC",
+    "category": "branding",
+    "categoryLabel": {
+      "ua": "Айдентика & Постери",
+      "en": "Identity & Posters"
     },
-    role: {
-      ua: '3D Concept Artist & Visual Director',
-      en: '3D Concept Artist & Visual Director'
+    "status": "концепт",
+    "statusLabel": {
+      "ua": "Концепт",
+      "en": "Concept"
     },
-    timeline: '2024 (Концептуальне дослідження)',
-    tagline: {
-      ua: 'Дослідження архітектурної брутальності та скульптурного світла',
-      en: 'Sculptural light exploration and architectural brutalism'
+    "statusBadgeLabel": {
+      "ua": "Концепт",
+      "en": "Concept"
     },
-    description: {
-      ua: 'Серія статичних високодеталізованих 3D-рендерів, які вивчають взаємодію масивних титанових і базальтових геометричних тіл із розсіяним атмосферним освітленням.',
-      en: 'A curated cycle of high-fidelity volumetric 3D renders exploring the tension between monolithic basalt forms and diffuse directional radiance.'
+    "role": {
+      "ua": "Графічний дизайнер",
+      "en": "Graphic Designer"
     },
-    problemStatement: {
-      ua: 'Створити виразну серію концептуальних візуальних робіт високої роздільної здатності для демонстрації роботи з формою, світлом і текстурою.',
-      en: 'Create a distinctive series of high-resolution conceptual visual artworks showcasing mastery over form, light, and material texture.'
+    "timeline": "2019",
+    "tagline": {
+      "ua": "Логотип, що поєднує українську етніку та сучасну типографію.",
+      "en": "A logo combining Ukrainian ethnic motifs with modern typography."
     },
-    solution: {
-      ua: 'Ретельне моделювання геометрії, налаштування фізично коректних матеріалів та об\'ємного світла. Рендери оптимізовані для кристально чіткого перегляду в 4K.',
-      en: 'Physically based material shading, volumetric lighting passes, and color grading optimized for ultra-crisp 4K display.'
+    "description": {
+      "ua": "Візуальна ідентифікація побудована навколо стилізованого геометричного орнаменту, що відсилає до традиційної української вишивки та сакральної символіки. Сувора гротескна типографія балансує цей складний графічний знак, створюючи сучасний, але водночас автентичний образ культурної інституції.",
+      "en": "The visual identity is built around a stylized geometric ornament that references traditional Ukrainian embroidery and sacred symbolism. Strict sans-serif typography balances this complex graphic mark, creating a modern yet authentic image of the cultural institution."
     },
-    businessImpact: {
-      ua: 'Проєкт отримав відзнаку Behance Featured у категорії 3D Art та став візуальним референсом для стилістики двох міжнародних брендів.',
-      en: 'Recognized as Behance Curated 3D Pick, establishing a signature aesthetic that generated 4 enterprise consulting inquiries.'
+    "problemStatement": {
+      "ua": "Поєднати традиційні українські сакральні та етнічні мотиви із сучасними трендами графічного дизайну для створення актуального образу культурної інституції.",
+      "en": "Combine traditional Ukrainian sacred and ethnic motifs with modern graphic design trends to create a contemporary image for a cultural institution."
     },
-    toolsUsed: ['Cinema 4D', 'Octane Render', 'Adobe Photoshop'],
-    designSystem: {
-      fonts: ['Monument Extended', 'Neue Haas Grotesk'],
-      colors: [
-        { name: 'Obsidian Black', hex: '#050505' },
-        { name: 'Titanium Raw', hex: '#8A8D93' },
-        { name: 'Caustic White', hex: '#F9FAFB' }
-      ],
-      gridType: 'Single Column Focus / Golden Ratio Margins'
+    "solution": {
+      "ua": "Створено стилізований геометричний орнамент на основі сакральної символіки, збалансований строгим сучасним гротеском.",
+      "en": "Created a stylized geometric ornament based on sacred symbolism, balanced by a strict modern sans-serif."
     },
-    thumbnailUrl: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=1200',
-    galleryUrls: [
-      'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=1400',
-      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=1400',
-      'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&q=80&w=1400'
+    "businessImpact": {
+      "ua": "Розроблено потужну візуальну гіпотезу, яка показує, як релігійна та культурна інституція може комунікувати із сучасною аудиторією через актуальний дизайн.",
+      "en": "A powerful visual hypothesis was developed, showing how a religious and cultural institution can communicate with a modern audience through contemporary design."
+    },
+    "toolsUsed": [
+      "Adobe Illustrator",
+      "Figma"
     ],
-    isFeatured: true,
-    sortOrder: 2
+    "designSystem": {
+      "fonts": [
+        "Montserrat"
+      ],
+      "fontsDescription": {
+        "ua": "Нейтральний і сучасний гротеск урівноважує складний етнічний знак, додаючи логотипу інституційної поважності та стриманості.",
+        "en": "A neutral, modern sans-serif balances the complex ethnic mark, providing institutional weight and restraint to the logo."
+      },
+      "colors": [
+        {
+          "name": "Color 1",
+          "hex": "#1B0D0D"
+        },
+        {
+          "name": "Color 2",
+          "hex": "#292941"
+        },
+        {
+          "name": "Color 3",
+          "hex": "#55200E"
+        },
+        {
+          "name": "Color 4",
+          "hex": "#5D6F9D"
+        },
+        {
+          "name": "Color 5",
+          "hex": "#7398C5"
+        },
+        {
+          "name": "Color 6",
+          "hex": "#F28C1D"
+        },
+        {
+          "name": "Color 7",
+          "hex": "#FCC022"
+        },
+        {
+          "name": "Color 8",
+          "hex": "#FFDA3F"
+        }
+      ],
+      "colorsDescription": {
+        "ua": "Багата палітра глибоких відтінків символізує багатогранність української культури, відсилаючи до кольорів традиційної вишивки та сакрального мистецтва.",
+        "en": "The rich palette of deep shades symbolizes the multifaceted nature of Ukrainian culture, referring to the colors of traditional embroidery and sacred art."
+      }
+    },
+    "thumbnailUrl": "/projects/muzei-saleziian.webp",
+    "galleryUrls": [
+      "/projects/muzei-saleziian.webp"
+    ],
+    "isFeatured": false,
+    "sortOrder": 2
   },
   {
-    id: 'p-3',
-    slug: 'swiss-grid-manifesto',
-    title: 'Die Raster: Swiss Typography & Print',
-    category: 'book-design',
-    categoryLabel: {
-      ua: 'Книжковий Дизайн & Препрес',
-      en: 'Editorial & Book Design'
+    "id": "3",
+    "slug": "3",
+    "title": {
+      "ua": "Логотип Cosmopedia",
+      "en": "Cosmopedia Logo"
     },
-    status: 'realized',
-    statusLabel: {
-      ua: 'Реалізовані (Продакшн)',
-      en: 'Live (Production)'
+    "title_ua": "Логотип Cosmopedia",
+    "title_en": "Cosmopedia Logo",
+    "client": {
+      "ua": "—",
+      "en": "N/A"
     },
-    statusBadgeLabel: {
-      ua: 'Продакшн',
-      en: 'Production'
+    "client_ua": "—",
+    "client_en": "N/A",
+    "category": "branding",
+    "categoryLabel": {
+      "ua": "Айдентика & Постери",
+      "en": "Identity & Posters"
     },
-    role: {
-      ua: 'Editorial Designer & Pre-press Specialist',
-      en: 'Editorial Designer & Pre-press Specialist'
+    "status": "концепт",
+    "statusLabel": {
+      "ua": "Концепт",
+      "en": "Concept"
     },
-    timeline: '2023 (3 місяці)',
-    tagline: {
-      ua: 'Фундаментальне видання про швейцарські модульні сітки',
-      en: 'Fundamental editorial study on rationalist Swiss grid systems'
+    "statusBadgeLabel": {
+      "ua": "Концепт",
+      "en": "Concept"
     },
-    description: {
-      ua: 'Академічне видання на 240 сторінок із математично вивіреною системою полів (за канонами Віллема Сандберга та Йозефа Мюллера-Брокманна), шовкодрук на тактильному швейцарському папері Munken Pure.',
-      en: 'A 240-page hardcover monograph adhering strictly to golden canon proportions. Features silkscreen cover accents, duplex color separations, and printed on tactile FSC-certified Munken Pure paper stock.'
+    "role": {
+      "ua": "Графічний дизайнер",
+      "en": "Graphic Designer"
     },
-    problemStatement: {
-      ua: 'Необхідно було структурувати масивний історичний архів текстів трьома мовами так, щоб складні багаторівневі виноски та схеми залишалися синхронними з базовим шрифтовим інтерліньяжем.',
-      en: 'The challenge required synchronizing complex multilingual parallel essays with technical diagrams without violating strict baseline grid continuity across facing spreads.'
+    "timeline": "2020",
+    "tagline": {
+      "ua": "Градієнтний логотип, що символізує космічну орбіту.",
+      "en": "A gradient logo symbolizing a cosmic orbit."
     },
-    solution: {
-      ua: 'Розроблено 12-колонкову комбіновану модульну сітку з вертикальним кроком 11pt. Всі заголовки, підписи та маргіналії підпорядковані суворій геометричній пропорції 1:1.414 (DIN).',
-      en: 'Engineered a composite 12-column modular grid with a rigid 11pt baseline rhythm. Applied ISO-216 proportional scaling for subheadings, marginalia, and typographic markers.'
+    "description": {
+      "ua": "Концепція айдентики базується на стилізованій літері «С», що нагадує орбіти планет або фази місяця. Плавний перехід кольорів від глибокого синього до яскравого кармінового передає енергію космосу, науки та безперервного технологічного розвитку.",
+      "en": "The identity concept is based on a stylized letter \"C\" resembling planetary orbits or lunar phases. A smooth color transition from deep blue to bright carmine conveys the energy of space, science, and continuous technological development."
     },
-    businessImpact: {
-      ua: 'Тираж 1,500 примірників розпродано за перші два тижні. Нагорода "Кращий книжковий дизайн року" на галузевому форумі.',
-      en: 'Full 1,500 limited first edition sold out within 14 days; awarded Book Design of the Year by the National Graphic Syndicate.'
+    "problemStatement": {
+      "ua": "Створити лаконічний графічний знак, який візуалізує концепцію орбітального руху та космічної енергії, зберігаючи простоту та впізнаваність форми.",
+      "en": "Create a concise graphic mark that visualizes the concept of orbital motion and cosmic energy while maintaining simplicity and form recognition."
     },
-    toolsUsed: ['Adobe InDesign', 'Adobe Illustrator', 'Pre-Press Acrobat Pro', 'Enfocus PitStop'],
-    designSystem: {
-      fonts: ['Univers 55 Roman', 'Univers 65 Bold'],
-      colors: [
-        { name: 'Munken Cream', hex: '#F6F5EE' },
-        { name: 'Swiss Vermilion', hex: '#FF2A00' },
-        { name: 'Deep Carbon', hex: '#121212' }
-      ],
-      gridType: '12-Module Swiss Editorial Grid'
+    "solution": {
+      "ua": "Спроєктовано мінімалістичний знак у формі літери «С», що нагадує орбіту, з використанням динамічного градієнта від глибокого синього до кармінового.",
+      "en": "Designed a minimalist mark in the shape of the letter \"C\" resembling an orbit, using a dynamic gradient from deep blue to carmine."
     },
-    thumbnailUrl: 'https://images.unsplash.com/photo-1600868856403-51829e2fa930?auto=format&fit=crop&q=80&w=1200',
-    galleryUrls: [
-      'https://images.unsplash.com/photo-1600868856403-51829e2fa930?auto=format&fit=crop&q=80&w=1400',
-      'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=1400'
+    "businessImpact": {
+      "ua": "Концепт ілюструє навичку створення динамічної айдентики, яка здатна стати міцною візуальною основою для потенційного освітнього або наукового стартапу.",
+      "en": "The concept illustrates the skill of creating dynamic identity, which can become a solid visual foundation for a potential educational or scientific startup."
+    },
+    "toolsUsed": [
+      "Adobe Illustrator",
+      "Figma"
     ],
-    liveLink: 'https://artisan-press.example/raster',
-    isFeatured: true,
-    sortOrder: 3,
-    testimonialId: 't-2'
+    "designSystem": {
+      "fonts": [
+        "Amsterdam"
+      ],
+      "fontsDescription": {
+        "ua": "Додає динаміки та візуальної виразності, підкреслюючи концепцію орбітального руху в логотипі.",
+        "en": "Adds dynamics and visual expressiveness, emphasizing the concept of orbital motion in the logo."
+      },
+      "colors": [
+        {
+          "name": "Color 1",
+          "hex": "#002CC7"
+        },
+        {
+          "name": "Color 2",
+          "hex": "#FD003D"
+        }
+      ],
+      "colorsDescription": {
+        "ua": "Перехід від глибокого синього до кармінового уособлює енергію космосу та пульсацію безперервного технологічного розвитку.",
+        "en": "The transition from deep blue to carmine embodies the energy of space and the pulsation of continuous technological development."
+      }
+    },
+    "thumbnailUrl": "/projects/cosmopedia.svg",
+    "galleryUrls": [
+      "/projects/cosmopedia.svg"
+    ],
+    "isFeatured": false,
+    "sortOrder": 3
   },
   {
-    id: 'p-4',
-    slug: 'synapse-ai-platform',
-    title: 'Synapse: Neuromorphic Cloud Console',
-    category: 'ui-ux',
-    categoryLabel: {
-      ua: 'UI/UX Продукт',
-      en: 'UI/UX SaaS Product'
+    "id": "4",
+    "slug": "4",
+    "title": {
+      "ua": "Фандрейзингова платформа НУЛП",
+      "en": "LPNU Fundraising Platform"
     },
-    status: 'concept',
-    statusLabel: {
-      ua: 'Концепт',
-      en: 'Concept'
+    "title_ua": "Фандрейзингова платформа НУЛП",
+    "title_en": "LPNU Fundraising Platform",
+    "client": {
+      "ua": "Національний університет «Львівська політехніка»",
+      "en": "Lviv Polytechnic National University"
     },
-    statusBadgeLabel: {
-      ua: 'Концепт',
-      en: 'Concept'
+    "client_ua": "Національний університет «Львівська політехніка»",
+    "client_en": "Lviv Polytechnic National University",
+    "category": "ui-ux",
+    "categoryLabel": {
+      "ua": "UI/UX / Web Design",
+      "en": "UI/UX / Web Design"
     },
-    role: {
-      ua: 'Product Architect & Creative Director',
-      en: 'Product Architect & Creative Director'
+    "status": "концепт",
+    "statusLabel": {
+      "ua": "Концепт",
+      "en": "Concept"
     },
-    timeline: '2024 (Концепт B2B платформи)',
-    tagline: {
-      ua: 'Платформа керування нейромережевими кластерами та GPU фермами',
-      en: 'Next-gen console for neuromorphic model training & GPU clusters'
+    "statusBadgeLabel": {
+      "ua": "Концепт",
+      "en": "Concept"
     },
-    description: {
-      ua: 'Концепт панелі моніторингу для AI-інженерів: наочна топологія тензорних ядер, відстеження теплових карт пам’яті та мікроінтерактивна консоль конфігурації тренування LLM.',
-      en: 'Next-generation web console for deep learning teams: interactive tensor topology graph, memory distribution heatmaps, and low-latency micro-interactive deployment pipelines.'
+    "role": {
+      "ua": "UI/UX-дизайнер",
+      "en": "UI/UX Designer"
     },
-    problemStatement: {
-      ua: 'Сучасні інструменти типу AWS/GCP страждають від надлишкової складності та застарілого інтерфейсу зразка 2012 року, де інженерам важко діагностувати "застрягання" тренування моделей.',
-      en: 'Incumbent cloud dashboards (AWS/GCP) feel fragmented and outdated, causing ML researchers to lose hours detecting stalled gradient descent pipelines across clusters.'
+    "timeline": "2023",
+    "tagline": {
+      "ua": "Концепт платформи для фандрейзингової кампанії університету.",
+      "en": "Platform concept for the university's fundraising campaign."
     },
-    solution: {
-      ua: 'Створено просторову модель кластера у вигляді інтерактивного графа зв’язків із кольоровим кодуванням пропускної здатності та нативною темною темою з високим контрастом.',
-      en: 'Designed an interactive SVG node topology visualization with dynamic link weight coloring and contextual side-drawers for zero-navigation diagnostic workflows.'
+    "description": {
+      "ua": "Дизайн платформи розроблено для залучення благодійних внесків від випускників та партнерів. Структура головної сторінки побудована на принципах сторітелінгу: від історій впливу до інформації про фонди. Академічна стилістика з бордовим кольором покликана підкреслити довіру до інституції.",
+      "en": "The platform design was developed to attract charitable contributions from alumni and partners. The homepage structure is built on storytelling principles: from impact stories to information about funds. The academic visual style featuring a burgundy color aims to emphasize trust in the institution."
     },
-    businessImpact: {
-      ua: 'Концепт продемонстрував можливості скорочення часу виявлення збоїв у розподіленому тренуванні на 45% порівняно зі стандартними консолями.',
-      en: 'Simulated 45% faster fault isolation in multi-GPU distributed runs compared to industry benchmark consoles.'
+    "problemStatement": {
+      "ua": "Спроєктувати статусний лендинг для фандрейзингової кампанії, який викликатиме довіру у меценатів та ефективно комунікуватиме цінності університету через сторітелінг.",
+      "en": "Design a premium landing page for a fundraising campaign that builds trust among patrons and effectively communicates the university's values through storytelling."
     },
-    toolsUsed: ['Figma', 'Next.js', 'Lucide Icons', 'D3.js Topology Engine'],
-    designSystem: {
-      fonts: ['Geist Sans', 'Geist Mono'],
-      colors: [
-        { name: 'OLED Pitch', hex: '#000000' },
-        { name: 'Neural Indigo', hex: '#4F46E5' },
-        { name: 'Synapse Cyan', hex: '#06B6D4' }
-      ],
-      gridType: 'Modular High-Density Data Grid'
+    "solution": {
+      "ua": "Побудовано структуру платформи на принципах сторітелінгу з використанням фірмового бордового кольору для підкреслення статусу, надійності та академічності.",
+      "en": "Built the platform's structure on storytelling principles, using the signature burgundy color to emphasize status, reliability, and academicism."
     },
-    thumbnailUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1200',
-    galleryUrls: [
-      'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1400',
-      'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&q=80&w=1400'
+    "businessImpact": {
+      "ua": "Запропоновано концептуальне бачення платформи, що демонструє, як грамотний UX та сторітелінг здатні потенційно підвищити рівень довіри та залучення меценатів.",
+      "en": "A conceptual vision of the platform is proposed, demonstrating how well-executed UX and storytelling can potentially increase the level of trust and engagement of patrons."
+    },
+    "toolsUsed": [
+      "Figma"
     ],
-    liveLink: 'https://synapse-cloud.demo',
-    figmaUrl: 'https://www.figma.com/design/synapse-neuromorphic-console',
-    figmaEmbedUrl: 'https://embed.figma.com/proto/synapse-neuromorphic-console?node-id=0-1&scaling=contain&embed-host=share',
-    isFeatured: false,
-    sortOrder: 4
+    "designSystem": {
+      "fonts": [
+        "Exo 2",
+        "Bitter"
+      ],
+      "fontsDescription": {
+        "ua": "Bitter створює атмосферу академічної довіри у текстах, а Exo 2 забезпечує чистий, сучасний та зручний UI платформи.",
+        "en": "Bitter creates an atmosphere of academic trust in the text, while Exo 2 ensures a clean, modern, and user-friendly UI for the platform."
+      },
+      "colors": [
+        {
+          "name": "Color 1",
+          "hex": "#5E2128"
+        },
+        {
+          "name": "Color 2",
+          "hex": "#1E1E1E"
+        }
+      ],
+      "colorsDescription": {
+        "ua": "Фірмовий бордовий колір виступає символом інституційної надійності, багаторічних традицій та високого академічного статусу університету.",
+        "en": "The signature burgundy color serves as a symbol of institutional reliability, long-standing traditions, and the high academic status of the university."
+      }
+    },
+    "thumbnailUrl": "/projects/fundraising-lp.webp",
+    "galleryUrls": [
+      "/projects/fundraising-lp.webp"
+    ],
+    "figmaUrl": "https://www.figma.com/design/eJCs1VuROXVmG0vAWh86kQ/Fundraising-Landing-page-for-NULP?node-id=1-4&t=vS6kEHXpcUYyOZEJ-4",
+    "figmaEmbedUrl": "https://embed.figma.com/design/eJCs1VuROXVmG0vAWh86kQ/Fundraising-Landing-page-for-NULP?node-id=1-4&embed-host=share",
+    "isFeatured": true,
+    "sortOrder": 4
   },
   {
-    id: 'p-5',
-    slug: 'kinetica-sound-identity',
-    title: 'Kinetica: Generative Sound Identity',
-    category: 'branding',
-    categoryLabel: {
-      ua: 'Айдентика & Постери',
-      en: 'Visual Identity & Posters'
+    "id": "5",
+    "slug": "5",
+    "title": {
+      "ua": "Сайт Bee Protect",
+      "en": "Bee Protect Site"
     },
-    status: 'realized',
-    statusLabel: {
-      ua: 'Реалізовані (Продакшн)',
-      en: 'Live (Production)'
+    "title_ua": "Сайт Bee Protect",
+    "title_en": "Bee Protect Site",
+    "client": {
+      "ua": "—",
+      "en": "N/A"
     },
-    statusBadgeLabel: {
-      ua: 'Продакшн',
-      en: 'Production'
+    "client_ua": "—",
+    "client_en": "N/A",
+    "category": "ui-ux",
+    "categoryLabel": {
+      "ua": "UI/UX / Web Design",
+      "en": "UI/UX / Web Design"
     },
-    role: {
-      ua: 'Art Director & Graphic System Designer',
-      en: 'Art Director & Graphic System Designer'
+    "status": "концепт",
+    "statusLabel": {
+      "ua": "Концепт",
+      "en": "Concept"
     },
-    timeline: '2023',
-    tagline: {
-      ua: 'Динамічна графічна система міжнародного фестивалю електронної музики',
-      en: 'Generative modular visual identity for avant-garde electronic music'
+    "statusBadgeLabel": {
+      "ua": "Концепт",
+      "en": "Concept"
     },
-    description: {
-      ua: 'Колекція з 12 широкоформатних постерів, де шрифтові композиції деформуються в такт низькочастотним звуковим хвилям за допомогою кастомного JS-генератора.',
-      en: 'A collection of 12 monumental posters where typographic glyphs deform algorithmically driven by raw sub-bass frequencies and kinetic script modules.'
+    "role": {
+      "ua": "UI/UX-дизайнер",
+      "en": "UI/UX Designer"
     },
-    problemStatement: {
-      ua: 'Статична айдентика попередніх років не передавала драйв та інноваційність саунд-дизайну учасників фестивалю.',
-      en: 'Prior static festival collateral failed to express the visceral tension and digital avant-garde sonic textures of modern electronic music.'
+    "timeline": "2019",
+    "tagline": {
+      "ua": "Концепт яскравого лендингу для екологічної ініціативи із захисту бджіл.",
+      "en": "Vibrant landing page concept for an ecological initiative protecting bees."
     },
-    solution: {
-      ua: 'Створено систему варіативного шрифту, що реагує на спектральний аудіо-вхід, та розроблено серію постерів на преміальному матовому папері з УФ-лакуванням.',
-      en: 'Engineered an audio-reactive generative script exporting ready-to-print vector assets with spot-UV varnished typographical highlights.'
+    "description": {
+      "ua": "Дизайн візуальної концепції будується на використанні яскраво-жовтого кольору та графічного патерну стільників. Виразна типографія та інтерактивні елементи створюють сміливий образ, що привертає увагу до екологічної проблеми.",
+      "en": "The visual concept design is based on the use of bright yellow color and a graphic honeycomb pattern. Expressive typography and interactive elements create a bold image that draws attention to the environmental issue."
     },
-    businessImpact: {
-      ua: 'Sold out фестивалю за 48 годин після запуску рекламної кампанії. Постери виставлялися в галереї сучасного мистецтва.',
-      en: 'Festival tickets sold out within 48 hours of poster rollout; visual series selected for contemporary gallery exhibition.'
+    "problemStatement": {
+      "ua": "Створити емоційно заряджений та яскравий вебдизайн, який миттєво привертатиме увагу до екологічної проблеми та мотивуватиме користувачів до дій.",
+      "en": "Create an emotionally charged and vibrant web design that instantly draws attention to an environmental issue and motivates users to take action."
     },
-    toolsUsed: ['Processing / p5.js', 'Adobe Illustrator', 'Custom Variable Font'],
-    designSystem: {
-      fonts: ['Kinetic Grotesk Display', 'Suisse Int’l'],
-      colors: [
-        { name: 'Pure White', hex: '#FFFFFF' },
-        { name: 'Acid Acid Lime', hex: '#D4FF00' },
-        { name: 'Absolute Dark', hex: '#000000' }
-      ],
-      gridType: 'Dynamic Asymmetric Soundwave Grid'
+    "solution": {
+      "ua": "Застосовано контрастну палітру з домінуванням яскраво-жовтого кольору та графічного патерну стільників для створення емоційно виразного та сміливого образу.",
+      "en": "Applied a contrasting palette dominated by bright yellow and a graphic honeycomb pattern to create an emotionally expressive and bold image."
     },
-    thumbnailUrl: 'https://images.unsplash.com/photo-1600607686527-6fb886090705?auto=format&fit=crop&q=80&w=1200',
-    galleryUrls: [
-      'https://images.unsplash.com/photo-1600607686527-6fb886090705?auto=format&fit=crop&q=80&w=1400',
-      'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&q=80&w=1400'
+    "businessImpact": {
+      "ua": "Концепт презентує навички роботи з емоційним дизайном, пропонуючи дієвий візуальний інструмент для привернення уваги до соціальних та екологічних ініціатив.",
+      "en": "The concept presents skills in working with emotional design, offering an effective visual tool for drawing attention to social and environmental initiatives."
+    },
+    "toolsUsed": [
+      "Figma"
     ],
-    isFeatured: false,
-    sortOrder: 5
+    "designSystem": {
+      "fonts": [
+        "Rubik"
+      ],
+      "fontsDescription": {
+        "ua": "Злегка заокруглені форми шрифту створюють дружній, природний та емоційно теплий образ для екоініціативи.",
+        "en": "The slightly rounded forms create a friendly, organic, and emotionally warm image for the eco-initiative."
+      },
+      "colors": [
+        {
+          "name": "Color 1",
+          "hex": "#FFF500"
+        },
+        {
+          "name": "Color 2",
+          "hex": "#282828"
+        }
+      ],
+      "colorsDescription": {
+        "ua": "Жовто-чорна гама прямо символізує бджолине забарвлення, водночас транслюючи відчуття тривоги за екологію та заклик до активних дій.",
+        "en": "The yellow-black color scheme directly symbolizes bee coloration while simultaneously conveying a sense of environmental anxiety and a call to action."
+      }
+    },
+    "thumbnailUrl": "/projects/bee-protect-lp.webp",
+    "galleryUrls": [
+      "/projects/bee-protect-lp.webp"
+    ],
+    "figmaUrl": "https://www.figma.com/design/uoBMyBi7RddWb0gFGJbkU2/Fundraising-Landing-page-for-BeeProtect?node-id=1-18&t=rlI5lQDWgutAiGD8-4",
+    "figmaEmbedUrl": "https://embed.figma.com/design/uoBMyBi7RddWb0gFGJbkU2/Fundraising-Landing-page-for-BeeProtect?node-id=1-18&embed-host=share",
+    "isFeatured": true,
+    "sortOrder": 5
+  },
+  {
+    "id": "6",
+    "slug": "6",
+    "title": {
+      "ua": "Сайт Inspace",
+      "en": "Inspace Site"
+    },
+    "title_ua": "Сайт Inspace",
+    "title_en": "Inspace Site",
+    "client": {
+      "ua": "—",
+      "en": "N/A"
+    },
+    "client_ua": "—",
+    "client_en": "N/A",
+    "category": "ui-ux",
+    "categoryLabel": {
+      "ua": "UI/UX / Web Design",
+      "en": "UI/UX / Web Design"
+    },
+    "status": "концепт",
+    "statusLabel": {
+      "ua": "Концепт",
+      "en": "Concept"
+    },
+    "statusBadgeLabel": {
+      "ua": "Концепт",
+      "en": "Concept"
+    },
+    "role": {
+      "ua": "UI/UX-дизайнер",
+      "en": "UI/UX Designer"
+    },
+    "timeline": "2019",
+    "tagline": {
+      "ua": "Інтерактивний сайт космічної тематики для освітнього проєкту.",
+      "en": "Interactive space-themed site for an educational project."
+    },
+    "description": {
+      "ua": "Концепт вебсайту для освітнього космічного проєкту. Головний фокус зосереджено на логічній структуризації науково-популярного контенту. Інтерфейс забезпечує інтуїтивну навігацію розділами та використовує темну тематичну палітру для створення сучасного й зручного користувацького досвіду без зайвого візуального перевантаження.",
+      "en": "A website concept for an educational space project. The main focus is on the logical structuring of popular science content. The interface provides intuitive navigation through sections and uses a dark thematic palette to create a modern and clear user experience without visual clutter."
+    },
+    "problemStatement": {
+      "ua": "Розробити зрозумілу архітектуру освітнього вебресурсу космічної тематики, збалансувавши великі обсяги тексту з візуальними матеріалами для зручної навігації.",
+      "en": "Develop a clear architecture for a space-themed educational web resource, balancing large volumes of text with visual materials for convenient navigation."
+    },
+    "solution": {
+      "ua": "Спроєктовано модульну структуру з темною тематичною палітрою та контрастною типографікою, що розбиває масиви інформації на зручні для сканування блоки.",
+      "en": "Designed a modular structure with a dark thematic palette and contrasting typography, breaking down arrays of information into easy-to-scan blocks."
+    },
+    "businessImpact": {
+      "ua": "Концепт демонструє вміння працювати з інформаційною архітектурою, перетворюючи складний науковий контент на доступний та зручний для користувача освітній продукт.",
+      "en": "The concept demonstrates the ability to work with information architecture, transforming complex scientific content into an accessible and user-friendly educational product."
+    },
+    "toolsUsed": [
+      "Figma"
+    ],
+    "designSystem": {
+      "fonts": [
+        "Montserrat"
+      ],
+      "fontsDescription": {
+        "ua": "Забезпечує відмінну читабельність масивів наукових текстів на темному фоні завдяки ідеальній геометрії.",
+        "en": "Ensures excellent readability of scientific text blocks on a dark background due to its perfect geometry."
+      },
+      "colors": [
+        {
+          "name": "Color 1",
+          "hex": "#332966"
+        },
+        {
+          "name": "Color 2",
+          "hex": "#332966"
+        }
+      ],
+      "colorsDescription": {
+        "ua": "Темна синьо-фіолетова палітра символізує безмежність космічного простору, створюючи ефект глибокого занурення у Всесвіт.",
+        "en": "The dark blue-purple palette symbolizes the boundlessness of outer space, creating the effect of deep immersion into the Universe."
+      }
+    },
+    "thumbnailUrl": "/projects/inspace-lp-d.webp",
+    "mobileThumbnailUrl": "/projects/inspace-lp-m.webp",
+    "mobilePreviewUrl": "/projects/inspace-lp-m.webp",
+    "galleryUrls": [
+      "/projects/inspace-lp-d.webp"
+    ],
+    "mobileGalleryUrls": [
+      "/projects/inspace-lp-m.webp"
+    ],
+    "figmaUrl": "https://www.figma.com/design/Oyi7RfDZP6HuhJArb3TRBe/InSpace?node-id=2-515&t=0ZNRPkBB6txdEtv7-4",
+    "figmaEmbedUrl": "https://embed.figma.com/design/Oyi7RfDZP6HuhJArb3TRBe/InSpace?node-id=2-515&embed-host=share",
+    "isFeatured": false,
+    "sortOrder": 6
+  },
+  {
+    "id": "7",
+    "slug": "7",
+    "title": {
+      "ua": "Редизайн британського паспорта",
+      "en": "British Passport Redesign"
+    },
+    "title_ua": "Редизайн британського паспорта",
+    "title_en": "British Passport Redesign",
+    "client": {
+      "ua": "—",
+      "en": "N/A"
+    },
+    "client_ua": "—",
+    "client_en": "N/A",
+    "category": "book-design",
+    "categoryLabel": {
+      "ua": "Editorial / Print Design",
+      "en": "Editorial / Print Design"
+    },
+    "status": "концепт",
+    "statusLabel": {
+      "ua": "Концепт",
+      "en": "Concept"
+    },
+    "statusBadgeLabel": {
+      "ua": "Концепт",
+      "en": "Concept"
+    },
+    "role": {
+      "ua": "Графічний дизайнер",
+      "en": "Graphic Designer"
+    },
+    "timeline": "2017",
+    "tagline": {
+      "ua": "Концепт редизайну паспорта Великої Британії з акцентом на культурну спадщину.",
+      "en": "British Passport redesign concept focusing on cultural heritage."
+    },
+    "description": {
+      "ua": "Концептуальний редизайн британського паспорта. Внутрішні сторінки містять захисні патерни (гільйош) та напівпрозорі ілюстрації ключових символів країни: від історичних постатей до ікон попкультури. Дизайн використовує пастельну гаму прапора Union Jack, адаптовану для безпечного друку.",
+      "en": "A conceptual redesign of the British passport. The inner pages feature security patterns (guilloche) and translucent illustrations of the country's key symbols: from historical figures to pop culture icons. The design uses a pastel color palette based on the Union Jack flag, adapted for security printing."
+    },
+    "problemStatement": {
+      "ua": "Переосмислити дизайн офіційного документа, зробивши його сучасним, глибоко символічним та захищеним від підробок за допомогою складних графічних патернів.",
+      "en": "Rethink the design of an official document, making it modern, deeply symbolic, and protected from forgery using complex graphic patterns."
+    },
+    "solution": {
+      "ua": "Розроблено складні захисні гільйош-патерни та напівпрозорі ілюстрації національних символів у пастельній гамі Union Jack, адаптованій для безпекового друку.",
+      "en": "Developed complex security guilloche patterns and translucent illustrations of national symbols in the pastel palette of the Union Jack, adapted for security printing."
+    },
+    "businessImpact": {
+      "ua": "Проєкт ілюструє здатність поєднувати суворі технічні вимоги до безпекової поліграфії із сучасною естетикою державного брендингу.",
+      "en": "The project illustrates the ability to combine strict technical requirements for security printing with the modern aesthetics of state branding."
+    },
+    "toolsUsed": [
+      "Adobe Illustrator",
+      "Figma"
+    ],
+    "designSystem": {
+      "fonts": [
+        "Gill Sans MT"
+      ],
+      "fontsDescription": {
+        "ua": "Класичний британський шрифт, що глибоко підкреслює національну спадщину та офіційність документа.",
+        "en": "A classic British typeface that deeply emphasizes national heritage and the official nature of the document."
+      },
+      "colors": [
+        {
+          "name": "Color 1",
+          "hex": "#004791"
+        }
+      ],
+      "colorsDescription": {
+        "ua": "Пастельний синій уособлює британську національну ідентичність, будучи концептуальним переосмисленням кольору з прапора Union Jack.",
+        "en": "The pastel blue embodies British national identity, being a conceptual reimagining of the color from the Union Jack flag."
+      }
+    },
+    "thumbnailUrl": "/projects/uk-passport-redesign.webp",
+    "galleryUrls": [
+      "/projects/uk-passport-redesign.webp"
+    ],
+    "isFeatured": true,
+    "sortOrder": 7
+  },
+  {
+    "id": "8",
+    "slug": "8",
+    "title": {
+      "ua": "Рекламні банери Petsbro",
+      "en": "Petsbro Ad Banners"
+    },
+    "title_ua": "Рекламні банери Petsbro",
+    "title_en": "Petsbro Ad Banners",
+    "client": {
+      "ua": "Petsbro",
+      "en": "Petsbro"
+    },
+    "client_ua": "Petsbro",
+    "client_en": "Petsbro",
+    "category": "advertising",
+    "categoryLabel": {
+      "ua": "Advertising / Social Media",
+      "en": "Advertising / Social Media"
+    },
+    "status": "реалізовані-продакшн",
+    "statusLabel": {
+      "ua": "Реалізовані (Продакшн)",
+      "en": "Live (Production)"
+    },
+    "statusBadgeLabel": {
+      "ua": "Реалізовані (Продакшн)",
+      "en": "Live (Production)"
+    },
+    "role": {
+      "ua": "Графічний дизайнер",
+      "en": "Graphic Designer"
+    },
+    "timeline": "2024",
+    "tagline": {
+      "ua": "Серія рекламних креативів для соціальних мереж бренду Petsbro.",
+      "en": "Social media advertising creatives for the Petsbro pet brand."
+    },
+    "description": {
+      "ua": "Серія рекламних креативів для соцмереж болгарського зообренду Petsbro. Банери демонструють різні моделі кігтеточок. Візуальний акцент зроблено на чіткій презентації продукту, його ціни та габаритів за допомогою контрастного бірюзового фону та динамічної композиції.",
+      "en": "A series of social media advertising creatives for the Bulgarian pet brand Petsbro. The banners showcase different models of scratching posts. The visual focus is on the clear presentation of the product, its price, and dimensions using a contrasting turquoise background and dynamic composition."
+    },
+    "problemStatement": {
+      "ua": "Створити серію рекламних банерів з високим CTR, які чітко комунікують переваги товару (ціна, габарити) та виділяються у стрічці соцмереж.",
+      "en": "Create a series of high-CTR advertising banners that clearly communicate the product's benefits (price, dimensions) and stand out in the social media feed."
+    },
+    "solution": {
+      "ua": "Використано контрастний бірюзовий фон та динамічну композицію для миттєвого зчитування зовнішнього вигляду продукту, його габаритів та акційної ціни.",
+      "en": "Used a contrasting turquoise background and dynamic composition for instant reading of the product's appearance, dimensions, and promotional price."
+    },
+    "businessImpact": {
+      "ua": "Чітка та контрастна візуальна подача продукту допомогла замовнику виділитися у стрічці, що позитивно вплинуло на результативність рекламних кампаній зоомагазину в соцмережах.",
+      "en": "A clear and contrasting visual presentation of the product helped the client stand out in the feed, which positively impacted the performance of the pet store's social media advertising campaigns."
+    },
+    "toolsUsed": [
+      "Figma"
+    ],
+    "designSystem": {
+      "fonts": [
+        "Days One",
+        "Roboto"
+      ],
+      "fontsDescription": {
+        "ua": "Days One привертає увагу до масивних акцентних заголовків, а Roboto забезпечує зручне зчитування деталей.",
+        "en": "Days One draws attention to massive headline accents, while Roboto ensures easy reading of details."
+      },
+      "colors": [
+        {
+          "name": "Color 1",
+          "hex": "#29B5B2"
+        }
+      ],
+      "colorsDescription": {
+        "ua": "Насичений бірюзовий колір символізує життєрадісність та турботу про домашніх улюбленців, формуючи позитивний емоційний зв'язок із брендом.",
+        "en": "The rich turquoise color symbolizes cheerfulness and care for pets, forming a positive emotional connection with the brand."
+      }
+    },
+    "thumbnailUrl": "/projects/facebook-post-6.webp",
+    "galleryUrls": [
+      "/projects/facebook-post-6.webp"
+    ],
+    "isFeatured": false,
+    "sortOrder": 8
+  },
+  {
+    "id": "9",
+    "slug": "9",
+    "title": {
+      "ua": "3D-модель «Тисячолітнього сокола»",
+      "en": "Millennium Falcon 3D Model"
+    },
+    "title_ua": "3D-модель «Тисячолітнього сокола»",
+    "title_en": "Millennium Falcon 3D Model",
+    "client": {
+      "ua": "—",
+      "en": "N/A"
+    },
+    "client_ua": "—",
+    "client_en": "N/A",
+    "category": "3d-render",
+    "categoryLabel": {
+      "ua": "3D Modeling",
+      "en": "3D Modeling"
+    },
+    "status": "концепт",
+    "statusLabel": {
+      "ua": "Концепт",
+      "en": "Concept"
+    },
+    "statusBadgeLabel": {
+      "ua": "Концепт",
+      "en": "Concept"
+    },
+    "role": {
+      "ua": "3D-моделер",
+      "en": "3D Modeler"
+    },
+    "timeline": "2018",
+    "tagline": {
+      "ua": "Деталізована високополігональна 3D-модель легендарного корабля Millennium Falcon.",
+      "en": "Detailed high-poly 3D model of the legendary Millennium Falcon spaceship."
+    },
+    "description": {
+      "ua": "Створення високополігональної 3D-моделі легендарного корабля Millennium Falcon із всесвіту Star Wars. Робота велася на основі детальних візуальних референсів, концепт-артів та креслень. Особливу увагу приділено текстурам, опрацюванню дрібних деталей корпусу та відтворенню автентичної атмосфери кінофраншизи.",
+      "en": "Creation of a high-poly 3D model of the legendary Millennium Falcon spaceship from the Star Wars universe. The work was based on detailed visual references, concept art, and blueprints. Special attention was paid to textures, detailing of the hull, and recreating the authentic atmosphere of the film franchise."
+    },
+    "problemStatement": {
+      "ua": "Відтворити надзвичайно складну геометрію та деталізацію (greebles) легендарного кінокорабля, зберігаючи точність пропорцій за візуальними референсами.",
+      "en": "Recreate the highly complex geometry and detailing (greebles) of the legendary cinematic spaceship, maintaining accurate proportions based on visual references."
+    },
+    "solution": {
+      "ua": "Виконано скрупульозне моделювання корпусу з високою деталізацією технічних елементів на основі автентичних кінематографічних референсів.",
+      "en": "Performed meticulous modeling of the hull with high detailing of technical elements based on authentic cinematic references."
+    },
+    "businessImpact": {
+      "ua": "Робота підтверджує навички точного відтворення надскладної геометрії за референсами та високу увагу до найдрібніших деталей у 3D-середовищі.",
+      "en": "The work confirms the skills of accurately recreating highly complex geometry from references and high attention to the smallest details in a 3D environment."
+    },
+    "toolsUsed": [
+      "Autodesk 3ds Max"
+    ],
+    "designSystem": {
+      "fonts": [
+        "—"
+      ],
+      "colors": []
+    },
+    "thumbnailUrl": "/projects/mfalcon-3d.webp",
+    "galleryUrls": [
+      "/projects/mfalcon-3d.webp"
+    ],
+    "isFeatured": true,
+    "sortOrder": 9
+  },
+  {
+    "id": "10",
+    "slug": "10",
+    "title": {
+      "ua": "Вебзастосунок Cosmopedia",
+      "en": "Cosmopedia Web App"
+    },
+    "title_ua": "Вебзастосунок Cosmopedia",
+    "title_en": "Cosmopedia Web App",
+    "client": {
+      "ua": "—",
+      "en": "N/A"
+    },
+    "client_ua": "—",
+    "client_en": "N/A",
+    "category": "ui-ux",
+    "categoryLabel": {
+      "ua": "UI/UX / EdTech",
+      "en": "UI/UX Product"
+    },
+    "status": "концепт",
+    "statusLabel": {
+      "ua": "Концепт",
+      "en": "Concept"
+    },
+    "statusBadgeLabel": {
+      "ua": "Концепт",
+      "en": "Concept"
+    },
+    "role": {
+      "ua": "UI/UX-дизайнер",
+      "en": "UI/UX Designer"
+    },
+    "timeline": "2020",
+    "tagline": {
+      "ua": "Інтерактивний освітній вебзастосунок для дослідження масштабів Всесвіту.",
+      "en": "Interactive educational web application for exploring the scale of the universe."
+    },
+    "description": {
+      "ua": "Концепт інтерактивної освітньої енциклопедії, яка візуалізує розміри об'єктів Всесвіту від квантового до мегамасштабу. Інтерфейс дозволяє користувачеві зручно скролити та наочно порівнювати габарити всього існуючого: від планківської довжини та кварків до розмірів галактик і надскупчень.",
+      "en": "An interactive educational encyclopedia concept that visualizes the sizes of objects in the Universe from the quantum to the mega-scale. The interface allows users to easily scroll and visually compare the dimensions of everything in existence: from the Planck length and quarks to the sizes of galaxies and superclusters."
+    },
+    "problemStatement": {
+      "ua": "Розробити зрозумілу навігацію та візуальну мову для безшовного відображення колосального діапазону масштабів (від квантів до галактик) в єдиному інтерфейсі.",
+      "en": "Develop clear navigation and visual language for the seamless display of a colossal range of scales (from quanta to galaxies) in a single interface."
+    },
+    "solution": {
+      "ua": "Створено інтерактивний інтерфейс зі зручним скролінгом, який забезпечує плавний перехід та наочне порівняння об'єктів від квантового світу до макрокосмосу.",
+      "en": "Created an interactive interface with convenient scrolling, ensuring smooth transitions and visual comparisons of objects from the quantum world to the macrocosm."
+    },
+    "businessImpact": {
+      "ua": "Концепт презентує інноваційний підхід до UX-архітектури, показуючи, як колосальні масиви наукових даних можуть бути легко сприйняті через грамотну інтерактивну візуалізацію.",
+      "en": "The concept presents an innovative approach to UX architecture, showing how colossal arrays of scientific data can be easily perceived through competent interactive visualization."
+    },
+    "toolsUsed": [
+      "Figma"
+    ],
+    "designSystem": {
+      "fonts": [
+        "Ubuntu"
+      ],
+      "fontsDescription": {
+        "ua": "Технологічний, але водночас м'який шрифт, який робить складні наукові дані візуально привітнішими.",
+        "en": "A technological yet soft typeface that makes complex scientific data visually approachable."
+      },
+      "colors": [
+        {
+          "name": "Color 1",
+          "hex": "#10ADB7"
+        },
+        {
+          "name": "Color 2",
+          "hex": "#3F00FF"
+        },
+        {
+          "name": "Color 3",
+          "hex": "#FFFF00"
+        }
+      ],
+      "colorsDescription": {
+        "ua": "Неонові акценти на темному тлі символізують технологічність, світло зірок та передовий науковий підхід до дослідження мікро- та макросвітів.",
+        "en": "Neon accents on a dark background symbolize technological advancement, starlight, and a cutting-edge scientific approach to exploring the micro- and macrocosm."
+      }
+    },
+    "thumbnailUrl": "/projects/cosmopedia-app.webp",
+    "galleryUrls": [
+      "/projects/cosmopedia-app.webp"
+    ],
+    "isFeatured": true,
+    "sortOrder": 10
+  },
+  {
+    "id": "11",
+    "slug": "11",
+    "title": {
+      "ua": "Цифровий архів «Родоводи шляхти»",
+      "en": "Nobility Genealogy Digital Archive"
+    },
+    "title_ua": "Цифровий архів «Родоводи шляхти»",
+    "title_en": "Nobility Genealogy Digital Archive",
+    "client": {
+      "ua": "—",
+      "en": "N/A"
+    },
+    "client_ua": "—",
+    "client_en": "N/A",
+    "category": "ui-ux",
+    "categoryLabel": {
+      "ua": "UI/UX / Web Design",
+      "en": "UI/UX / Web Design"
+    },
+    "status": "реалізовані-продакшн",
+    "statusLabel": {
+      "ua": "Реалізовані (Продакшн)",
+      "en": "Live (Production)"
+    },
+    "statusBadgeLabel": {
+      "ua": "Реалізовані (Продакшн)",
+      "en": "Live (Production)"
+    },
+    "role": {
+      "ua": "UI/UX-дизайнер",
+      "en": "UI/UX Designer"
+    },
+    "timeline": "2026",
+    "tagline": {
+      "ua": "Вебплатформа для збереження та дослідження генеалогії шляхетних родів.",
+      "en": "Web platform for preserving and researching the genealogy of noble families."
+    },
+    "description": {
+      "ua": "Розробка UI/UX дизайну для цифрового архіву поколінних розписів. Інтерфейс сфокусовано на чистій типографіці та грамотній структурі текстових блоків, що забезпечує зручне читання та зрозумілу навігацію родинними деревами.",
+      "en": "UI/UX design development for a digital archive of genealogical records. The interface focuses on clean typography and well-structured text blocks, ensuring convenient reading and clear navigation through family trees."
+    },
+    "problemStatement": {
+      "ua": "Спроєктувати зручний текстовий інтерфейс для багаторівневої генеалогічної інформації, забезпечивши легке зчитування поколінних розписів без візуального перевантаження.",
+      "en": "Design a user-friendly text interface for multi-level genealogical information, ensuring easy reading of generational charts without visual clutter."
+    },
+    "solution": {
+      "ua": "Розроблено мінімалістичний дизайн із чіткою типографічною ієрархією та системою відступів, що візуально структурує складні текстові списки та робить їх зручними для сканування.",
+      "en": "Developed a minimalist design with a clear typographic hierarchy and spacing system, visually structuring complex text lists and making them easy to scan."
+    },
+    "businessImpact": {
+      "ua": "Спроєктовано чистий текстовий інтерфейс, який завдяки продуманій типографіці та системі відступів структурує багаторівневі дані, роблячи поколінні розписи зручними для читання та сканування.",
+      "en": "A clean text interface was designed, which, thanks to thoughtful typography and a spacing system, structures multi-level data, making generational charts easy to read and scan."
+    },
+    "toolsUsed": [
+      "Google AI Studio"
+    ],
+    "designSystem": {
+      "fonts": [
+        "Playfair Display",
+        "Inter"
+      ],
+      "fontsDescription": {
+        "ua": "Playfair Display транслює історичну елегантність у заголовках, а Inter ідеально структурує масиви даних.",
+        "en": "Playfair Display conveys historical elegance in headings, while Inter perfectly structures large datasets."
+      },
+      "colors": [
+        {
+          "name": "Color 1",
+          "hex": "#8B0000"
+        },
+        {
+          "name": "Color 2",
+          "hex": "#C5A059"
+        },
+        {
+          "name": "Color 3",
+          "hex": "#2B2B2B"
+        }
+      ],
+      "colorsDescription": {
+        "ua": "Поєднання глибокого бордового, золотого та графітового символізує шляхетність, аристократизм та повагу до історичної спадщини.",
+        "en": "The combination of deep burgundy, gold, and graphite symbolizes nobility, aristocracy, and respect for historical heritage."
+      }
+    },
+    "thumbnailUrl": "/projects/rodovody-archive.webp",
+    "galleryUrls": [
+      "/projects/rodovody-archive.webp"
+    ],
+    "liveLink": "https://rodowod.vercel.app/?lang=ua",
+    "isFeatured": false,
+    "sortOrder": 11
+  },
+  {
+    "id": "12",
+    "slug": "12",
+    "title": {
+      "ua": "Айдентика конференції з дизайну",
+      "en": "Design Conference Identity"
+    },
+    "title_ua": "Айдентика конференції з дизайну",
+    "title_en": "Design Conference Identity",
+    "client": {
+      "ua": "Національний університет «Львівська політехніка»",
+      "en": "Lviv Polytechnic National University"
+    },
+    "client_ua": "Національний університет «Львівська політехніка»",
+    "client_en": "Lviv Polytechnic National University",
+    "category": "branding",
+    "categoryLabel": {
+      "ua": "Event Identity / Print",
+      "en": "Identity & Posters"
+    },
+    "status": "реалізовані-продакшн",
+    "statusLabel": {
+      "ua": "Реалізовані (Продакшн)",
+      "en": "Live (Production)"
+    },
+    "statusBadgeLabel": {
+      "ua": "Реалізовані (Продакшн)",
+      "en": "Live (Production)"
+    },
+    "role": {
+      "ua": "Графічний дизайнер",
+      "en": "Graphic Designer"
+    },
+    "timeline": "2022",
+    "tagline": {
+      "ua": "Айдентика всеукраїнської науково-практичної конференції.",
+      "en": "Visual identity for an all-Ukrainian scientific and practical conference."
+    },
+    "description": {
+      "ua": "Комплексна візуальна ідентифікація для всеукраїнської науково-практичної конференції «Теорія та практика дизайну: Нові виклики в умовах війни» в Національному університеті «Львівська політехніка». Розроблена айдентика включає логотип та поліграфічні матеріали, які відображають сучасні виклики дизайну в умовах війни, зберігаючи строгу академічну естетику заходу.",
+      "en": "Comprehensive visual identity for the all-Ukrainian scientific and practical conference \"Theory and Practice of Design: New Challenges in Wartime\" at Lviv Polytechnic National University. The developed identity includes a logo and printed materials reflecting modern design challenges in wartime while maintaining the strict academic aesthetics of the event."
+    },
+    "problemStatement": {
+      "ua": "Створити візуальну ідентичність, яка б органічно поєднувала академічну строгість наукового заходу із відображенням сучасних воєнних реалій.",
+      "en": "Create a visual identity that organically combines the academic strictness of a scientific event with the reflection of modern wartime realities."
+    },
+    "solution": {
+      "ua": "Розроблено комплексну візуальну систему, яка поєднує строгу академічну подачу з актуальними візуальними метафорами викликів воєнного часу.",
+      "en": "Developed a comprehensive visual system combining a strict academic presentation with relevant visual metaphors of wartime challenges."
+    },
+    "businessImpact": {
+      "ua": "Забезпечено професійне візуальне супроводження реальної події, що підкреслило її академічний статус та допомогло ефективно комунікувати із великою кількістю учасників.",
+      "en": "Professional visual support for a real event was provided, which emphasized its academic status and helped effectively communicate with a large number of participants."
+    },
+    "toolsUsed": [
+      "Adobe Illustrator"
+    ],
+    "designSystem": {
+      "fonts": [
+        "Inter",
+        "Bahnshift"
+      ],
+      "fontsDescription": {
+        "ua": "Bahnschrift задає строгий індустріальний тон воєнних викликів, який гармонійно врівноважується нейтральним Inter.",
+        "en": "Bahnschrift sets a strict industrial tone for wartime challenges, harmoniously balanced by the neutral Inter."
+      },
+      "colors": [
+        {
+          "name": "Color 1",
+          "hex": "#49453A"
+        }
+      ],
+      "colorsDescription": {
+        "ua": "Приглушений хакі символізує суворі реалії воєнного часу, відображаючи стійкість українського суспільства та актуальний контекст для дизайну.",
+        "en": "The muted khaki symbolizes the harsh realities of wartime, reflecting the resilience of Ukrainian society and the current context for design."
+      }
+    },
+    "thumbnailUrl": "/projects/conference-identity.webp",
+    "galleryUrls": [
+      "/projects/conference-identity.webp"
+    ],
+    "isFeatured": false,
+    "sortOrder": 12
+  },
+  {
+    "id": "13",
+    "slug": "13",
+    "title": {
+      "ua": "Мобільний застосунок Kavomolka",
+      "en": "Kavomolka Mobile App"
+    },
+    "title_ua": "Мобільний застосунок Kavomolka",
+    "title_en": "Kavomolka Mobile App",
+    "client": {
+      "ua": "Кавомолка",
+      "en": "Kavomolka"
+    },
+    "client_ua": "Кавомолка",
+    "client_en": "Kavomolka",
+    "category": "ui-ux",
+    "categoryLabel": {
+      "ua": "UI/UX / Mobile App",
+      "en": "UI/UX Product"
+    },
+    "status": "реалізовані-продакшн",
+    "statusLabel": {
+      "ua": "Реалізовані (Продакшн)",
+      "en": "Live (Production)"
+    },
+    "statusBadgeLabel": {
+      "ua": "Реалізовані (Продакшн)",
+      "en": "Live (Production)"
+    },
+    "role": {
+      "ua": "UI/UX-дизайнер",
+      "en": "UI/UX Designer"
+    },
+    "timeline": "2024",
+    "tagline": {
+      "ua": "Деталізований користувацький флоу мобільного застосунку для кав'ярні з програмою лояльності.",
+      "en": "Detailed user flow for a coffee shop mobile app with a loyalty program."
+    },
+    "description": {
+      "ua": "Проєктування повноцінного UX/UI для мобільного застосунку мережі кав'ярень. Робота охоплює створення деталізованих схем переходів (user flow), екранів реєстрації, меню замовлень та інтеграцію програми лояльності. Інтерфейс сфокусований на швидкому та інтуїтивному процесі купівлі кави чи випічки зі смартфона.",
+      "en": "Designing a complete UX/UI for a coffee shop chain's mobile application. The work covers the creation of detailed transition schemes (user flow), registration screens, order menus, and loyalty program integration. The interface is focused on a fast and intuitive process of purchasing coffee or pastries from a smartphone."
+    },
+    "problemStatement": {
+      "ua": "Продумати безшовний користувацький досвід та логіку взаємодії, щоб максимально спростити та пришвидшити процес замовлення кави зі смартфона.",
+      "en": "Design a seamless user experience and interaction logic to maximally simplify and speed up the coffee ordering process from a smartphone."
+    },
+    "solution": {
+      "ua": "Створено деталізовані схеми переходів та інтуїтивні інтерфейси відповідних екранів для максимально швидкого оформлення замовлення та використання бонусів.",
+      "en": "Created detailed transition flows and intuitive interfaces for the respective screens to maximize the speed of placing an order and using bonuses."
+    },
+    "businessImpact": {
+      "ua": "Деталізований UX-флоу дозволив розробникам швидко імплементувати дизайн, а бізнесу — отримати діючий мобільний інструмент для підвищення лояльності та продажів.",
+      "en": "The detailed UX flow allowed developers to quickly implement the design, and the business to receive a working mobile tool for increasing loyalty and sales."
+    },
+    "toolsUsed": [
+      "Figma"
+    ],
+    "designSystem": {
+      "fonts": [
+        "Lato"
+      ],
+      "fontsDescription": {
+        "ua": "Чистий та теплий гротеск, що допомагає перенести дружню та затишну атмосферу кав'ярні у цифровий формат.",
+        "en": "A clean and warm sans-serif that helps translate the friendly and cozy coffee shop atmosphere into a digital format."
+      },
+      "colors": [
+        {
+          "name": "Color 1",
+          "hex": "#187453"
+        },
+        {
+          "name": "Color 2",
+          "hex": "#3A3A3A"
+        }
+      ],
+      "colorsDescription": {
+        "ua": "Глибокий зелений колір символізує натуральність кавових зерен та екологічність, передаючи атмосферу спокою і затишку кав'ярні.",
+        "en": "The deep green color symbolizes the naturalness of coffee beans and eco-friendliness, conveying the calm and cozy atmosphere of a coffee shop."
+      }
+    },
+    "thumbnailUrl": "/projects/kavomolka-app.webp",
+    "mobileThumbnailUrl": "/projects/kavomolka-app.webp",
+    "mobilePreviewUrl": "/projects/kavomolka-app.webp",
+    "galleryUrls": [],
+    "mobileGalleryUrls": [
+      "/projects/kavomolka-app.webp"
+    ],
+    "figmaUrl": "https://www.figma.com/design/crKf8UWo40COKK2aT6ggBX/KAVOMOLKA?node-id=1-56283&t=wgGCFjO5QnCGh7m5-4",
+    "figmaEmbedUrl": "https://embed.figma.com/design/crKf8UWo40COKK2aT6ggBX/KAVOMOLKA?node-id=1-56283&embed-host=share",
+    "isFeatured": false,
+    "sortOrder": 13
+  },
+  {
+    "id": "14",
+    "slug": "14",
+    "title": {
+      "ua": "Лендинг лікаря-стоматолога",
+      "en": "Dentist Landing Page"
+    },
+    "title_ua": "Лендинг лікаря-стоматолога",
+    "title_en": "Dentist Landing Page",
+    "client": {
+      "ua": "Лікар Уляна Чернієнко",
+      "en": "Dr. Uliana Cherniienko"
+    },
+    "client_ua": "Лікар Уляна Чернієнко",
+    "client_en": "Dr. Uliana Cherniienko",
+    "category": "ui-ux",
+    "categoryLabel": {
+      "ua": "UI/UX / Web Design",
+      "en": "UI/UX / Web Design"
+    },
+    "status": "концепт",
+    "statusLabel": {
+      "ua": "Концепт",
+      "en": "Concept"
+    },
+    "statusBadgeLabel": {
+      "ua": "Концепт",
+      "en": "Concept"
+    },
+    "role": {
+      "ua": "UI/UX-дизайнер",
+      "en": "UI/UX Designer"
+    },
+    "timeline": "2024",
+    "tagline": {
+      "ua": "Дизайн лендингу для просування послуг професійної гігієни зубів.",
+      "en": "Landing page design promoting professional dental hygiene services."
+    },
+    "description": {
+      "ua": "Розробка дизайну лендингу для лікаря-пародонтолога. Сторінка спроєктована з акцентом на довіру та професіоналізм, включаючи блоки з презентацією послуг, відгуками та формою запису. Чистий медичний UI з легкими акцентними кольорами допомагає пацієнтам швидко знаходити потрібну інформацію.",
+      "en": "Landing page design development for a periodontist. The page is designed with an emphasis on trust and professionalism, including service presentation blocks, reviews, and an appointment booking form. The clean medical UI with light accent colors helps patients quickly find the necessary information."
+    },
+    "problemStatement": {
+      "ua": "Створити привітний та зрозумілий медичний інтерфейс, який зніматиме тривожність пацієнтів, формуватиме довіру до лікаря та стимулюватиме до запису на прийом.",
+      "en": "Create a welcoming and clear medical interface that reduces patient anxiety, builds trust in the doctor, and encourages appointment bookings."
+    },
+    "solution": {
+      "ua": "Використано чистий світлий UI з медичними блакитними відтінками, структуровано блоки послуг та додано соціальні докази з простою формою для швидкого запису.",
+      "en": "Used a clean, light UI with medical blue hues, structuring service blocks and adding social proof along with a simple form for quick appointment booking."
+    },
+    "businessImpact": {
+      "ua": "Створено продуманий прототип інструменту лідогенерації, який демонструє розуміння медичної ніші та способів підвищення довіри пацієнтів через чистий UI.",
+      "en": "A well-thought-out prototype of a lead generation tool was created, demonstrating an understanding of the medical niche and ways to increase patient trust through a clean UI."
+    },
+    "toolsUsed": [
+      "Figma"
+    ],
+    "designSystem": {
+      "fonts": [
+        "Montserrat"
+      ],
+      "fontsDescription": {
+        "ua": "Створює відчуття чистоти, стерильності та професіоналізму, що є критично необхідним для медичного UI.",
+        "en": "Creates a sense of cleanliness, sterility, and professionalism, which is critical for a medical UI."
+      },
+      "colors": [
+        {
+          "name": "Color 1",
+          "hex": "#02404F"
+        },
+        {
+          "name": "Color 2",
+          "hex": "#FFC700"
+        },
+        {
+          "name": "Color 3",
+          "hex": "#3E6C8F"
+        }
+      ],
+      "colorsDescription": {
+        "ua": "Синьо-блакитна палітра символізує стерильність, медичну безпеку та спокій, допомагаючи зняти тривожність пацієнтів перед прийомом.",
+        "en": "The blue and cyan palette symbolizes sterility, medical safety, and calmness, helping to relieve patient anxiety before an appointment."
+      }
+    },
+    "thumbnailUrl": "/projects/dentist-landing-page-d.webp",
+    "mobileThumbnailUrl": "/projects/dentist-landing-page-m.webp",
+    "mobilePreviewUrl": "/projects/dentist-landing-page-m.webp",
+    "galleryUrls": [
+      "/projects/dentist-landing-page-d.webp"
+    ],
+    "mobileGalleryUrls": [
+      "/projects/dentist-landing-page-m.webp"
+    ],
+    "figmaUrl": "https://www.figma.com/design/LtO0hLZxnX9MgKLwyveMJm/%D0%9F%D1%80%D0%BE%D1%84%D0%B5%D1%81%D1%96%D0%B9%D0%BD%D0%B0-%D0%93%D1%96%D0%B3%D1%96%D1%94%D0%BD%D0%B0?node-id=1-118&t=gbofnTWIJx30Sreg-4",
+    "figmaEmbedUrl": "https://embed.figma.com/design/LtO0hLZxnX9MgKLwyveMJm/%D0%9F%D1%80%D0%BE%D1%84%D0%B5%D1%81%D1%96%D0%B9%D0%BD%D0%B0-%D0%93%D1%96%D0%B3%D1%96%D1%94%D0%BD%D0%B0?node-id=1-118&embed-host=share",
+    "isFeatured": false,
+    "sortOrder": 14
+  },
+  {
+    "id": "15",
+    "slug": "15",
+    "title": {
+      "ua": "LUNA e-commerce",
+      "en": "LUNA E-commerce"
+    },
+    "title_ua": "LUNA e-commerce",
+    "title_en": "LUNA E-commerce",
+    "client": {
+      "ua": "—",
+      "en": "N/A"
+    },
+    "client_ua": "—",
+    "client_en": "N/A",
+    "category": "ui-ux",
+    "categoryLabel": {
+      "ua": "UI/UX / E-commerce",
+      "en": "UI/UX Product"
+    },
+    "status": "концепт",
+    "statusLabel": {
+      "ua": "Концепт",
+      "en": "Concept"
+    },
+    "statusBadgeLabel": {
+      "ua": "Концепт",
+      "en": "Concept"
+    },
+    "role": {
+      "ua": "UI/UX-дизайнер",
+      "en": "UI/UX Designer"
+    },
+    "timeline": "2020",
+    "tagline": {
+      "ua": "Дизайн мобільної версії інтернет-магазину домашнього текстилю.",
+      "en": "Mobile UX/UI design for a home textile e-commerce store."
+    },
+    "description": {
+      "ua": "Створення мобільного UI/UX дизайну для інтернет-магазину домашнього текстилю LUNA. Опрацьовано ключові сторінки для забезпечення належного рівня користувацького досвіду: від зручної головної сторінки з каталогом до кошика та процесу чекауту. Мінімалістичний інтерфейс підкреслює естетику товарів та забезпечує безшовний досвід мобільних покупок.",
+      "en": "Creation of a mobile UI/UX design for the LUNA home textile online store. Key pages were developed to ensure a high level of user experience: from a convenient homepage with a catalog to the shopping cart and checkout process. The minimalist interface emphasizes the aesthetics of the products and provides a seamless mobile shopping experience."
+    },
+    "problemStatement": {
+      "ua": "Оптимізувати e-commerce інтерфейс для мобільних пристроїв, створивши зручну навігацію каталогом та максимально простий процес оформлення замовлення.",
+      "en": "Optimize the e-commerce interface for mobile devices by creating convenient catalog navigation and the simplest possible checkout process."
+    },
+    "solution": {
+      "ua": "Спроєктовано мінімалістичний мобільний інтерфейс зі зручним бургер-меню, акцентом на естетиці товарів та оптимізованим односторінковим процесом чекауту.",
+      "en": "Designed a minimalist mobile interface featuring a convenient hamburger menu, an emphasis on product aesthetics, and an optimized single-page checkout process."
+    },
+    "businessImpact": {
+      "ua": "Візуальний концепт показує ефективне вирішення типових проблем мобільного e-commerce: оптимізацію навігації каталогом та зменшення бар'єрів при оформленні замовлення.",
+      "en": "The visual concept shows an effective solution to typical mobile e-commerce problems: optimizing catalog navigation and reducing barriers during checkout."
+    },
+    "toolsUsed": [
+      "Figma"
+    ],
+    "designSystem": {
+      "fonts": [
+        "Philosopher",
+        "Montserrat"
+      ],
+      "fontsDescription": {
+        "ua": "Philosopher додає естетичної витонченості домашньому текстилю, а Montserrat відповідає за зручний мобільний UI.",
+        "en": "Philosopher adds aesthetic refinement for home textiles, while Montserrat ensures a convenient mobile UI."
+      },
+      "colors": [
+        {
+          "name": "Color 1",
+          "hex": "#2E4E4D"
+        },
+        {
+          "name": "Color 2",
+          "hex": "#96C9DA"
+        },
+        {
+          "name": "Color 3",
+          "hex": "#F0F5FF"
+        }
+      ],
+      "colorsDescription": {
+        "ua": "М'які, приглушені пастельні тони символізують домашній затишок, ніжність текстильних матеріалів та спокійний відпочинок.",
+        "en": "Soft, muted pastel tones symbolize home comfort, the tenderness of textile materials, and peaceful relaxation."
+      }
+    },
+    "thumbnailUrl": "/projects/luna-m.webp",
+    "mobileThumbnailUrl": "/projects/luna-m.webp",
+    "mobilePreviewUrl": "/projects/luna-m.webp",
+    "galleryUrls": [],
+    "mobileGalleryUrls": [
+      "/projects/luna-m.webp"
+    ],
+    "figmaUrl": "https://www.figma.com/design/u72RbUgBD3zZv7ov8QXHpo/Ecommerce-LUNA--mobile-version-?node-id=0-43&t=4SoJ2oKxbofHnQ8S-4",
+    "figmaEmbedUrl": "https://embed.figma.com/design/u72RbUgBD3zZv7ov8QXHpo/Ecommerce-LUNA--mobile-version-?node-id=0-43&embed-host=share",
+    "isFeatured": false,
+    "sortOrder": 15
+  },
+  {
+    "id": "16",
+    "slug": "16",
+    "title": {
+      "ua": "B2B платформа Parad Obuvi",
+      "en": "Parad Obuvi B2B Platform"
+    },
+    "title_ua": "B2B платформа Parad Obuvi",
+    "title_en": "Parad Obuvi B2B Platform",
+    "client": {
+      "ua": "Парад Взуття",
+      "en": "Parad Obuvi"
+    },
+    "client_ua": "Парад Взуття",
+    "client_en": "Parad Obuvi",
+    "category": "ui-ux",
+    "categoryLabel": {
+      "ua": "UI/UX / E-commerce (B2B)",
+      "en": "UI/UX Product"
+    },
+    "status": "реалізовані-продакшн",
+    "statusLabel": {
+      "ua": "Реалізовані (Продакшн)",
+      "en": "Live (Production)"
+    },
+    "statusBadgeLabel": {
+      "ua": "Реалізовані (Продакшн)",
+      "en": "Live (Production)"
+    },
+    "role": {
+      "ua": "UI/UX-дизайнер",
+      "en": "UI/UX Designer"
+    },
+    "timeline": "2023",
+    "tagline": {
+      "ua": "Дизайн гуртової B2B-платформи взуття зі складною системою замовлень.",
+      "en": "B2B e-commerce design for a wholesale shoe brand featuring a complex ordering system."
+    },
+    "description": {
+      "ua": "Комплексний UI/UX редизайн оптового B2B-майданчика Parad Obuvi. Опрацьовано розгалужену систему користувацьких сценаріїв: від складної фільтрації та сторінок категорій до багатокрокового кошика. Інтерфейси враховують специфіку гуртових закупівель, включаючи логіку замовлення півящиків, керування шаблонами замовлення та адаптивні мобільні версії.",
+      "en": "A comprehensive UI/UX redesign of the wholesale B2B platform Parad Obuvi. An extensive system of user scenarios was developed: from complex filtering and category pages to a multi-step cart. The interfaces consider the specifics of wholesale purchases, including half-box ordering logic, order template management, and adaptive mobile versions."
+    },
+    "problemStatement": {
+      "ua": "Спростити обробку складних B2B-даних (оптові партії, комплектація коробок) та розробити зрозумілі користувацькі сценарії для масових гуртових закупівель.",
+      "en": "Simplify the processing of complex B2B data (wholesale batches, box configurations) and develop clear user scenarios for mass wholesale purchases."
+    },
+    "solution": {
+      "ua": "Реалізовано гнучку систему карток товарів для опту, зручний кабінет користувача та адаптивну таблицю замовлень з чіткою індикацією статусів оплати й логістики.",
+      "en": "Implemented a flexible wholesale product card system, a convenient user dashboard, and an adaptive order table with clear indication of payment and logistics statuses."
+    },
+    "businessImpact": {
+      "ua": "Впроваджений редизайн суттєво знизив когнітивне навантаження на клієнтів, зменшив кількість помилок при замовленнях та оптимізував процеси обробки гуртових закупівель.",
+      "en": "The implemented redesign significantly reduced the cognitive load on clients, decreased the number of order errors, and optimized wholesale purchase processing."
+    },
+    "toolsUsed": [
+      "Figma"
+    ],
+    "designSystem": {
+      "fonts": [
+        "Montserrat"
+      ],
+      "fontsDescription": {
+        "ua": "Універсальний шрифт із високою читабельністю, який ідеально впорядковує складні B2B-таблиці без зайвого візуального шуму.",
+        "en": "A highly readable, versatile typeface that perfectly organizes complex B2B tables without visual noise."
+      },
+      "colors": [
+        {
+          "name": "Color 1",
+          "hex": "#F0F5FF"
+        },
+        {
+          "name": "Color 2",
+          "hex": "#282828"
+        }
+      ],
+      "colorsDescription": {
+        "ua": "Світлий монохромний фон символізує прозорість бізнес-процесів, системність та порядок, необхідні для серйозної B2B-платформи.",
+        "en": "The light monochrome background symbolizes the transparency of business processes, systematicity, and order necessary for a serious B2B platform."
+      }
+    },
+    "thumbnailUrl": "/projects/parad-obuvi-d.webp",
+    "galleryUrls": [
+      "/projects/parad-obuvi-d.webp"
+    ],
+    "figmaUrl": "https://www.figma.com/design/8FRCLOq6KsmZH7T8CqYtKx/Parad-Vzuttia?node-id=1-91658&t=2EN4LZdr1ybSptWs-4",
+    "figmaEmbedUrl": "https://embed.figma.com/design/8FRCLOq6KsmZH7T8CqYtKx/Parad-Vzuttia?node-id=1-91658&embed-host=share",
+    "isFeatured": false,
+    "sortOrder": 16
   }
 ];
 
@@ -581,8 +1701,8 @@ export const DEFAULT_EXPERIENCE: ExperienceItem[] = [
       en: 'Kyiv / Remote'
     },
     role: {
-      ua: 'Lead UI/UX Architect & Art Director',
-      en: 'Lead UI/UX Architect & Art Director'
+      ua: 'Lead UI/UX Designer & Architect',
+      en: 'Lead UI/UX Designer & Architect'
     },
     period: {
       ua: '2023 — Зараз',
@@ -597,7 +1717,7 @@ export const DEFAULT_EXPERIENCE: ExperienceItem[] = [
       en: [
         'Directing UI/UX architecture and visual strategy for high-stakes fintech and enterprise clients across EU & US.',
         'Architecting multi-brand design systems with unified design tokens for 30+ engineer cross-functional squads.',
-        'Infusing quantitative product metrics (SUS, CSAT, task latency) into award-winning art direction.'
+        'Infusing quantitative product metrics (SUS, CSAT, task latency) into high-fidelity design execution.'
       ]
     },
     technologies: ['Figma', 'Design Systems', 'Design Tokens', 'Next.js', 'Awwwards Mentorship']
@@ -647,8 +1767,8 @@ export const DEFAULT_EXPERIENCE: ExperienceItem[] = [
       en: 'Kyiv'
     },
     role: {
-      ua: 'Art Direction & Digital Design Honors',
-      en: 'Art Direction & Digital Design Honors'
+      ua: 'Digital & Interactive Design Honors',
+      en: 'Digital & Interactive Design Honors'
     },
     period: {
       ua: '2019 — 2021',
@@ -790,7 +1910,7 @@ export const DEFAULT_LEGAL_AND_BANNERS: LegalAndBannersData = {
         },
         content: {
           ua: 'Ця Політика конфіденційності регламентує порядок обробки та захисту персональних даних користувачів персонального вебсайту та цифрового портфоліо UI/UX дизайнера Івана Селіванова. Ми поважаємо вашу приватність і прагнемо забезпечити найвищий рівень безпеки та прозорості під час взаємодії з нашими ресурсами.',
-          en: 'This Privacy Policy governs the processing and safeguarding of personal data collected through the digital portfolio and portfolio website of Art Director & UI/UX Architect Ivan Selivanov. We hold user privacy to the highest standard and implement minimal-footprint data practices across all client-side and server-side components.'
+          en: 'This Privacy Policy governs the processing and safeguarding of personal data collected through the digital portfolio and portfolio website of UI/UX Designer Ivan Selivanov. We hold user privacy to the highest standard and implement minimal-footprint data practices across all client-side and server-side components.'
         }
       },
       {

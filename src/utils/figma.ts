@@ -1,36 +1,73 @@
 /**
- * Utilities for Figma URLs and interactive embeds
+ * Utilities for Figma URLs and secure interactive embeds
  */
 
 /**
- * Checks if a string is a valid Figma URL (file, design, proto)
+ * Checks if a string is a valid, safe Figma URL (file, design, proto)
  */
 export function isFigmaUrl(url?: string | null): boolean {
   if (!url) return false;
-  const clean = String(url).trim().toLowerCase();
-  return clean.includes('figma.com/') || clean.includes('embed.figma.com/');
+  const clean = String(url).trim();
+  if (!clean) return false;
+
+  try {
+    const parsed = new URL(clean.startsWith('http') ? clean : `https://${clean}`);
+    const host = parsed.hostname.toLowerCase();
+    const isFigmaHost = host === 'figma.com' || host.endsWith('.figma.com');
+    return isFigmaHost && (parsed.protocol === 'https:' || parsed.protocol === 'http:');
+  } catch {
+    return false;
+  }
 }
 
 /**
- * Normalizes any Figma URL (share link, prototype link, design link) into an embeddable iframe src
+ * Sanitizes any external URL to prevent XSS (javascript:, data:, vbscript:)
+ */
+export function sanitizeUrl(url?: string | null, fallback: string = '#'): string {
+  if (!url) return fallback;
+  const clean = String(url).trim();
+  if (!clean || clean === '-' || clean === '–' || clean === '—') return fallback;
+
+  // Allow anchor hashes
+  if (clean.startsWith('#')) return clean;
+
+  try {
+    const parsed = new URL(clean.startsWith('http') || clean.startsWith('mailto:') || clean.startsWith('tel:') ? clean : `https://${clean}`);
+    if (['https:', 'http:', 'mailto:', 'tel:'].includes(parsed.protocol)) {
+      return parsed.toString();
+    }
+  } catch {
+    // URL parsing failed
+  }
+  return fallback;
+}
+
+/**
+ * Normalizes any Figma URL (share link, prototype link, design link) into a secure embeddable iframe src
  * Reference: https://www.figma.com/developers/embed
  */
 export function getFigmaEmbedSrc(rawUrl?: string | null): string | null {
-  if (!rawUrl) return null;
+  if (!rawUrl || !isFigmaUrl(rawUrl)) return null;
   const clean = String(rawUrl).trim();
-  if (!clean) return null;
 
-  // If already an embed url
-  if (clean.includes('embed.figma.com') || clean.includes('figma.com/embed')) {
-    return clean;
+  try {
+    const parsed = new URL(clean.startsWith('http') ? clean : `https://${clean}`);
+    const host = parsed.hostname.toLowerCase();
+
+    // If already a valid figma embed url
+    if (host === 'embed.figma.com') {
+      return parsed.toString();
+    }
+
+    // Standard figma.com URL (file, proto, design)
+    if (host === 'figma.com' || host === 'www.figma.com') {
+      return `https://embed.figma.com/proto?url=${encodeURIComponent(parsed.toString())}&scaling=contain&embed-host=share`;
+    }
+  } catch {
+    return null;
   }
 
-  // If it's a standard figma.com URL (file, proto, design)
-  if (clean.includes('figma.com/')) {
-    return `https://embed.figma.com/proto?url=${encodeURIComponent(clean)}&scaling=contain&embed-host=share`;
-  }
-
-  return clean;
+  return null;
 }
 
 /**
@@ -42,16 +79,17 @@ export function getFigmaDirectUrl(project: { figmaUrl?: string; figmaEmbedUrl?: 
   }
 
   // Extract from figmaEmbedUrl if it has &url=...
-  if (project.figmaEmbedUrl) {
+  if (project.figmaEmbedUrl && isFigmaUrl(project.figmaEmbedUrl)) {
     try {
       const parsed = new URL(project.figmaEmbedUrl);
       const targetUrl = parsed.searchParams.get('url');
-      if (targetUrl) return decodeURIComponent(targetUrl);
+      if (targetUrl && isFigmaUrl(targetUrl)) {
+        return decodeURIComponent(targetUrl);
+      }
+      if (project.figmaEmbedUrl.includes('embed.figma.com/proto/')) {
+        return project.figmaEmbedUrl.replace('embed.figma.com/proto/', 'www.figma.com/proto/');
+      }
     } catch {}
-    if (project.figmaEmbedUrl.includes('embed.figma.com/proto/')) {
-      const cleanProto = project.figmaEmbedUrl.replace('embed.figma.com/proto/', 'www.figma.com/proto/');
-      return cleanProto;
-    }
     return project.figmaEmbedUrl;
   }
 

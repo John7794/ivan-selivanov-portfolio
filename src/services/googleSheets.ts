@@ -24,6 +24,29 @@ export interface PortfolioData {
 
 export const DEFAULT_SHEETS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzWBH_tyMHYUEeaRM1u91hS1TWTKiQm3F2H6eFfQNN9oUBIKfbwZnF36kFERfZ9D1gLhA/exec';
 
+const LOCAL_PROJECT_IMAGE_MAP: Record<string, string> = {
+  '1': '/projects/conference-identity.webp',
+  '1.png': '/projects/rodovody-archive.webp',
+  'bee-protect-lp.webp': '/projects/bee-protect-lp.webp',
+  'cosmopedia.svg': '/projects/cosmopedia.svg',
+  'dentist-landing-page-d': '/projects/dentist-landing-page-d.webp',
+  'dentist-landing-page-m': '/projects/dentist-landing-page-m.webp',
+  'facebook-post-6.png': '/projects/facebook-post-6.webp',
+  'fundraising-lp.png': '/projects/fundraising-lp.webp',
+  'image-01.png': '/projects/cosmopedia-app.webp',
+  'inspace-logo.webp': '/projects/inspace-logo.webp',
+  'inspace-lp-d': '/projects/inspace-lp-d.webp',
+  'inspace-lp-m': '/projects/inspace-lp-m.webp',
+  'kavomolka': '/projects/kavomolka-app.webp',
+  'kavomolka.png': '/projects/kavomolka-app.webp',
+  'luna-m': '/projects/luna-m.webp',
+  'luna-m.jpg': '/projects/luna-m.webp',
+  'mfalcon-1.png': '/projects/mfalcon-3d.webp',
+  'muzei-saleziian-uhkts.webp': '/projects/muzei-saleziian.webp',
+  'parad-obuvi-d': '/projects/parad-obuvi-d.webp',
+  'project-passport-uk-pages-to-jpg-0001.jpg': '/projects/uk-passport-redesign.webp'
+};
+
 export function formatImageUrl(url: any, fallback?: string): string {
   if (!url) return fallback || '';
 
@@ -40,6 +63,19 @@ export function formatImageUrl(url: any, fallback?: string): string {
   }
 
   if (!cleanUrl) return fallback || '';
+
+  // Intercept jsDelivr or GitHub raw links pointing to this repo's assets and serve local high-speed optimized WebP
+  if (cleanUrl.includes('assets/projects/')) {
+    const filename = cleanUrl.split('assets/projects/')[1].split('?')[0].split('#')[0].trim();
+    if (LOCAL_PROJECT_IMAGE_MAP[filename]) {
+      return LOCAL_PROJECT_IMAGE_MAP[filename];
+    }
+    const cleanBasename = filename.replace(/\.(png|jpg|jpeg|webp)$/i, '');
+    if (LOCAL_PROJECT_IMAGE_MAP[cleanBasename]) {
+      return LOCAL_PROJECT_IMAGE_MAP[cleanBasename];
+    }
+    return `/projects/${cleanBasename}.webp`;
+  }
   
   // Extract ID from any Google Drive link
   let fileId = '';
@@ -63,7 +99,7 @@ export function formatImageUrl(url: any, fallback?: string): string {
   if (thumbMatch && thumbMatch[1]) fileId = thumbMatch[1];
   
   if (fileId) {
-    // =s0 instructs Google's edge CDN to render the image in full crystal-clear native resolution, preventing blurry previews
+    // =s0 instructs Google's edge CDN to render the image in full crystal-clear native resolution
     return `https://lh3.googleusercontent.com/d/${fileId}=s0`;
   }
 
@@ -71,12 +107,12 @@ export function formatImageUrl(url: any, fallback?: string): string {
   if (cleanUrl.includes('images.unsplash.com')) {
     let upgraded = cleanUrl;
     if (upgraded.includes('w=')) {
-      upgraded = upgraded.replace(/w=\d+/, 'w=3200');
+      upgraded = upgraded.replace(/w=\d+/, 'w=2400');
     } else {
-      upgraded += '&w=3200';
+      upgraded += '&w=2400';
     }
     if (upgraded.includes('q=')) {
-      upgraded = upgraded.replace(/q=\d+/, 'q=95');
+      upgraded = upgraded.replace(/q=\d+/, 'q=85');
     }
     return upgraded;
   }
@@ -2323,7 +2359,7 @@ export function getGeneralSheetTsvTemplate(): string {
     ['key', 'ua', 'en'],
     // 1. Profile & Bio
     ['name', 'Іван Селіванов', 'Ivan Selivanov'],
-    ['title', 'Артдиректор & UI/UX Архітектор', 'Art Director & UI/UX Architect'],
+    ['title', 'UI/UX Дизайнер', 'UI/UX Designer'],
     ['heroImage', '', ''],
     ['heroTag', 'Готовий до співпраці', 'Available for work'],
     ['heroTagline', 'Проєктую сучасні вебсайти та цифрові продукти, поєднуючи чисту візуальну естетику з продуманою логікою.', 'I design modern websites and digital products, combining clean visual aesthetics with thoughtful logic.'],

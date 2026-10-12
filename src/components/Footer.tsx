@@ -94,7 +94,8 @@ export const Footer: React.FC<FooterProps> = ({ settings, contacts, language, on
               <button
                 onClick={handleCopyEmail}
                 title={t.copyHint}
-                className="p-2 border border-[#0a0a0a]/20 hover:bg-[#0a0a0a] hover:text-white transition-colors cursor-pointer shrink-0"
+                aria-label={t.copyHint}
+                className="p-2 border border-[#0a0a0a]/20 hover:bg-[#0a0a0a] hover:text-white transition-colors cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900"
               >
                 {copiedEmail ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
               </button>

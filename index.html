@@ -1,14 +1,32 @@
 <!doctype html>
-<html lang="en">
+<html lang="uk" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>IS | Ivan Selivanov - UI/UX Architect</title>
-    <meta name="description" content="Portfolio of Ivan Selivanov, Art Director & UI/UX Architect. Awwwards-winning level design." />
-    <meta property="og:title" content="IS | Ivan Selivanov - UI/UX Architect" />
-    <meta property="og:description" content="Portfolio of Ivan Selivanov, Art Director & UI/UX Architect. Awwwards-winning level design." />
+    <title>Іван Селіванов | UI/UX Дизайнер</title>
+    <meta name="description" content="Портфоліо Івана Селіванова, UI/UX дизайнера (Львів, Україна). Проєктування зручних користувацьких інтерфейсів, вебсайтів, мобільних застосунків та дизайн-систем." />
+    <meta name="keywords" content="Іван Селіванов, Ivan Selivanov, UI/UX Designer, UI/UX Дизайнер, Product Designer, Design Systems, Figma, Web Design, Lviv, Ukraine, Portfolio" />
+    <meta name="author" content="Іван Селіванов" />
+    <link rel="canonical" href="https://ivanselivanov.com/" />
+
+    <!-- Open Graph / Facebook / LinkedIn / Telegram -->
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://ivanselivanov.com/" />
+    <meta property="og:site_name" content="Ivan Selivanov | Portfolio" />
+    <meta property="og:title" content="Іван Селіванов | UI/UX Дизайнер" />
+    <meta property="og:description" content="Портфоліо Івана Селіванова: інтерфейси, вебсайти, дизайн-системи та швейцарська типографіка." />
+    <meta property="og:image" content="https://ivanselivanov.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Ivan Selivanov — UI/UX Designer" />
+    <meta property="og:locale" content="uk_UA" />
+    <meta property="og:locale:alternate" content="en_US" />
+
+    <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Ivan Selivanov | UI/UX Designer" />
+    <meta name="twitter:description" content="Portfolio of Ivan Selivanov: digital products, interfaces, design systems, and Swiss typography." />
+    <meta name="twitter:image" content="https://ivanselivanov.com/og-image.png" />
 
     <!-- Favicons for All Platforms & Devices -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -20,14 +38,60 @@
     <meta name="theme-color" content="#0a0a0a" />
     <meta name="msapplication-TileColor" content="#0a0a0a" />
 
-    <!-- Unified High-Performance Google Fonts (Inter & JetBrains Mono) with Full Cyrillic & Latin Coverage -->
+    <!-- Performance Google Fonts (Inter & JetBrains Mono) with font-display: swap -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Structured Data (JSON-LD) for Search Engines -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Person",
+          "@id": "https://ivanselivanov.com/#person",
+          "name": "Іван Селіванов",
+          "alternateName": "Ivan Selivanov",
+          "jobTitle": "UI/UX Designer",
+          "description": "UI/UX Designer based in Lviv, Ukraine. Specialized in high-performance digital products, web design, and design systems.",
+          "url": "https://ivanselivanov.com/",
+          "image": "https://ivanselivanov.com/apple-touch-icon.png",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Lviv",
+            "addressCountry": "UA"
+          },
+          "knowsAbout": [
+            "UI/UX Design",
+            "Web Design",
+            "Design Systems",
+            "Product Architecture",
+            "Typography",
+            "Figma",
+            "Frontend Prototyping"
+          ],
+          "sameAs": [
+            "https://www.linkedin.com/in/ivan-selivanov-4bb884183/",
+            "https://github.com/John7794"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://ivanselivanov.com/#website",
+          "url": "https://ivanselivanov.com/",
+          "name": "Ivan Selivanov | Portfolio",
+          "publisher": {
+            "@id": "https://ivanselivanov.com/#person"
+          },
+          "inLanguage": ["uk-UA", "en-US"]
+        }
+      ]
+    }
+    </script>
   </head>
-  <body>
+  <body class="bg-[#0a0a0a] text-[#f4f4f0]">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-
