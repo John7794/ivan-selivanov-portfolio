@@ -36,6 +36,7 @@ export const BentoExpertise: React.FC<BentoExpertiseProps> = ({ language, expert
     card3Title: getLocalizedText(data.card3Title, language, def.card3Title),
     card3Desc: removeFigJam(getLocalizedText(data.card3Desc, language, def.card3Desc)),
     card4Title: getLocalizedText(data.card4Title, language, def.card4Title),
+    card4Desc: removeFigJam(getLocalizedText(data.card4Desc, language, def.card4Desc || { ua: '', en: '' })),
     heuristics: getLocalizedArray(data.heuristics, language, def.heuristics),
     techStack: getLocalizedText(data.techStackTitle, language, def.techStackTitle)
   };
@@ -164,9 +165,9 @@ export const BentoExpertise: React.FC<BentoExpertiseProps> = ({ language, expert
               <h3 className="text-2xl font-medium uppercase tracking-tight mb-2">
                 {t.card4Title}
               </h3>
-              {data.card4Desc && (
+              {t.card4Desc && (
                 <p className="text-neutral-400 font-light text-sm leading-relaxed">
-                  {removeFigJam(data.card4Desc[language])}
+                  {t.card4Desc}
                 </p>
               )}
             </div>

@@ -90,7 +90,6 @@ export const WorkflowSection: React.FC<WorkflowSectionProps> = ({
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-50px' }}
                 transition={{ duration: 0.5, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                onMouseEnter={() => playClickSound()}
                 className="group relative flex flex-col justify-between p-6 sm:p-7 bg-[#101010]/95 hover:bg-[#141414] border border-neutral-800/80 hover:border-neutral-700 transition-all duration-500 rounded-sm overflow-hidden shadow-xl hover:shadow-2xl"
               >
                 {/* Unified Perimeter Border Tracing Hover Effect (same as all other blocks) */}

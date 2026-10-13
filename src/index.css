@@ -21,6 +21,12 @@ html, body {
   max-width: 100%;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 /* Ultra-Minimalist Designer Scrollbar System */
 html {
   scrollbar-width: thin;

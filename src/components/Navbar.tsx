@@ -214,7 +214,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => { playClickSound(); onLanguageChange('ua'); }}
-              className={`px-2 py-1 sm:px-2.5 sm:py-1 text-xs font-semibold cursor-pointer transition-colors flex items-center gap-1.5 sm:gap-2 ${
+              className={`px-2 py-1 sm:px-2.5 sm:py-1 text-xs font-semibold cursor-pointer transition-colors flex items-center gap-1.5 sm:gap-2 touch-manipulation active:scale-[0.97] ${
                 language === 'ua' ? 'bg-[#f4f4f0] text-black font-bold' : 'text-neutral-400 hover:text-white'
               }`}
               title="Українська"
@@ -229,7 +229,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => { playClickSound(); onLanguageChange('en'); }}
-              className={`px-2 py-1 sm:px-2.5 sm:py-1 text-xs font-semibold cursor-pointer transition-colors flex items-center gap-1.5 sm:gap-2 ${
+              className={`px-2 py-1 sm:px-2.5 sm:py-1 text-xs font-semibold cursor-pointer transition-colors flex items-center gap-1.5 sm:gap-2 touch-manipulation active:scale-[0.97] ${
                 language === 'en' ? 'bg-[#f4f4f0] text-black font-bold' : 'text-neutral-400 hover:text-white'
               }`}
               title="English (US)"
@@ -304,7 +304,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               setIsMenuOpen(!isMenuOpen);
             }}
             aria-label={isMenuOpen ? 'Закрити меню' : 'Відкрити меню'}
-            className="flex items-center gap-2 px-3 py-1.5 bg-neutral-900/90 hover:bg-neutral-800 text-[#f4f4f0] border border-neutral-800 hover:border-neutral-600 transition-all cursor-pointer font-mono text-xs uppercase tracking-wider select-none shadow-sm"
+            className="flex items-center gap-2 px-3 py-1.5 bg-neutral-900/90 hover:bg-neutral-800 text-[#f4f4f0] border border-neutral-800 hover:border-neutral-600 transition-all cursor-pointer font-mono text-xs uppercase tracking-wider select-none shadow-sm touch-manipulation active:scale-[0.97]"
           >
             <div className="w-4 h-4 flex items-center justify-center shrink-0">
               {isMenuOpen ? (

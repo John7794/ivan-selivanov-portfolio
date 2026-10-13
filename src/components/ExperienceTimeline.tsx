@@ -12,15 +12,14 @@ interface ExperienceTimelineProps {
 }
 
 export const ExperienceTimeline: React.FC<ExperienceTimelineProps> = ({ experience, language, ui }) => {
-  const [mousePos, setMousePos] = useState({ x: -1000, y: -1000 });
   const [isHovered, setIsHovered] = useState(false);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    setMousePos({
-      x: Math.round(e.clientX - rect.left),
-      y: Math.round(e.clientY - rect.top),
-    });
+    const x = Math.round(e.clientX - rect.left);
+    const y = Math.round(e.clientY - rect.top);
+    e.currentTarget.style.setProperty('--timeline-mouse-x', `${x}px`);
+    e.currentTarget.style.setProperty('--timeline-mouse-y', `${y}px`);
     if (!isHovered) setIsHovered(true);
   };
 
@@ -35,8 +34,8 @@ export const ExperienceTimeline: React.FC<ExperienceTimelineProps> = ({ experien
       en: 'Career Track & Background'
     }),
     subtitle: getLocalizedText(ui?.experienceSubtitle, language, {
-      ua: 'Хронологія комерційних проєктів, артдирекції та фундаментальної академічної школи',
-      en: 'Timeline of design leadership, commercial execution, and academic honors'
+      ua: 'Хронологія комерційних проєктів, дизайну цифрових продуктів та фундаментальної академічної школи',
+      en: 'Timeline of design execution, digital product architecture, and academic honors'
     }),
     present: language === 'ua' ? 'Зараз' : 'Present'
   };
@@ -69,8 +68,8 @@ export const ExperienceTimeline: React.FC<ExperienceTimelineProps> = ({ experien
             backgroundImage:
               'linear-gradient(#444444 1px, transparent 1px), linear-gradient(90deg, #444444 1px, transparent 1px)',
             backgroundSize: '5rem 5rem',
-            maskImage: `radial-gradient(340px circle at ${mousePos.x}px ${mousePos.y}px, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 45%, transparent 75%)`,
-            WebkitMaskImage: `radial-gradient(340px circle at ${mousePos.x}px ${mousePos.y}px, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 45%, transparent 75%)`,
+            maskImage: 'radial-gradient(340px circle at var(--timeline-mouse-x, -1000px) var(--timeline-mouse-y, -1000px), rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 45%, transparent 75%)',
+            WebkitMaskImage: 'radial-gradient(340px circle at var(--timeline-mouse-x, -1000px) var(--timeline-mouse-y, -1000px), rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 45%, transparent 75%)',
           }}
         />
 
@@ -79,7 +78,7 @@ export const ExperienceTimeline: React.FC<ExperienceTimelineProps> = ({ experien
           className="w-full h-full absolute inset-0 transition-opacity duration-500 pointer-events-none"
           style={{
             opacity: isHovered ? 0.2 : 0,
-            background: `radial-gradient(400px circle at ${mousePos.x}px ${mousePos.y}px, rgba(255, 255, 255, 0.02), transparent 70%)`
+            background: 'radial-gradient(400px circle at var(--timeline-mouse-x, -1000px) var(--timeline-mouse-y, -1000px), rgba(255, 255, 255, 0.02), transparent 70%)'
           }}
         />
       </div>

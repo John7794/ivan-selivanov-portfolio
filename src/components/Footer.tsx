@@ -72,7 +72,7 @@ export const Footer: React.FC<FooterProps> = ({ settings, contacts, language, on
 
         <a
           href={`mailto:${activeEmail}`}
-          className="text-[14vw] leading-[0.8] font-bold tracking-tighter uppercase mb-12 hover:italic transition-all inline-block select-none"
+          className="text-[13vw] sm:text-[14vw] lg:text-[12vw] xl:text-[9.5rem] leading-[0.82] font-bold tracking-tighter uppercase mb-8 sm:mb-12 hover:italic transition-all inline-block select-none max-w-full break-words"
         >
           {t.letsTalk}
         </a>

@@ -38,16 +38,15 @@ export default function App() {
   const [isSheetsModalOpen, setIsSheetsModalOpen] = useState(false);
   const [isCookieBannerOpen, setIsCookieBannerOpen] = useState(false);
 
-  // Interactive subtle grid spotlight on mouse move
-  const [heroMousePos, setHeroMousePos] = useState({ x: -1000, y: -1000 });
+  // Interactive subtle grid spotlight on mouse move (optimized via CSS variables to prevent re-renders)
   const [isHeroHovered, setIsHeroHovered] = useState(false);
 
   const handleHeroMouseMove = (e: React.MouseEvent<HTMLElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    setHeroMousePos({
-      x: Math.round(e.clientX - rect.left),
-      y: Math.round(e.clientY - rect.top),
-    });
+    const x = Math.round(e.clientX - rect.left);
+    const y = Math.round(e.clientY - rect.top);
+    e.currentTarget.style.setProperty('--hero-mouse-x', `${x}px`);
+    e.currentTarget.style.setProperty('--hero-mouse-y', `${y}px`);
     if (!isHeroHovered) setIsHeroHovered(true);
   };
 
@@ -483,8 +482,8 @@ export default function App() {
               opacity: isHeroHovered ? 0.6 : 0,
               backgroundImage: 'linear-gradient(#444444 1px, transparent 1px), linear-gradient(90deg, #444444 1px, transparent 1px)',
               backgroundSize: '5rem 5rem',
-              maskImage: `radial-gradient(350px circle at ${heroMousePos.x}px ${heroMousePos.y}px, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 45%, transparent 75%)`,
-              WebkitMaskImage: `radial-gradient(350px circle at ${heroMousePos.x}px ${heroMousePos.y}px, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 45%, transparent 75%)`,
+              maskImage: 'radial-gradient(350px circle at var(--hero-mouse-x, -1000px) var(--hero-mouse-y, -1000px), rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 45%, transparent 75%)',
+              WebkitMaskImage: 'radial-gradient(350px circle at var(--hero-mouse-x, -1000px) var(--hero-mouse-y, -1000px), rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 45%, transparent 75%)',
             }}
           />
 
@@ -493,7 +492,7 @@ export default function App() {
             className="w-full h-full absolute inset-0 transition-opacity duration-500 pointer-events-none"
             style={{
               opacity: isHeroHovered ? 0.2 : 0,
-              background: `radial-gradient(420px circle at ${heroMousePos.x}px ${heroMousePos.y}px, rgba(255, 255, 255, 0.02), transparent 75%)`
+              background: 'radial-gradient(420px circle at var(--hero-mouse-x, -1000px) var(--hero-mouse-y, -1000px), rgba(255, 255, 255, 0.02), transparent 75%)'
             }}
           />
         </div>
@@ -592,11 +591,16 @@ export default function App() {
             {/* Hero Image (Absolute on Desktop to overlap bio, natural integrated portrait on mobile without harsh box frames) */}
             <motion.div 
               style={{ y: heroImageY }}
-              className="mt-8 sm:mt-12 lg:mt-0 lg:absolute lg:right-0 lg:bottom-0 w-full max-w-[280px] sm:max-w-[340px] lg:max-w-none lg:w-[380px] xl:w-[480px] group z-10 mx-auto lg:mx-0 relative"
+              className="mt-8 sm:mt-12 lg:mt-0 lg:absolute lg:right-0 lg:bottom-0 w-full max-w-[280px] sm:max-w-[340px] lg:max-w-none lg:w-[380px] xl:w-[480px] group z-10 mx-auto lg:mx-0 relative flex items-end justify-center"
             >
               <img 
                 src={data.settings.heroImage || "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=1200&auto=format&fit=crop"} 
                 alt={data.settings.name[language]}
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                width="480"
+                height="640"
                 className="w-full h-auto object-contain object-bottom filter grayscale opacity-75 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700 ease-out"
                 referrerPolicy="no-referrer"
               />
@@ -678,7 +682,7 @@ export default function App() {
                 <button
                   key={`${cat.id || 'cat'}-${catIdx}`}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-3 py-1.5 sm:px-3.5 sm:py-1.5 text-[11px] sm:text-xs border transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 sm:px-3.5 sm:py-1.5 text-[11px] sm:text-xs border transition-all cursor-pointer touch-manipulation active:scale-[0.97] ${
                     selectedCategory === cat.id
                       ? 'border-white bg-[#f4f4f0] text-black font-semibold'
                       : 'border-neutral-800 text-neutral-400 hover:border-neutral-600 hover:text-white'
@@ -698,7 +702,7 @@ export default function App() {
                 <button
                   key={`${st.id || 'st'}-${stIdx}`}
                   onClick={() => setSelectedStatus(st.id)}
-                  className={`px-2.5 py-1 sm:px-3 sm:py-1 text-[10px] sm:text-[11px] border transition-all cursor-pointer ${
+                  className={`px-2.5 py-1 sm:px-3 sm:py-1 text-[10px] sm:text-[11px] border transition-all cursor-pointer touch-manipulation active:scale-[0.97] ${
                     selectedStatus === st.id
                       ? 'border-neutral-400 bg-neutral-800 text-white font-medium'
                       : 'border-neutral-900 text-neutral-500 hover:border-neutral-700 hover:text-neutral-300'

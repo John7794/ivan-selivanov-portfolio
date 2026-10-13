@@ -217,6 +217,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
           src={currentDisplayImage}
           alt={getLocalizedText(project.title, language, { ua: 'Проєкт', en: 'Project' })}
           loading="lazy"
+          decoding="async"
           className={`w-full h-full object-cover ${
             project.category === 'ui-ux' ? 'object-top' : 'object-center'
           } filter grayscale-[20%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-[0.16,1,0.3,1]`}
