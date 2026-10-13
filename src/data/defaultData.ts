@@ -6,20 +6,20 @@ export const DEFAULT_SETTINGS: GeneralSettings = {
     en: 'Ivan Selivanov'
   },
   title: {
-    ua: 'UI/UX Дизайнер',
-    en: 'UI/UX Designer'
+    ua: 'Мультидисциплінарний цифровий дизайнер',
+    en: 'Multidisciplinary Digital Designer'
   },
   bioShort: {
-    ua: 'Проєктую сучасні вебсайти та цифрові продукти, поєднуючи чисту візуальну естетику з продуманою логікою.',
-    en: 'I design modern websites and digital products, combining clean visual aesthetics with thoughtful logic.'
+    ua: 'Проєктую цифрові продукти, вебсайти та візуальну айдентику, поєднуючи академічну базу дизайну з інженерною логікою.',
+    en: 'I design digital products, websites, and visual identities, combining academic design foundations with engineering logic.'
   },
   heroTag: {
     ua: 'Готовий до співпраці',
     en: 'Available for work'
   },
   heroTagline: {
-    ua: 'Проєктую сучасні вебсайти та цифрові продукти, поєднуючи чисту візуальну естетику з продуманою логікою.',
-    en: 'I design modern websites and digital products, combining clean visual aesthetics with thoughtful logic.'
+    ua: 'Проєктую цифрові продукти, вебсайти та візуальну айдентику, поєднуючи академічну базу дизайну з інженерною логікою.',
+    en: 'I design digital products, websites, and visual identities, combining academic design foundations with engineering logic.'
   },
   location: {
     ua: 'Львів, Україна (Доступний по всьому світу)',
@@ -209,38 +209,7 @@ export const DEFAULT_SETTINGS: GeneralSettings = {
   }
 };
 
-export const DEFAULT_TESTIMONIALS: Testimonial[] = [
-  {
-    id: 't-1',
-    projectId: 'fintech-liquidity-os',
-    author: 'Марк Оксфорд (Mark Oxford)',
-    company: 'FinPulse Capital (London)',
-    role: {
-      ua: 'VP of Product Engineering',
-      en: 'VP of Product Engineering'
-    },
-    text: {
-      ua: 'Іван трансформував наш перевантажений біржовий термінал у бездоганну дизайн-систему. Час прийняття рішень трейдерами скоротився на 38%. Рідкісне поєднання художнього смаку рівня Awwwards і суворої продуктової інженерії.',
-      en: 'Ivan transformed our cluttered trading terminal into a pristine, high-frequency design system. Trader decision latency dropped by 38%. A rare blend of world-class design aesthetics and rigorous product engineering.'
-    },
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200'
-  },
-  {
-    id: 't-2',
-    projectId: 'swiss-grid-manifesto',
-    author: 'Олена Ковальчук',
-    company: 'Artisan Press Publishing',
-    role: {
-      ua: 'Головна редакторка видавництва',
-      en: 'Editor-in-Chief, Artisan Press'
-    },
-    text: {
-      ua: 'Робота Івана з модульними сітками та типографікою для арт-буку викликала справжній фурор на Книжковому Арсеналі. Він відчуває кожен міліметр шпальти та глибину шрифтового контрасту.',
-      en: 'Ivan’s mastery over modular grid systems and typographic rhythm created an absolute sensation. He commands every millimeter of negative space and typographic contrast with total precision.'
-    },
-    avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=200'
-  }
-];
+export const DEFAULT_TESTIMONIALS: Testimonial[] = [];
 
 export const DEFAULT_PROJECTS: Project[] = [
   {
@@ -1691,100 +1660,150 @@ export const DEFAULT_PROJECTS: Project[] = [
 export const DEFAULT_EXPERIENCE: ExperienceItem[] = [
   {
     id: 'exp-1',
-    type: 'art-direction',
+    type: 'education',
     company: {
-      ua: 'Monolith Design Labs',
-      en: 'Monolith Design Labs'
+      ua: 'Національний університет «Львівська політехніка»',
+      en: 'Lviv Polytechnic National University'
     },
     location: {
-      ua: 'Київ / Віддалено',
-      en: 'Kyiv / Remote'
+      ua: 'Львів, Україна',
+      en: 'Lviv, Ukraine'
     },
     role: {
-      ua: 'Lead UI/UX Designer & Architect',
-      en: 'Lead UI/UX Designer & Architect'
+      ua: 'Старший викладач',
+      en: 'Senior Lecturer'
     },
     period: {
-      ua: '2023 — Зараз',
-      en: '2023 — Present'
+      ua: 'Сер 2026 — Зараз',
+      en: 'Aug 2026 — Present'
     },
     description: {
       ua: [
-        'Керування дизайн-стратегією складних фінтех та Web3 платформ для клієнтів з Лондона, Берліна та Нью-Йорка.',
-        'Побудова дизайн-систем з підтримкою мульти-брендів та токенізацією для великих команд розробки.',
-        'Впровадження суворих продуктових метрик (SUS, CSAT, task success rate) у креативний дизайн-процес.'
+        'Викладання в Інституті архітектури та дизайну, кафедра візуального дизайну та мистецтв.'
       ],
       en: [
-        'Directing UI/UX architecture and visual strategy for high-stakes fintech and enterprise clients across EU & US.',
-        'Architecting multi-brand design systems with unified design tokens for 30+ engineer cross-functional squads.',
-        'Infusing quantitative product metrics (SUS, CSAT, task latency) into high-fidelity design execution.'
+        'Teaching at the Institute of Architecture and Design, Department of Visual Design and Art.'
       ]
     },
-    technologies: ['Figma', 'Design Systems', 'Design Tokens', 'Next.js', 'Awwwards Mentorship']
+    technologies: ['Design Theory', 'Visual Arts', 'Architecture & Design', 'Academic Mentorship']
   },
   {
     id: 'exp-2',
-    type: 'commercial',
+    type: 'education',
     company: {
-      ua: 'Apex Digital Systems',
-      en: 'Apex Digital Systems'
+      ua: 'Національний університет «Львівська політехніка»',
+      en: 'Lviv Polytechnic National University'
     },
     location: {
-      ua: 'Київ',
-      en: 'Kyiv'
+      ua: 'Львів, Україна',
+      en: 'Lviv, Ukraine'
     },
     role: {
-      ua: 'Senior Product Designer',
-      en: 'Senior Product Designer'
+      ua: 'Асистент кафедри',
+      en: 'Assistant Lecturer'
     },
     period: {
-      ua: '2021 — 2023',
-      en: '2021 — 2023'
+      ua: 'Жов 2022 — Сер 2026',
+      en: 'Oct 2022 — Aug 2026'
     },
     description: {
       ua: [
-        'Створення інтерфейсів SaaS платформ, аналітичних дашбордів та мобільних додатків із мільйонною аудиторією.',
-        'Тісна колаборація з продуктовими менеджерами, проведення поглиблених інтерв’ю та тестування зручності користування.',
-        'Оптимізація конверсійних воронок (CRO) з вимірюваним зростанням ключових показників на 24-40%.'
+        'Викладання в Інституті архітектури та дизайну, кафедра візуального дизайну та мистецтв.'
       ],
       en: [
-        'Designed mission-critical SaaS dashboards, enterprise portals, and consumer mobile apps serving 1M+ active users.',
-        'Conducted qualitative customer discovery, usability benchmarks, and end-to-end user journey mapping.',
-        'Drove conversion rate optimization initiatives yielding 24% to 40% lifts in key funnel milestones.'
+        'Teaching at the Institute of Architecture and Design, Department of Visual Design and Art.'
       ]
     },
-    technologies: ['User Research', 'Information Architecture', 'Figma', 'Prototyping', 'WCAG 2.1 AAA']
+    technologies: ['Visual Design', 'Art Direction', 'Typography', 'Color Theory']
   },
   {
     id: 'exp-3',
     type: 'education',
     company: {
-      ua: 'Kyiv National Academy of Media Arts (KAMA)',
-      en: 'Kyiv National Academy of Media Arts (KAMA)'
+      ua: 'Національний університет «Львівська політехніка»',
+      en: 'Lviv Polytechnic National University'
     },
     location: {
-      ua: 'Київ',
-      en: 'Kyiv'
+      ua: 'Львів, Україна',
+      en: 'Lviv, Ukraine'
     },
     role: {
-      ua: 'Digital & Interactive Design Honors',
-      en: 'Digital & Interactive Design Honors'
+      ua: 'Аспірант',
+      en: 'Postgraduate Student'
     },
     period: {
-      ua: '2019 — 2021',
-      en: '2019 — 2021'
+      ua: 'Вер 2021 — Сер 2025',
+      en: 'Sep 2021 — Aug 2025'
     },
     description: {
       ua: [
-        'Поглиблене вивчення історії швейцарської типографіки, структурної семіотики, кольорознавства та кінетичного дизайну.',
-        'Дипломна робота з інтерактивного вебдизайну відзначена міжнародним журі.'
+        'Проведення науково-дослідницької роботи, розвиток дослідницьких навичок у сфері дизайну та архітектури.'
       ],
       en: [
-        'Specialized studies in Swiss rationalist typography, semiotic visual narrative, chromatic theory, and motion systems.',
-        'Graduation capstone interactive design project acclaimed by international jury.'
+        'Conducting academic research, developing research skills in the field of design and architecture.'
       ]
     },
-    technologies: ['Swiss Typography', 'Structural Semiotics', 'Grid Systems', 'Book Pre-press']
+    technologies: ['Academic Research', 'Design Systems', 'Architectural Design']
+  },
+  {
+    id: 'exp-4',
+    type: 'commercial',
+    company: {
+      ua: 'Фриланс',
+      en: 'Freelance'
+    },
+    location: {
+      ua: 'Віддалено',
+      en: 'Remote'
+    },
+    role: {
+      ua: 'UI/UX Дизайнер & Веброзробник',
+      en: 'UI/UX Designer & Web Developer'
+    },
+    period: {
+      ua: 'Гру 2019 — Зараз',
+      en: 'Dec 2019 — Present'
+    },
+    description: {
+      ua: [
+        'Проєктування користувацького досвіду, дослідницька робота та створення інтерактивних прототипів у Figma.',
+        'Розробка вебсайтів, лендингів та фронтенд-інтерфейсів з використанням HTML, JavaScript, CSS та розгортанням на Vercel.'
+      ],
+      en: [
+        'Designing user experiences, research, and interactive prototyping using Figma and UI/UX methodologies.',
+        'Developing websites, landing pages, and frontend interfaces using HTML, JavaScript, CSS, and deploying to Vercel.'
+      ]
+    },
+    technologies: ['Figma', 'UI/UX', 'HTML/CSS', 'JavaScript', 'Vercel']
+  },
+  {
+    id: 'exp-5',
+    type: 'commercial',
+    company: {
+      ua: 'Фриланс',
+      en: 'Freelance'
+    },
+    location: {
+      ua: 'Віддалено',
+      en: 'Remote'
+    },
+    role: {
+      ua: 'Спеціаліст з реклами & таргетингу',
+      en: 'Paid Ads Specialist / Targeting Specialist'
+    },
+    period: {
+      ua: 'Чер 2020 — Зараз',
+      en: 'Jun 2020 — Present'
+    },
+    description: {
+      ua: [
+        'Налаштування та оптимізація рекламних кампаній за допомогою Google Ads, аналітика даних через Google Analytics та GTM.'
+      ],
+      en: [
+        'Setting up and optimizing advertising campaigns using Google Ads, analyzing data with Google Analytics and GTM.'
+      ]
+    },
+    technologies: ['Google Ads', 'Google Analytics', 'Google Tag Manager', 'Data Modeling']
   }
 ];
 

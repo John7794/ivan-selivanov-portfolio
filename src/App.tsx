@@ -74,16 +74,22 @@ export default function App() {
   // Dynamic document title & lang attribute synchronization
   useEffect(() => {
     document.documentElement.lang = language === 'ua' ? 'uk' : 'en';
-    const siteTitle = language === 'ua'
-      ? 'Іван Селіванов | UI/UX Дизайнер'
-      : 'Ivan Selivanov | UI/UX Designer';
+    const role = getLocalizedText(data.settings.title, language, {
+      ua: 'Мультидисциплінарний цифровий дизайнер',
+      en: 'Multidisciplinary Digital Designer'
+    });
+    const name = getLocalizedText(data.settings.name, language, {
+      ua: 'Іван Селіванов',
+      en: 'Ivan Selivanov'
+    });
+    const siteTitle = `${name} | ${role}`;
     if (activeProject) {
       const projTitle = getLocalizedText(activeProject.title, language, { ua: 'Кейс', en: 'Case Study' });
       document.title = `${projTitle} // ${siteTitle}`;
     } else {
       document.title = siteTitle;
     }
-  }, [language, activeProject]);
+  }, [language, activeProject, data.settings.title, data.settings.name]);
 
   // Project select & close with URL hash synchronization
   const handleSelectProject = (project: Project) => {

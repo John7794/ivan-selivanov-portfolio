@@ -2359,15 +2359,15 @@ export function getGeneralSheetTsvTemplate(): string {
     ['key', 'ua', 'en'],
     // 1. Profile & Bio
     ['name', 'Іван Селіванов', 'Ivan Selivanov'],
-    ['title', 'UI/UX Дизайнер', 'UI/UX Designer'],
+    ['title', 'Мультидисциплінарний цифровий дизайнер', 'Multidisciplinary Digital Designer'],
     ['heroImage', '', ''],
     ['heroTag', 'Готовий до співпраці', 'Available for work'],
-    ['heroTagline', 'Проєктую сучасні вебсайти та цифрові продукти, поєднуючи чисту візуальну естетику з продуманою логікою.', 'I design modern websites and digital products, combining clean visual aesthetics with thoughtful logic.'],
+    ['heroTagline', 'Проєктую цифрові продукти, вебсайти та візуальну айдентику, поєднуючи академічну базу дизайну з інженерною логікою.', 'I design digital products, websites, and visual identities, combining academic design foundations with engineering logic.'],
     ['location', 'Львів, Україна (Доступний по всьому світу)', 'Lviv, Ukraine (Available Worldwide)'],
     
     // 2. Direct Channels & Contacts
     ['email', dContacts.email || 'ivanselivanov771994@gmail.com', dContacts.email || 'ivanselivanov771994@gmail.com'],
-    ['telegram', dContacts.telegram || 'https://t.me/ivanselivanov', dContacts.telegram || 'https://t.me/ivanselivanov'],
+    ['telegram', dContacts.telegram || '', dContacts.telegram || ''],
     ['linkedin', dContacts.linkedin || 'https://www.linkedin.com/in/ivan-selivanov-4bb884183/', dContacts.linkedin || 'https://www.linkedin.com/in/ivan-selivanov-4bb884183/'],
     ['behance', dContacts.behance || 'https://behance.net/ivanselivanov', dContacts.behance || 'https://behance.net/ivanselivanov'],
     ['github', dContacts.github || 'https://github.com/ivanselivanov', dContacts.github || 'https://github.com/ivanselivanov'],
