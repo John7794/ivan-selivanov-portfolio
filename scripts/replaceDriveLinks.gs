@@ -1,0 +1,93 @@
+/**
+ * Автоматична заміна посилань Google Диску на високоякісні посилання GitHub (jsDelivr CDN)
+ * 
+ * Інструкція:
+ * 1. Відкрийте вашу Google Таблицю
+ * 2. У верхньому меню оберіть: Розширення > Apps Script (Extensions > Apps Script)
+ * 3. Вставте цю функцію в кінець файлу
+ * 4. У випадаючому списку функцій оберіть "replaceDriveLinksWithGithub" і натисніть кнопку "Виконати" (Run ▶)
+ * 5. Усі посилання в таблиці автоматично оновляться!
+ */
+function replaceDriveLinksWithGithub() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Projects") || ss.getSheetByName("Проєкти") || ss.getActiveSheet();
+  var range = sheet.getDataRange();
+  var values = range.getValues();
+  
+  var driveMap = {
+  "1aSuuwApMts70iAdCwniVuaFArP_250lM": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/inspace-logo.webp",
+  "1RaVwj7rW9qVB3RBPewDBYOoCil-PMFZt": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/muzei-saleziian.webp",
+  "1vgB0yGEjA0Y2mtoasQ6GNxT10Qck_D_T": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/cosmopedia.webp",
+  "15SC2uKDcnbZQeH1LYWyBtFoU2HSeRMWo": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/fundraising-lp.webp",
+  "1FsJEaurApt4v0uj88b2LS5tncXcIKaHM": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/bee-protect-lp.webp",
+  "1e8dLHEaIO5ECHLA7cp_5WJn027wzw1Oy": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/inspace-lp.webp",
+  "13p26B0XL3lkzdR4_kRba7y5nIh8SjGr6": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/inspace-lp-m.webp",
+  "1Hh002OuHFz7PfuhLeLmM20vX2QM8oZoo": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/uk-passport-01.webp",
+  "1afAjcXT0Dz4ISeluHAUUsNv9K4EzwiFT": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/uk-passport-02.webp",
+  "17YjD3Y09OM7HxLewTis0Hkw4RECYTCOV": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/uk-passport-03.webp",
+  "1qMI_dxat3zrOQOLyurEl8mxBnP-Xa31g": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/uk-passport-04.webp",
+  "1kNz9S_olWCpSahOrr-1dAxdTf_qslvyE": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/uk-passport-05.webp",
+  "1JahKk9hYWOX5WX9Dbo7n1GvFbtIvieqK": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/petsbro-ads-01.webp",
+  "1Zd15HbMjsFRRF9O6WAKhd1zurvP5MPpn": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/petsbro-ads-02.webp",
+  "1oNzt2NZB9rjr0sXJlSWdAli35rL2G8zf": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/petsbro-ads-03.webp",
+  "1xgS8V74RSvx18fv4ATq7A0y_hGf3z4R4": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/mfalcon-3d-01.webp",
+  "1KZ34kpoG0fOnTA7gjgQbKK7t7jE1RrjM": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/mfalcon-3d-02.webp",
+  "1aDHpuGaT9nX-TMq0jI4uD3XUFZXh5qFe": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/mfalcon-3d-03.webp",
+  "1phdyeaxEVj9-Pp5GJpIZtMnasM1-HxzE": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/mfalcon-3d-04.webp",
+  "1HSh3KE0C-IGUmnHzhblbV8s_o_ivtH7g": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/mfalcon-3d-05.webp",
+  "1fiPaJPLtf_f-QSrdoz95ZWmpWEkKTCyt": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/mfalcon-3d-06.webp",
+  "1Sc-a3o6ZcqU_SPkQdfvPA9cQDUY_oN_p": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/mfalcon-3d-07.webp",
+  "19fJbKe41zLUrJv2gaBj8cisMUiLWNd7l": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/mfalcon-3d-08.webp",
+  "1HLUaeHDhZNU3-kPLUpSMyxrWVLz3ZKxD": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/mfalcon-3d-09.webp",
+  "1mQ-ldLgwXvkGxEDUbxCd3HzlX9uCmAD-": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/mfalcon-3d-10.webp",
+  "1E4tw5xHvyJF9puNtYuhuqxOi3Je6Xxt7": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/cosmopedia-app-01.webp",
+  "1EUxW22Sx7tRvId4ILCQyQ8itGIuo_K_S": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/cosmopedia-app-02.webp",
+  "1nzv_fv44O-8hXE4g9x8viy_cbmGMBZO3": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/cosmopedia-app-03.webp",
+  "1nbM9pq6WppzA505M4PjNan_dX0-XA8nn": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/cosmopedia-app-04.webp",
+  "1z9vI0-eEfm7jcPQiViwi86C67cZX-jXM": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/cosmopedia-app-05.webp",
+  "11aQHgUDEgoAgvzM66C-epQc-sOXdV0Ur": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/cosmopedia-app-06.webp",
+  "1mGt5aGdGs5MwZdbz1_5Ol32tsc83AWbu": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/cosmopedia-app-07.webp",
+  "1lYrkEZgAyfoGEs_sVJgSdWaAxebj-CSW": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/rodovody-archive-01.webp",
+  "1cSyks8JpMQTuy1Rrz8U_hGCivBqWXuKr": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/rodovody-archive-02.webp",
+  "1vMmyKwkMkQKaBmBkOUFi1yg68LwjOZLY": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/rodovody-archive-03.webp",
+  "1JZ9yuyItAwGZNCZS5t5y961NOypFxD7t": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/conference-identity.webp",
+  "1yzPyLHfEhKFhYTWoTnKUB-jJ1I1AWZWF": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/kavomolka-app.webp",
+  "1sW1CGBVJ825iFut-Qp5-HmSo4wcVQbU6": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/dentist-landing-page.webp",
+  "16z2Ob10HMJPUH7Vcs_rJAPs5k4EDN8B0": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/dentist-landing-page-m.webp",
+  "1RWWldmqBzTEAoSI9IMWj_7udJbCDgmZ9": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/luna-m.webp",
+  "190ez-hH-9klWMHbFHHHMrG2Afa51CQ1I": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/parad-obuvi-d.webp"
+};
+  
+  var replacementCount = 0;
+  
+  for (var r = 0; r < values.length; r++) {
+    for (var c = 0; c < values[r].length; c++) {
+      var cellVal = String(values[r][c] || "");
+      if (cellVal.indexOf("drive.google.com") !== -1) {
+        var lines = cellVal.split(/\n/);
+        var modified = false;
+        
+        for (var i = 0; i < lines.length; i++) {
+          var line = lines[i].trim();
+          if (!line) continue;
+          
+          for (var driveId in driveMap) {
+            if (line.indexOf(driveId) !== -1) {
+              lines[i] = driveMap[driveId];
+              modified = true;
+              replacementCount++;
+              break;
+            }
+          }
+        }
+        
+        if (modified) {
+          values[r][c] = lines.join("\n");
+        }
+      }
+    }
+  }
+  
+  range.setValues(values);
+  SpreadsheetApp.getUi().alert("Успішно замінено " + replacementCount + " посилань Google Диску на CDN GitHub!");
+}

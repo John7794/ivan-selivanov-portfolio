@@ -1,0 +1,344 @@
+[
+  {
+    "id": 1,
+    "slug": "inspace-logo",
+    "files": [
+      {
+        "type": "desktop",
+        "driveId": "1aSuuwApMts70iAdCwniVuaFArP_250lM",
+        "outName": "inspace-logo.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/inspace-logo.webp"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "slug": "muzei-saleziian",
+    "files": [
+      {
+        "type": "desktop",
+        "driveId": "1RaVwj7rW9qVB3RBPewDBYOoCil-PMFZt",
+        "outName": "muzei-saleziian.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/muzei-saleziian.webp"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "slug": "cosmopedia-logo",
+    "files": [
+      {
+        "type": "desktop",
+        "driveId": "1vgB0yGEjA0Y2mtoasQ6GNxT10Qck_D_T",
+        "outName": "cosmopedia.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/cosmopedia.webp"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "slug": "fundraising-lp",
+    "files": [
+      {
+        "type": "desktop",
+        "driveId": "15SC2uKDcnbZQeH1LYWyBtFoU2HSeRMWo",
+        "outName": "fundraising-lp.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/fundraising-lp.webp"
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "slug": "bee-protect-lp",
+    "files": [
+      {
+        "type": "desktop",
+        "driveId": "1FsJEaurApt4v0uj88b2LS5tncXcIKaHM",
+        "outName": "bee-protect-lp.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/bee-protect-lp.webp"
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "slug": "inspace-site",
+    "files": [
+      {
+        "type": "desktop",
+        "driveId": "1e8dLHEaIO5ECHLA7cp_5WJn027wzw1Oy",
+        "outName": "inspace-lp.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/inspace-lp.webp"
+      },
+      {
+        "type": "mobile",
+        "driveId": "13p26B0XL3lkzdR4_kRba7y5nIh8SjGr6",
+        "outName": "inspace-lp-m.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/inspace-lp-m.webp"
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "slug": "uk-passport-redesign",
+    "files": [
+      {
+        "type": "desktop",
+        "driveId": "1Hh002OuHFz7PfuhLeLmM20vX2QM8oZoo",
+        "outName": "uk-passport-01.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/uk-passport-01.webp"
+      },
+      {
+        "type": "desktop",
+        "driveId": "1afAjcXT0Dz4ISeluHAUUsNv9K4EzwiFT",
+        "outName": "uk-passport-02.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/uk-passport-02.webp"
+      },
+      {
+        "type": "desktop",
+        "driveId": "17YjD3Y09OM7HxLewTis0Hkw4RECYTCOV",
+        "outName": "uk-passport-03.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/uk-passport-03.webp"
+      },
+      {
+        "type": "desktop",
+        "driveId": "1qMI_dxat3zrOQOLyurEl8mxBnP-Xa31g",
+        "outName": "uk-passport-04.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/uk-passport-04.webp"
+      },
+      {
+        "type": "desktop",
+        "driveId": "1kNz9S_olWCpSahOrr-1dAxdTf_qslvyE",
+        "outName": "uk-passport-05.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/uk-passport-05.webp"
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "slug": "petsbro-ads",
+    "files": [
+      {
+        "type": "desktop",
+        "driveId": "1JahKk9hYWOX5WX9Dbo7n1GvFbtIvieqK",
+        "outName": "petsbro-ads-01.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/petsbro-ads-01.webp"
+      },
+      {
+        "type": "desktop",
+        "driveId": "1Zd15HbMjsFRRF9O6WAKhd1zurvP5MPpn",
+        "outName": "petsbro-ads-02.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/petsbro-ads-02.webp"
+      },
+      {
+        "type": "desktop",
+        "driveId": "1oNzt2NZB9rjr0sXJlSWdAli35rL2G8zf",
+        "outName": "petsbro-ads-03.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/petsbro-ads-03.webp"
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "slug": "mfalcon-3d",
+    "files": [
+      {
+        "type": "desktop",
+        "driveId": "1xgS8V74RSvx18fv4ATq7A0y_hGf3z4R4",
+        "outName": "mfalcon-3d-01.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/mfalcon-3d-01.webp"
+      },
+      {
+        "type": "desktop",
+        "driveId": "1KZ34kpoG0fOnTA7gjgQbKK7t7jE1RrjM",
+        "outName": "mfalcon-3d-02.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/mfalcon-3d-02.webp"
+      },
+      {
+        "type": "desktop",
+        "driveId": "1aDHpuGaT9nX-TMq0jI4uD3XUFZXh5qFe",
+        "outName": "mfalcon-3d-03.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/mfalcon-3d-03.webp"
+      },
+      {
+        "type": "desktop",
+        "driveId": "1phdyeaxEVj9-Pp5GJpIZtMnasM1-HxzE",
+        "outName": "mfalcon-3d-04.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/mfalcon-3d-04.webp"
+      },
+      {
+        "type": "desktop",
+        "driveId": "1HSh3KE0C-IGUmnHzhblbV8s_o_ivtH7g",
+        "outName": "mfalcon-3d-05.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/mfalcon-3d-05.webp"
+      },
+      {
+        "type": "desktop",
+        "driveId": "1fiPaJPLtf_f-QSrdoz95ZWmpWEkKTCyt",
+        "outName": "mfalcon-3d-06.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/mfalcon-3d-06.webp"
+      },
+      {
+        "type": "desktop",
+        "driveId": "1Sc-a3o6ZcqU_SPkQdfvPA9cQDUY_oN_p",
+        "outName": "mfalcon-3d-07.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/mfalcon-3d-07.webp"
+      },
+      {
+        "type": "desktop",
+        "driveId": "19fJbKe41zLUrJv2gaBj8cisMUiLWNd7l",
+        "outName": "mfalcon-3d-08.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/mfalcon-3d-08.webp"
+      },
+      {
+        "type": "desktop",
+        "driveId": "1HLUaeHDhZNU3-kPLUpSMyxrWVLz3ZKxD",
+        "outName": "mfalcon-3d-09.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/mfalcon-3d-09.webp"
+      },
+      {
+        "type": "desktop",
+        "driveId": "1mQ-ldLgwXvkGxEDUbxCd3HzlX9uCmAD-",
+        "outName": "mfalcon-3d-10.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/mfalcon-3d-10.webp"
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "slug": "cosmopedia-app",
+    "files": [
+      {
+        "type": "desktop",
+        "driveId": "1E4tw5xHvyJF9puNtYuhuqxOi3Je6Xxt7",
+        "outName": "cosmopedia-app-01.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/cosmopedia-app-01.webp"
+      },
+      {
+        "type": "desktop",
+        "driveId": "1EUxW22Sx7tRvId4ILCQyQ8itGIuo_K_S",
+        "outName": "cosmopedia-app-02.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/cosmopedia-app-02.webp"
+      },
+      {
+        "type": "desktop",
+        "driveId": "1nzv_fv44O-8hXE4g9x8viy_cbmGMBZO3",
+        "outName": "cosmopedia-app-03.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/cosmopedia-app-03.webp"
+      },
+      {
+        "type": "desktop",
+        "driveId": "1nbM9pq6WppzA505M4PjNan_dX0-XA8nn",
+        "outName": "cosmopedia-app-04.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/cosmopedia-app-04.webp"
+      },
+      {
+        "type": "desktop",
+        "driveId": "1z9vI0-eEfm7jcPQiViwi86C67cZX-jXM",
+        "outName": "cosmopedia-app-05.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/cosmopedia-app-05.webp"
+      },
+      {
+        "type": "desktop",
+        "driveId": "11aQHgUDEgoAgvzM66C-epQc-sOXdV0Ur",
+        "outName": "cosmopedia-app-06.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/cosmopedia-app-06.webp"
+      },
+      {
+        "type": "desktop",
+        "driveId": "1mGt5aGdGs5MwZdbz1_5Ol32tsc83AWbu",
+        "outName": "cosmopedia-app-07.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/cosmopedia-app-07.webp"
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "slug": "rodovody-archive",
+    "files": [
+      {
+        "type": "desktop",
+        "driveId": "1lYrkEZgAyfoGEs_sVJgSdWaAxebj-CSW",
+        "outName": "rodovody-archive-01.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/rodovody-archive-01.webp"
+      },
+      {
+        "type": "desktop",
+        "driveId": "1cSyks8JpMQTuy1Rrz8U_hGCivBqWXuKr",
+        "outName": "rodovody-archive-02.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/rodovody-archive-02.webp"
+      },
+      {
+        "type": "desktop",
+        "driveId": "1vMmyKwkMkQKaBmBkOUFi1yg68LwjOZLY",
+        "outName": "rodovody-archive-03.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/rodovody-archive-03.webp"
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "slug": "conference-identity",
+    "files": [
+      {
+        "type": "desktop",
+        "driveId": "1JZ9yuyItAwGZNCZS5t5y961NOypFxD7t",
+        "outName": "conference-identity.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/conference-identity.webp"
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "slug": "kavomolka-app",
+    "files": [
+      {
+        "type": "mobile",
+        "driveId": "1yzPyLHfEhKFhYTWoTnKUB-jJ1I1AWZWF",
+        "outName": "kavomolka-app.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/kavomolka-app.webp"
+      }
+    ]
+  },
+  {
+    "id": 14,
+    "slug": "dentist-landing-page",
+    "files": [
+      {
+        "type": "desktop",
+        "driveId": "1sW1CGBVJ825iFut-Qp5-HmSo4wcVQbU6",
+        "outName": "dentist-landing-page.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/dentist-landing-page.webp"
+      },
+      {
+        "type": "mobile",
+        "driveId": "16z2Ob10HMJPUH7Vcs_rJAPs5k4EDN8B0",
+        "outName": "dentist-landing-page-m.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/dentist-landing-page-m.webp"
+      }
+    ]
+  },
+  {
+    "id": 15,
+    "slug": "luna-ecommerce",
+    "files": [
+      {
+        "type": "mobile",
+        "driveId": "1RWWldmqBzTEAoSI9IMWj_7udJbCDgmZ9",
+        "outName": "luna-m.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/luna-m.webp"
+      }
+    ]
+  },
+  {
+    "id": 16,
+    "slug": "parad-obuvi",
+    "files": [
+      {
+        "type": "desktop",
+        "driveId": "190ez-hH-9klWMHbFHHHMrG2Afa51CQ1I",
+        "outName": "parad-obuvi-d.webp",
+        "jsdelivrUrl": "https://cdn.jsdelivr.net/gh/John7794/ivan-selivanov-portfolio@main/assets/projects/parad-obuvi-d.webp"
+      }
+    ]
+  }
+]

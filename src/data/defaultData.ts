@@ -852,8 +852,12 @@ export const DEFAULT_PROJECTS: Project[] = [
     },
     "thumbnailUrl": "/projects/uk-passport-redesign.webp",
     "galleryUrls": [
-      "/projects/uk-passport-redesign.webp"
-    ],
+    "/projects/uk-passport-01.webp",
+    "/projects/uk-passport-02.webp",
+    "/projects/uk-passport-03.webp",
+    "/projects/uk-passport-04.webp",
+    "/projects/uk-passport-05.webp"
+],
     "isFeatured": true,
     "sortOrder": 7
   },
@@ -936,8 +940,10 @@ export const DEFAULT_PROJECTS: Project[] = [
     },
     "thumbnailUrl": "/projects/facebook-post-6.webp",
     "galleryUrls": [
-      "/projects/facebook-post-6.webp"
-    ],
+    "/projects/petsbro-ads-01.webp",
+    "/projects/petsbro-ads-02.webp",
+    "/projects/petsbro-ads-03.webp"
+],
     "isFeatured": false,
     "sortOrder": 8
   },
@@ -1006,8 +1012,17 @@ export const DEFAULT_PROJECTS: Project[] = [
     },
     "thumbnailUrl": "/projects/mfalcon-3d.webp",
     "galleryUrls": [
-      "/projects/mfalcon-3d.webp"
-    ],
+    "/projects/mfalcon-3d-01.webp",
+    "/projects/mfalcon-3d-02.webp",
+    "/projects/mfalcon-3d-03.webp",
+    "/projects/mfalcon-3d-04.webp",
+    "/projects/mfalcon-3d-05.webp",
+    "/projects/mfalcon-3d-06.webp",
+    "/projects/mfalcon-3d-07.webp",
+    "/projects/mfalcon-3d-08.webp",
+    "/projects/mfalcon-3d-09.webp",
+    "/projects/mfalcon-3d-10.webp"
+],
     "isFeatured": true,
     "sortOrder": 9
   },
@@ -1097,8 +1112,14 @@ export const DEFAULT_PROJECTS: Project[] = [
     },
     "thumbnailUrl": "/projects/cosmopedia-app.webp",
     "galleryUrls": [
-      "/projects/cosmopedia-app.webp"
-    ],
+    "/projects/cosmopedia-app-01.webp",
+    "/projects/cosmopedia-app-02.webp",
+    "/projects/cosmopedia-app-03.webp",
+    "/projects/cosmopedia-app-04.webp",
+    "/projects/cosmopedia-app-05.webp",
+    "/projects/cosmopedia-app-06.webp",
+    "/projects/cosmopedia-app-07.webp"
+],
     "isFeatured": true,
     "sortOrder": 10
   },
@@ -1189,8 +1210,10 @@ export const DEFAULT_PROJECTS: Project[] = [
     },
     "thumbnailUrl": "/projects/rodovody-archive.webp",
     "galleryUrls": [
-      "/projects/rodovody-archive.webp"
-    ],
+    "/projects/rodovody-archive-01.webp",
+    "/projects/rodovody-archive-02.webp",
+    "/projects/rodovody-archive-03.webp"
+],
     "liveLink": "https://rodowod.vercel.app/?lang=ua",
     "isFeatured": false,
     "sortOrder": 11

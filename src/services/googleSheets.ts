@@ -50,6 +50,50 @@ const LOCAL_PROJECT_IMAGE_MAP: Record<string, string> = {
   'project-passport-uk-pages-to-jpg-0001.jpg': '/projects/uk-passport-redesign.webp'
 };
 
+const DRIVE_ID_TO_LOCAL_PATH: Record<string, string> = {
+  "1aSuuwApMts70iAdCwniVuaFArP_250lM": "/projects/inspace-logo.webp",
+  "1RaVwj7rW9qVB3RBPewDBYOoCil-PMFZt": "/projects/muzei-saleziian.webp",
+  "1vgB0yGEjA0Y2mtoasQ6GNxT10Qck_D_T": "/projects/cosmopedia.webp",
+  "15SC2uKDcnbZQeH1LYWyBtFoU2HSeRMWo": "/projects/fundraising-lp.webp",
+  "1FsJEaurApt4v0uj88b2LS5tncXcIKaHM": "/projects/bee-protect-lp.webp",
+  "1e8dLHEaIO5ECHLA7cp_5WJn027wzw1Oy": "/projects/inspace-lp.webp",
+  "13p26B0XL3lkzdR4_kRba7y5nIh8SjGr6": "/projects/inspace-lp-m.webp",
+  "1Hh002OuHFz7PfuhLeLmM20vX2QM8oZoo": "/projects/uk-passport-01.webp",
+  "1afAjcXT0Dz4ISeluHAUUsNv9K4EzwiFT": "/projects/uk-passport-02.webp",
+  "17YjD3Y09OM7HxLewTis0Hkw4RECYTCOV": "/projects/uk-passport-03.webp",
+  "1qMI_dxat3zrOQOLyurEl8mxBnP-Xa31g": "/projects/uk-passport-04.webp",
+  "1kNz9S_olWCpSahOrr-1dAxdTf_qslvyE": "/projects/uk-passport-05.webp",
+  "1JahKk9hYWOX5WX9Dbo7n1GvFbtIvieqK": "/projects/petsbro-ads-01.webp",
+  "1Zd15HbMjsFRRF9O6WAKhd1zurvP5MPpn": "/projects/petsbro-ads-02.webp",
+  "1oNzt2NZB9rjr0sXJlSWdAli35rL2G8zf": "/projects/petsbro-ads-03.webp",
+  "1xgS8V74RSvx18fv4ATq7A0y_hGf3z4R4": "/projects/mfalcon-3d-01.webp",
+  "1KZ34kpoG0fOnTA7gjgQbKK7t7jE1RrjM": "/projects/mfalcon-3d-02.webp",
+  "1aDHpuGaT9nX-TMq0jI4uD3XUFZXh5qFe": "/projects/mfalcon-3d-03.webp",
+  "1phdyeaxEVj9-Pp5GJpIZtMnasM1-HxzE": "/projects/mfalcon-3d-04.webp",
+  "1HSh3KE0C-IGUmnHzhblbV8s_o_ivtH7g": "/projects/mfalcon-3d-05.webp",
+  "1fiPaJPLtf_f-QSrdoz95ZWmpWEkKTCyt": "/projects/mfalcon-3d-06.webp",
+  "1Sc-a3o6ZcqU_SPkQdfvPA9cQDUY_oN_p": "/projects/mfalcon-3d-07.webp",
+  "19fJbKe41zLUrJv2gaBj8cisMUiLWNd7l": "/projects/mfalcon-3d-08.webp",
+  "1HLUaeHDhZNU3-kPLUpSMyxrWVLz3ZKxD": "/projects/mfalcon-3d-09.webp",
+  "1mQ-ldLgwXvkGxEDUbxCd3HzlX9uCmAD-": "/projects/mfalcon-3d-10.webp",
+  "1E4tw5xHvyJF9puNtYuhuqxOi3Je6Xxt7": "/projects/cosmopedia-app-01.webp",
+  "1EUxW22Sx7tRvId4ILCQyQ8itGIuo_K_S": "/projects/cosmopedia-app-02.webp",
+  "1nzv_fv44O-8hXE4g9x8viy_cbmGMBZO3": "/projects/cosmopedia-app-03.webp",
+  "1nbM9pq6WppzA505M4PjNan_dX0-XA8nn": "/projects/cosmopedia-app-04.webp",
+  "1z9vI0-eEfm7jcPQiViwi86C67cZX-jXM": "/projects/cosmopedia-app-05.webp",
+  "11aQHgUDEgoAgvzM66C-epQc-sOXdV0Ur": "/projects/cosmopedia-app-06.webp",
+  "1mGt5aGdGs5MwZdbz1_5Ol32tsc83AWbu": "/projects/cosmopedia-app-07.webp",
+  "1lYrkEZgAyfoGEs_sVJgSdWaAxebj-CSW": "/projects/rodovody-archive-01.webp",
+  "1cSyks8JpMQTuy1Rrz8U_hGCivBqWXuKr": "/projects/rodovody-archive-02.webp",
+  "1vMmyKwkMkQKaBmBkOUFi1yg68LwjOZLY": "/projects/rodovody-archive-03.webp",
+  "1JZ9yuyItAwGZNCZS5t5y961NOypFxD7t": "/projects/conference-identity.webp",
+  "1yzPyLHfEhKFhYTWoTnKUB-jJ1I1AWZWF": "/projects/kavomolka-app.webp",
+  "1sW1CGBVJ825iFut-Qp5-HmSo4wcVQbU6": "/projects/dentist-landing-page.webp",
+  "16z2Ob10HMJPUH7Vcs_rJAPs5k4EDN8B0": "/projects/dentist-landing-page-m.webp",
+  "1RWWldmqBzTEAoSI9IMWj_7udJbCDgmZ9": "/projects/luna-m.webp",
+  "190ez-hH-9klWMHbFHHHMrG2Afa51CQ1I": "/projects/parad-obuvi-d.webp"
+};
+
 export function formatImageUrl(url: any, fallback?: string): string {
   if (!url) return fallback || '';
 
@@ -77,6 +121,9 @@ export function formatImageUrl(url: any, fallback?: string): string {
     if (LOCAL_PROJECT_IMAGE_MAP[cleanBasename]) {
       return LOCAL_PROJECT_IMAGE_MAP[cleanBasename];
     }
+    if (filename.endsWith('.webp') || filename.endsWith('.svg')) {
+      return `/projects/${filename}`;
+    }
     return `/projects/${cleanBasename}.webp`;
   }
   
@@ -102,6 +149,9 @@ export function formatImageUrl(url: any, fallback?: string): string {
   if (thumbMatch && thumbMatch[1]) fileId = thumbMatch[1];
   
   if (fileId) {
+    if (DRIVE_ID_TO_LOCAL_PATH[fileId]) {
+      return DRIVE_ID_TO_LOCAL_PATH[fileId];
+    }
     // =s0 instructs Google's edge CDN to render the image in full crystal-clear native resolution
     return `https://lh3.googleusercontent.com/d/${fileId}=s0`;
   }
