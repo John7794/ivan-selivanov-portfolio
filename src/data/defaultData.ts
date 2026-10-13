@@ -1362,7 +1362,9 @@ export const DEFAULT_PROJECTS: Project[] = [
     "thumbnailUrl": "/projects/kavomolka-app.webp",
     "mobileThumbnailUrl": "/projects/kavomolka-app.webp",
     "mobilePreviewUrl": "/projects/kavomolka-app.webp",
-    "galleryUrls": [],
+    "galleryUrls": [
+      "/projects/kavomolka-app.webp"
+    ],
     "mobileGalleryUrls": [
       "/projects/kavomolka-app.webp"
     ],
@@ -1557,7 +1559,9 @@ export const DEFAULT_PROJECTS: Project[] = [
     "thumbnailUrl": "/projects/luna-m.webp",
     "mobileThumbnailUrl": "/projects/luna-m.webp",
     "mobilePreviewUrl": "/projects/luna-m.webp",
-    "galleryUrls": [],
+    "galleryUrls": [
+      "/projects/luna-m.webp"
+    ],
     "mobileGalleryUrls": [
       "/projects/luna-m.webp"
     ],

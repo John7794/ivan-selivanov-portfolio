@@ -39,8 +39,11 @@ const LOCAL_PROJECT_IMAGE_MAP: Record<string, string> = {
   'inspace-lp-m': '/projects/inspace-lp-m.webp',
   'kavomolka': '/projects/kavomolka-app.webp',
   'kavomolka.png': '/projects/kavomolka-app.webp',
+  'kavomolka.webp': '/projects/kavomolka-app.webp',
+  'kavomolka-app.webp': '/projects/kavomolka-app.webp',
   'luna-m': '/projects/luna-m.webp',
   'luna-m.jpg': '/projects/luna-m.webp',
+  'luna-m.webp': '/projects/luna-m.webp',
   'mfalcon-1.png': '/projects/mfalcon-3d.webp',
   'muzei-saleziian-uhkts.webp': '/projects/muzei-saleziian.webp',
   'parad-obuvi-d': '/projects/parad-obuvi-d.webp',
@@ -611,15 +614,14 @@ function parseProjectImages(p: any): {
   const distinctDesktopImages = images.filter(url => !mobileNormSet.has(normalizeForCompare(url)));
 
   // If distinct desktop images were provided, use them;
-  // If only mobile images exist, leave desktop gallery empty so that CaseStudyModal knows only mobile exists!
-  // (Only fallback to defaultImage if neither desktop nor mobile exists)
+  // If only mobile images exist, ensure galleryUrls falls back to mobile images so it's never empty!
   const finalDesktopUrls = distinctDesktopImages.length > 0
     ? distinctDesktopImages
-    : (mobileImages.length > 0 ? [] : [defaultImage]);
+    : (mobileImages.length > 0 ? mobileImages : [defaultImage]);
 
   return {
-    thumbnailUrl: finalDesktopUrls[0] || mobileImages[0] || defaultImage,
-    galleryUrls: finalDesktopUrls,
+    thumbnailUrl: distinctDesktopImages[0] || mobileImages[0] || defaultImage,
+    galleryUrls: distinctDesktopImages.length > 0 ? distinctDesktopImages : (mobileImages.length > 0 ? mobileImages : [defaultImage]),
     mobileThumbnailUrl: mobileImages[0] || undefined,
     mobilePreviewUrl: mobileImages[0] || undefined,
     mobileGalleryUrls: mobileImages.length > 0 ? mobileImages : undefined

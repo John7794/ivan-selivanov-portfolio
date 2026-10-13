@@ -4,6 +4,7 @@ import { ArrowUpRight, Sparkles, Box, BookOpen, Layers, Images, Figma } from 'lu
 import { Project, Language, GeneralSettings } from '../types';
 import { getLocalizedText } from '../utils/i18n';
 import { getFigmaDirectUrl } from '../utils/figma';
+import { formatImageUrl } from '../services/googleSheets';
 import { BorderTrace } from './BorderTrace';
 
 interface ProjectCardProps {
@@ -94,12 +95,24 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
 
   const imagesList = React.useMemo(() => {
     const list: string[] = [];
-    if (project.thumbnailUrl) list.push(project.thumbnailUrl);
+    const addImg = (raw?: string) => {
+      if (!raw) return;
+      const formatted = formatImageUrl(raw);
+      if (formatted && !list.includes(formatted)) {
+        list.push(formatted);
+      }
+    };
+
+    addImg(project.thumbnailUrl);
     if (Array.isArray(project.galleryUrls)) {
-      project.galleryUrls.forEach((u) => {
-        if (u && !list.includes(u)) list.push(u);
-      });
+      project.galleryUrls.forEach(addImg);
     }
+    addImg(project.mobileThumbnailUrl);
+    addImg(project.mobilePreviewUrl);
+    if (Array.isArray(project.mobileGalleryUrls)) {
+      project.mobileGalleryUrls.forEach(addImg);
+    }
+
     return list.length > 0 ? list : ['https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1600'];
   }, [project]);
 

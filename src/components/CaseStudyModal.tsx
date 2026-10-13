@@ -127,21 +127,53 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
   const hasMobilePreview = hasMobileImages;
   const hasDesktopPreview = hasDesktopImages;
 
-  // Safe effective device view that guarantees no desktop frame is forced when only mobile exists
-  const effectiveDeviceView = (hasMobilePreview && !hasDesktopPreview)
-    ? 'mobile'
-    : ((hasDesktopPreview && !hasMobilePreview) ? 'desktop' : deviceView);
-
   // Fallback if no images were provided at all
   const fallbackImage = 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=90&w=2400';
 
-  const desktopImages = hasDesktopImages 
-    ? rawDesktopImages 
-    : (hasMobileImages ? rawMobileImages : [fallbackImage]);
+  // Helper to determine if an image URL is a mobile mockup
+  const isImageMobile = React.useCallback((imgUrl: string) => {
+    if (!imgUrl) return false;
+    const normalize = (u: string) => formatImageUrl(u).toLowerCase().trim().replace(/\/+$/, '');
+    const mobileNorms = new Set(rawMobileImages.map(normalize));
+    return mobileNorms.has(normalize(imgUrl));
+  }, [rawMobileImages]);
 
-  const mobileImages = hasMobileImages 
-    ? rawMobileImages 
-    : (hasDesktopImages ? rawDesktopImages : [fallbackImage]);
+  // Unified list of all unique screens for this project (both desktop and mobile)
+  const allImages = React.useMemo(() => {
+    if (!project) return [fallbackImage];
+    const list: string[] = [];
+    const add = (raw?: string) => {
+      if (!raw) return;
+      const f = formatImageUrl(raw);
+      if (f && !list.includes(f)) list.push(f);
+    };
+
+    // Include desktop images first
+    rawDesktopImages.forEach(add);
+    // Then mobile images
+    rawMobileImages.forEach(add);
+    // Ensure thumbnails and gallery urls are covered
+    add(project.thumbnailUrl);
+    if (Array.isArray(project.galleryUrls)) project.galleryUrls.forEach(add);
+    add(project.mobileThumbnailUrl);
+    add(project.mobilePreviewUrl);
+    if (Array.isArray(project.mobileGalleryUrls)) project.mobileGalleryUrls.forEach(add);
+
+    return list.length > 0 ? list : [fallbackImage];
+  }, [project, rawDesktopImages, rawMobileImages, fallbackImage]);
+
+  const currentImage = allImages[activeImageIndex] || allImages[0] || fallbackImage;
+  const isCurrentScreenMobile = isImageMobile(currentImage);
+
+  // Safe effective device view:
+  // - If only mobile exists: 'mobile'
+  // - If only desktop exists: 'desktop'
+  // - If both exist: adapts automatically based on whether the selected image is a mobile mockup or desktop mockup!
+  const effectiveDeviceView = React.useMemo<'desktop' | 'mobile'>(() => {
+    if (hasMobilePreview && !hasDesktopPreview) return 'mobile';
+    if (hasDesktopPreview && !hasMobilePreview) return 'desktop';
+    return isCurrentScreenMobile ? 'mobile' : 'desktop';
+  }, [hasMobilePreview, hasDesktopPreview, isCurrentScreenMobile]);
 
   useEffect(() => {
     setActiveImageIndex(0);
@@ -154,13 +186,6 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
       setDeviceView('desktop');
     }
   }, [project?.id, hasMobileImages, hasDesktopImages]);
-
-  // Selected images based on effectiveDeviceView
-  const allImages = (effectiveDeviceView === 'mobile' && hasMobilePreview) 
-    ? mobileImages 
-    : desktopImages;
-
-  const currentImage = allImages[activeImageIndex] || allImages[0] || desktopImages[0];
 
   const handlePrevImage = () => {
     setActiveImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
@@ -620,7 +645,8 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                         <button
                           onClick={() => {
                             setDeviceView('desktop');
-                            setActiveImageIndex(0);
+                            const deskIdx = allImages.findIndex(u => !isImageMobile(u));
+                            if (deskIdx !== -1) setActiveImageIndex(deskIdx);
                           }}
                           className={`px-2 sm:px-2.5 py-1 flex items-center gap-1 sm:gap-1.5 cursor-pointer text-xs transition-colors ${
                             effectiveDeviceView === 'desktop' ? 'bg-neutral-800 text-white font-medium' : 'text-neutral-500 hover:text-neutral-300'
@@ -635,7 +661,8 @@ export const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
                         <button
                           onClick={() => {
                             setDeviceView('mobile');
-                            setActiveImageIndex(0);
+                            const mobIdx = allImages.findIndex(u => isImageMobile(u));
+                            if (mobIdx !== -1) setActiveImageIndex(mobIdx);
                           }}
                           className={`px-2 sm:px-2.5 py-1 flex items-center gap-1 sm:gap-1.5 cursor-pointer text-xs transition-colors ${
                             effectiveDeviceView === 'mobile' ? 'bg-neutral-800 text-white font-medium' : 'text-neutral-500 hover:text-neutral-300'
